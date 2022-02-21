@@ -1,0 +1,62 @@
+{#
+This file is part of EC-CUBE
+
+Copyright(c) EC-CUBE CO.,LTD. All Rights Reserved.
+
+http://www.ec-cube.co.jp/
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+#}
+{% form_theme form 'Form/form_div_layout.twig' %}
+
+<script>
+    window.addEventListener('load',event => {
+    //window.onload = event => {
+        console.log('onload select_tenpo')
+        const select_url = document.querySelector('.selectform').action
+        const select_tenpo = document.getElementById('tenpo_id')
+        select_tenpo.addEventListener('change', event => {
+            console.log('onchange select_tenpo')
+            if (select_tenpo.value=='') {
+                alert('店舗を選択して下さい');
+                return;
+            }
+            if (!window.confirm('受取店舗を変更しますか？')) {
+                return;
+            }
+            const select_path = select_url + '/' + select_tenpo.value
+            fetch(select_path, {
+                method: 'post',
+                headers: {
+                    'x-csrf-token': '{{ csrf_token('x-csrf-token') }}'
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    if ( confirm('受取店舗を変更しました。商品を入れ替えますか？') ) {
+                        location.reload();
+                    }
+                } else {
+                    alert('受取店舗の変更に失敗しました')
+                }
+            })
+        })
+    })
+</script>
+
+<style>
+    .select-tenpo select {
+        width: 120px;
+    }
+</style>
+
+<div class="ec-headerSearch">
+    <form method="get" class="selectform" action="{{ url('block_select_tenpo') }}">
+        <div class="">
+            <div class="ec-select ec-select_search select-tenpo">
+                {{ form_widget(form.tenpo_id, {'id': 'tenpo_id', 'attr': {'class': 'tenpo_id'}}) }}
+            </div>
+        </div>
+    </form>
+</div>
