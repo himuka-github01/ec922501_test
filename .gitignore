@@ -43,13 +43,17 @@ composer.phar
 .idea
 .vscode/
 *.php~
+*.php__
 *.php___
-.env
 .maintenance
 *.neon
 .DS_Store
+.env
 .env_bak
+.env_install
+.env.dist
 *_bak
+*.yaml__
 
 ###> symfony/phpunit-bridge ###
 .phpunit

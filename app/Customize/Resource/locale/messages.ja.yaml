@@ -75,7 +75,7 @@ admin.product.product_csv_upload_y01: 商品CSV登録(専用)
 
 # ラベル/メッセージ
 admin.product.bumon: 部門
-admin.product.fc: FC
+admin.product.fc: 電
 admin.product.sya: 社
 admin.product.haya: 早
 admin.product.matome: マト
@@ -125,7 +125,7 @@ admin.order.delivery_note__y01_memo: 注意事項
 admin.order.delivery_note__y01_line1: ・ご予約締め切り後のキャンセルはお受けできません。
 admin.order.delivery_note__y01_line2: ・お客様よりお預かりした個人情報は、個人情報保護法に基づきご予約の確認・集計にのみ使用致します。
 admin.order.delivery_note__y01_line3: ・各種割引は税抜金額を記載しております。
-admin.order.delivery_note__y01_line4: ・FC割は、電子マネーカード「フーディーズクラブ」でお支払いいただいた際の割引となります。
+admin.order.delivery_note__y01_line4: ・電子割は、電子マネーカード「ＸＸＸＸＸ」でお支払いいただいた際の割引となります。
 
 # 出荷CSV雛形
 
