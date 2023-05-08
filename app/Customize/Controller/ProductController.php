@@ -133,6 +133,11 @@ class ProductController extends BaseProductController
             $ids[] = $Product->getId();
         }
 
+        // (HDN) 商品がない場合は催事一覧に戻る
+        if ( count($ids) <= 0 ) {
+            return $this->redirectToRoute('start/list_saiji');
+        }
+
         // (HDN) 指定されている場合は対象を指定店舗に限定
         //$session = new Session();
         if ( $session->get('tenpo_id') ) {
