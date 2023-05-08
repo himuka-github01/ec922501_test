@@ -76,6 +76,8 @@ class HdnWariItemProcessor implements ItemPreprocessor
         //----------------------
         $OrderItem->setBumon($Product->getBumon());
         $OrderItem->setBasePrice($ProductClass->getPrice02());
+        // 2023.01.07
+        $OrderItem->setProductCode($ProductClass->getCode());
 
         //----------------------
         // (HDN) 割引計算
@@ -168,18 +170,24 @@ class HdnWariItemProcessor implements ItemPreprocessor
         $wPrice = $orgPrice2;
         if ( $Order->getWariAFlg() ) {
             if ( $Product->getWariAFlg() ) {
-                $OrderItem->setWariAFlg($Product->getWariAFlg());
-                $OrderItem->setWariAIsrate($Product->getWariAIsrate());
-                if ( $Product->getWariAValue() > 0 ) {
-                    if ( $Product->getWariAIsrate() ) {
-                        $wPrice = round($wPrice * (100-$Product->getWariAValue())/100);
-                    } else {
-                        $wPrice = round($wPrice - $Product->getWariAValue());
-                    }
-                    $OrderItem->setWariAValue($Product->getWariAValue());
+                // (HDN) 2022.05.12 社員割が設定されている場合はOmit
+                log_info('[割引計算機] FC割フラグ(O)：'.$Order->getWariAFlg().' 社割フラグ(O)：'.$Order->getWariBFlg()
+                .' 社割フラグ(P):'.$Product->getWariBFlg().' 社割値：'.$Order->getWariBValue());
+                if ( $Order->getWariBFlg() && $Product->getWariBFlg() && $Order->getWariBValue() > 0 ) {
                 } else {
-                    $wPrice = round($wPrice * (100-$Order->getWariAValue())/100);
-                    $OrderItem->setWariAValue($Order->getWariAValue());
+                    $OrderItem->setWariAFlg($Product->getWariAFlg());
+                    $OrderItem->setWariAIsrate($Product->getWariAIsrate());
+                    if ( $Product->getWariAValue() > 0 ) {
+                        if ( $Product->getWariAIsrate() ) {
+                            $wPrice = round($wPrice * (100-$Product->getWariAValue())/100);
+                        } else {
+                            $wPrice = round($wPrice - $Product->getWariAValue());
+                        }
+                        $OrderItem->setWariAValue($Product->getWariAValue());
+                    } else {
+                        $wPrice = round($wPrice * (100-$Order->getWariAValue())/100);
+                        $OrderItem->setWariAValue($Order->getWariAValue());
+                    }
                 }
             }
         }
@@ -217,6 +225,8 @@ class HdnWariItemProcessor implements ItemPreprocessor
         // 最終単価
         $finalPrice = round($finalPrice - $wariTotal);
         $OrderItem->setPrice($finalPrice);
+
+        log_info('[割引計算機] 商品名:'.$OrderItem->getProductName().' ＣＤ：'.$OrderItem->getProductCode().' 元単価：'.$orgPrice1.' 割引後：'.$finalPrice);
 
     }
 

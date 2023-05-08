@@ -38,6 +38,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;   // (HDN)
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -117,6 +118,59 @@ class ShoppingController extends BaseShoppingController
 
         log_info('[注文手続] Order.subtotal:'.$Order->getSubTotal().' tax:'.$Order->getTax());
 
+        // (HDN) 2022.06.11 残数チェックを行う
+        if ( $this->session->getFlashBag()->get('eccube.front.error') != '' ) {
+            // (HDN) 商品IDリスト取得
+            $wDeliveryDate = '';
+            $ids = [];
+            $orderItems = $Order->getOrderItems();
+            foreach ($orderItems as $orderItem) {
+                $p  = $orderItem->getProduct();
+                $ids[] = $p->getId();
+                $s  = $orderItem->getShipping()->getShippingDeliveryDate();
+                if ( $s ) {
+                    $wDeliveryDate = $s->format('Y-m-d');
+                }
+            }
+            // (HDN) 日付指定済みであれば、残数チェックを行う
+            if ( $wDeliveryDate != '' ) {
+                //-------------------------------------------
+                // (HDN) 2022.05.13 受渡日ごとの在庫状況を取得
+                // 1) 催事を取得し受渡日のリストを作成 $shippingDates[]
+                // 2) 商品毎(店舗)の受渡日別受注数を取得 $sumOrdersByTenpo
+                // 3) 商品毎(全店)の受渡日別受注数を取得 $sumOrdersAllTenpo
+                // 4) 商品毎の受渡日別受注状況をセット $infoByProductAndDate[]
+                //-------------------------------------------
+                $infoByProductAndDate
+                = $this->orderRepository->getStockAndOrderInfo($this->session->get('saiji_id'),$this->session->get('tenpo_id'),$ids,$this->entityManager);
+
+                //-------------------------------------------
+                // (HDN) 2022.06.11 指定日での残数チェック
+                // 1) 商品毎の在庫(出荷可能数)をチェック $infoByProductAndDate[$id][$day]
+                //    date , limit , quantity , stock
+                //-------------------------------------------
+                $wError = [];
+                foreach ($orderItems as $orderItem) {
+                    $id = $orderItem->getProduct()->getId();
+                    // チェック対象分のみ
+                    if ( $infoByProductAndDate[$id] ) {
+                        $d  = $orderItem->getShipping()->getShippingDeliveryDate()->format('Y-m-d');
+                        $q  = $orderItem->getQuantity();
+                        $s  = $infoByProductAndDate[$id][$d]['stock'];
+                        if ( $q > $infoByProductAndDate[$id][$d]['stock'] ) {
+                            $nm = $orderItem->getProductName();
+                            $wError[] = '指定日での残数が不足しています（商品：'.$nm.' 日付：'.$d.' 残数：'.$s.'）';
+                        }
+                    }
+                }
+                if ( count($wError) > 0 ) {
+                    $this->addError(implode('|',$wError));
+                    log_info('[注文確認] 残数エラーのため, 注文手続き画面へ遷移します.', $wError);
+                    //return $this->redirectToRoute('shopping');    
+                }
+            }
+        }
+
         $form = $this->createForm(OrderType::class, $Order);
 
         return [
@@ -150,7 +204,8 @@ class ShoppingController extends BaseShoppingController
         if ($this->orderHelper->isLoginRequired()) {
             log_info('[リダイレクト] 未ログインもしくはRememberMeログインのため, ログイン画面に遷移します.');
 
-            return $this->redirectToRoute('shopping_login');
+            //return $this->redirectToRoute('shopping_login');
+            return $this->redirectToRoute('start');
         }
 
         // 受注の存在チェック.
@@ -223,6 +278,184 @@ class ShoppingController extends BaseShoppingController
             'form' => $form->createView(),
             'Order' => $Order,
         ];
+    }
+
+    /**
+     * 注文確認画面を表示する.
+     * (HDN)2022.05.12 非会員入力画面からの直接遷移に対応
+     *   methodのPOST限定を外す
+     *   methodのPOST限定を外す
+     *
+     * ここではPaymentMethod::verifyがコールされます.
+     * PaymentMethod::verifyではクレジットカードの有効性チェック等, 注文手続きを進められるかどうかのチェック処理を行う事を想定しています.
+     * PaymentMethod::verifyでエラーが発生した場合は, 注文手続き画面へリダイレクトします.
+     *
+     * *Route("/shopping/confirm", name="shopping_confirm", methods={"POST"})
+     * @Route("/shopping/confirm", name="shopping_confirm")
+     * @Template("Shopping/confirm.twig")
+     */
+    public function confirm(Request $request)
+    {
+        // (HDN) 催事等が未選択の場合はstartへリダイレクト
+        $session = new Session();
+        if ( empty($session->get('saiji_id')) || empty($session->get('tenpo_id')) ) {
+            log_info('セッション無効：リダイレクト：催事ID：'.$session->get('saiji_id'));
+            return $this->redirectToRoute('start');
+        }
+        log_info('[注文確認]催事ID='.$session->get('saiji_id')." 店舗ID=".$session->get('tenpo_id'));
+
+        // ログイン状態のチェック.
+        if ($this->orderHelper->isLoginRequired()) {
+            log_info('[注文確認] 未ログインもしくはRememberMeログインのため, ログイン画面に遷移します.');
+
+            //return $this->redirectToRoute('shopping_login');
+            return $this->redirectToRoute('start');
+        }
+
+        // 受注の存在チェック
+        $preOrderId = $this->cartService->getPreOrderId();
+        $Order = $this->orderHelper->getPurchaseProcessingOrder($preOrderId);
+        if (!$Order) {
+            log_info('[注文確認] 購入処理中の受注が存在しません.', [$preOrderId]);
+
+            return $this->redirectToRoute('shopping_error');
+        }
+
+        $form = $this->createForm(OrderType::class, $Order);
+        $form->handleRequest($request);
+
+        log_info('[注文確認] isSubmitted:'.$form->isSubmitted().' isValid:'.$form->isValid());
+        log_info('[注文確認] form:',(array)$form);
+
+        // (HDN)2022.05.12 非会員入力画面からの直接遷移に対応
+        // (HDN) 先に異常条件を判定し、以外をOKとすることで、非会員入力画面からの遷移はそのまま通す
+        //if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && !$form->isValid()) {
+            log_info('[注文確認] フォームエラーのため, 注文手続画面を表示します.', [$Order->getId()]);
+
+            // FIXME @Templateの差し替え.
+            $request->attributes->set('_template', new Template(['template' => 'Shopping/index.twig']));
+    
+            return [
+                'form' => $form->createView(),
+                'Order' => $Order,
+            ];
+        } else {
+            log_info('[注文確認] 集計処理を開始します.', [$Order->getId()]);
+            $response = $this->executePurchaseFlow($Order);
+            $this->entityManager->flush();
+
+            if ($response) {
+                return $response;
+            }
+
+            log_info('[注文確認] PaymentMethod::verifyを実行します.', [$Order->getPayment()->getMethodClass()]);
+            $paymentMethod = $this->createPaymentMethod($Order, $form);
+            $PaymentResult = $paymentMethod->verify();
+
+            if ($PaymentResult) {
+                if (!$PaymentResult->isSuccess()) {
+                    $this->entityManager->rollback();
+                    foreach ($PaymentResult->getErrors() as $error) {
+                        $this->addError($error);
+                    }
+
+                    log_info('[注文確認] PaymentMethod::verifyのエラーのため, 注文手続き画面へ遷移します.', [$PaymentResult->getErrors()]);
+
+                    return $this->redirectToRoute('shopping');
+                }
+
+                $response = $PaymentResult->getResponse();
+                if ($response instanceof Response && ($response->isRedirection() || $response->isSuccessful())) {
+                    $this->entityManager->flush();
+
+                    log_info('[注文確認] PaymentMethod::verifyが指定したレスポンスを表示します.');
+
+                    return $response;
+                }
+            }
+
+            $this->entityManager->flush();
+
+            // (HDN) 商品IDリスト取得
+            $ids = [];
+            $orderItems = $Order->getOrderItems();
+            foreach ($orderItems as $orderItem) {
+                $p  = $orderItem->getProduct();
+                $ids[] = $p->getId();
+            }
+            //-------------------------------------------
+            // (HDN) 2022.05.13 受渡日ごとの在庫状況を取得
+            // 1) 催事を取得し受渡日のリストを作成 $shippingDates[]
+            // 2) 商品毎(店舗)の受渡日別受注数を取得 $sumOrdersByTenpo
+            // 3) 商品毎(全店)の受渡日別受注数を取得 $sumOrdersAllTenpo
+            // 4) 商品毎の受渡日別受注状況をセット $infoByProductAndDate[]
+            //-------------------------------------------
+            $infoByProductAndDate
+            = $this->orderRepository->getStockAndOrderInfo($session->get('saiji_id'),$session->get('tenpo_id'),$ids,$this->entityManager);
+
+            //-------------------------------------------
+            // (HDN) 2022.06.11 指定日での残数チェック
+            // 1) 商品毎の在庫(出荷可能数)をチェック $infoByProductAndDate[$id][$day]
+            //    date , limit , quantity , stock
+            //-------------------------------------------
+            $wError = [];
+            foreach ($orderItems as $orderItem) {
+                $id = $orderItem->getProduct()->getId();
+                // チェック対象分のみ
+                if ( $infoByProductAndDate[$id] ) {
+                    $d  = $orderItem->getShipping()->getShippingDeliveryDate()->format('Y-m-d');
+                    $q  = $orderItem->getQuantity();
+                    $s  = $infoByProductAndDate[$id][$d]['stock'];
+                    if ( $q > $infoByProductAndDate[$id][$d]['stock'] ) {
+                        $nm = $orderItem->getProductName();
+                        $wError[] = '指定日での残数が不足しています（商品：'.$nm.' 日付：'.$d.' 残数：'.$s.'）';
+                    }
+                }
+            }
+            if ( count($wError) > 0 ) {
+                $this->addError(implode('|',$wError));
+                log_info('[注文確認] 残数エラーのため, 注文手続き画面へ遷移します.', $wError);
+                return $this->redirectToRoute('shopping');    
+            }
+
+            log_info('[注文確認] 注文確認画面を表示します.');
+
+            return [
+                'form' => $form->createView(),
+                'Order' => $Order,
+                'infoByProductAndDate' => $infoByProductAndDate,
+            ];
+        }
+
+        /* (HDN) 2022.05.12 先にエラーを判定するために移動
+        log_info('[注文確認] フォームエラーのため, 注文手続画面を表示します.', [$Order->getId()]);
+
+        // FIXME @Templateの差し替え.
+        $request->attributes->set('_template', new Template(['template' => 'Shopping/index.twig']));
+
+        return [
+            'form' => $form->createView(),
+            'Order' => $Order,
+        ];
+        */
+    }
+
+    /**
+     * PaymentMethodをコンテナから取得する.
+     *
+     * @param Order $Order
+     * @param FormInterface $form
+     *
+     * @return PaymentMethodInterface
+     */
+    private function createPaymentMethod(Order $Order, FormInterface $form)
+    {
+        $PaymentMethod = $this->container->get($Order->getPayment()->getMethodClass());
+        $PaymentMethod->setOrder($Order);
+        $PaymentMethod->setFormType($form);
+
+        return $PaymentMethod;
     }
 
 }

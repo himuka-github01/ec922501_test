@@ -194,6 +194,58 @@ class ProductRepository extends BaseProductRepository
         return $products;
     }
     /**
+     * Find the Products with SaijiId.
+     *
+     * @param integer $saijiId
+     *
+     * @return ArrayCollection|array
+     */
+    public function findProductsWithSaiji2($saijiId, $tenpoId=null)
+    {
+        // (HDN) 指定催事分を検索する
+
+        // (HDN) 登録ミスの残骸が悪さをするためVisibleのみを対象とした
+        /*
+        $qb = $this->createQueryBuilder('p');
+        $qb->addSelect(['pc', 'cc1', 'pcat'])
+            ->innerJoin('p.ProductClasses', 'pc')
+            ->innerJoin('p.ProductCategories', 'pcat')
+            ->leftJoin('pc.ClassCategory1', 'cc1')
+            ->where('pcat.category_id = :saiji_id')
+            ->andWhere('pc.ClassCategory1 is null')
+            ->setParameter('saiji_id', $saijiId)
+            ->orderBy('pc.code');
+        */
+        $qb = $this->createQueryBuilder('p');
+        $qb->select(['pc.code', 'p.name'])
+            ->addSelect('bumon.id as bumon_id')
+            ->addSelect('bumon.name as bumon_name')
+            ->innerJoin('p.ProductClasses', 'pc')
+            ->innerJoin('p.ProductCategories', 'pcat')
+            ->leftJoin('pc.ClassCategory1', 'cc1')
+            ->leftJoin('p.Bumon', 'bumon')
+            ->where('pcat.category_id = :saiji_id')
+            ->andWhere('pc.visible = :visible')
+            ->setParameter('saiji_id', $saijiId)
+            ->setParameter('visible', true)
+            ->groupBy('pc.code')
+            ->addGroupBy('p.name')
+            ->addGroupBy('bumon.id')
+            ->addGroupBy('bumon.name')
+            ->orderBy('p.name');
+        if ( $tenpoId ) {
+            $qb->andWhere('pc.ClassCategory1 is null or pc.ClassCategory1 = :tenpo_id')
+            ->setParameter('tenpo_id', $tenpoId);
+        }
+
+        $products = $qb
+            ->getQuery()
+            ->useResultCache(true, $this->eccubeConfig['eccube_result_cache_lifetime_short'])
+            ->getResult();
+
+        return $products;
+    }
+    /**
      * get query builder.
      *
      * @param  array $searchData

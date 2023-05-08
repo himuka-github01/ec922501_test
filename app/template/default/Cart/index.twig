@@ -152,6 +152,9 @@ file that was distributed with this source code.
                                             </div>
                                             <div class="ec-cartRow__unitPrice">{{ CartItem.price|price }}</div>
                                             <div class="ec-cartRow__sutbtotalSP">{{ 'common.subtotal__with_separator'|trans }}{{ CartItem.total_price|price }}</div>
+                                            {% if infoByProductAndDate[Product.id] %}
+                                                <br/>{{ infoByProductAndDate[Product.id]['disp_simple'] }}
+                                            {% endif %}
                                         </div>
                                     </li>
                                     <li class="ec-cartRow__amountColumn">

@@ -170,6 +170,46 @@ file that was distributed with this source code.
                         </div>
                     </dd>
                 </dl>
+
+                <dl>
+                    <dt>
+                        {{ form_label(form.shipping_delivery_date, 'お引き渡し日', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-select ec-select__delivery">
+                            {{ form_widget(form.shipping_delivery_date, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.shipping_delivery_date) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        {{ form_label(form.DeliveryTime, 'お引き渡し時間', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-select ec-select__time">
+                            {{ form_widget(form.DeliveryTime, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.DeliveryTime) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        {{ form_label(form.Payment, 'お支払い方法', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-radio">
+                            {% for key, child in form.Payment %}
+                                <div style="display: block;">
+                                    {{ form_widget(child) }}
+                                </div>
+                            {% endfor %}
+                            {{ form_errors(form.Payment) }}
+                        </div>
+                    </dd>
+                </dl>
+
+
                 <dl>
                     <dt>
                         {{ form_label(form.uketsuke_name, '受付担当', { 'label_attr': { 'class': 'ec-label' }}) }}
@@ -201,6 +241,17 @@ file that was distributed with this source code.
                             <label>
                                 {{ form_widget(form.shain_flg, { 'label': '社員'|trans }) }}
                             </label>
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        {{ form_label(form.message, '備考', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-input{{ has_errors(form.message) ? ' error' }}">
+                            {{ form_widget(form.message, {'attr': {'class': 'form-control', 'placeholder': '(3000文字まで)'|trans, 'rows': '6'}}) }}
+                            {{ form_errors(form.message) }}
                         </div>
                     </dd>
                 </dl>

@@ -1,4 +1,10 @@
 <?php
+/*----------------------------------------
+ * OrderItemTrait
+ *----------------------------------------
+ * 2022.05.05 add product_ryaku_name by inok
+ * 2021.08.01 new by inok
+ *----------------------------------------*/
 
 namespace Customize\Entity;
 
@@ -12,6 +18,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 trait OrderItemTrait
 {
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $product_ryaku_name;
+
     /**
      * @ORM\Column(type="decimal", precision=12, scale=2, nullable=true, options={"default":0})
      */
@@ -155,7 +166,19 @@ trait OrderItemTrait
     /**
      * getter & setter
      */
-    public function getBasePrice()
+    public function getProductRyakuName(): ?string
+    {
+        return $this->product_ryaku_name;
+    }
+
+    public function setProductRyakuName(?string $product_ryaku_name): self
+    {
+        $this->product_ryaku_name = $product_ryaku_name;
+
+        return $this;
+    }
+
+     public function getBasePrice()
     {
         return $this->base_price;
     }

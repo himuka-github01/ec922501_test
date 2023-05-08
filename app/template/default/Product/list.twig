@@ -129,7 +129,7 @@ file that was distributed with this source code.
             padding: 3px;
         }
         .form-quantity input[type='number'] {
-            width: 50px;
+            width: 70px;
         }
         .hiddenItem {
             display: none;
@@ -252,6 +252,10 @@ file that was distributed with this source code.
                                         {% endif %}
                                         在庫数&nbsp;
                                         {{ Product.getTenpoStock }}
+                                        {% if infoByProductAndDate[Product.id] %}
+                                            <br/>
+                                            {{ infoByProductAndDate[Product.id]['disp_simple'] }}
+                                        {% endif %}
                                     </div>
                                     {{ form_rest(form) }}
                                 </form>

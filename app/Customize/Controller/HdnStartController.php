@@ -1,15 +1,11 @@
 <?php
-
-/*
- * This file is part of EC-CUBE
- *
- * Copyright(c) EC-CUBE CO.,LTD. All Rights Reserved.
- *
- * http://www.ec-cube.co.jp/
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+/*----------------------------------------
+ * HdnStartController
+ * 受注入力開始コントローラ
+ *----------------------------------------
+ * 2022.05.05 upd セッションに受付店舗を保持 (by inok)
+ * 2021.08.01 new (by inok)
+ *----------------------------------------*/
 
 //namespace Eccube\Controller;
 namespace Customize\Controller;
@@ -92,6 +88,8 @@ class HdnStartController extends AbstractController
                 $tenpo_id = $Tenpo->getId();
                 // 店舗IDをセッションに格納
                 $this->session->set( 'tenpo_id' , $tenpo_id );
+                // 2022.05.05 受付店舗IDをセッションに格納
+                $this->session->set( 'uketsuke_tenpo_id' , $tenpo_id );
             }
         }
         // Cartをクリア

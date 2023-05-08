@@ -299,8 +299,10 @@ class HdnOrderListService
         }
         $this->setHeaderColumn($sheet, ++$col, $row, '受付者');
         $this->setHeaderColumn($sheet, ++$col, $row, '紹介者');
+        $this->setHeaderColumn($sheet, ++$col, $row, '受付日');
+        $this->setHeaderColumn($sheet, ++$col, $row, '受付店舗');
         $this->setHeaderColumn($sheet, ++$col, $row, '備考');
-        $this->setHeaderColumn($sheet, ++$col, $row, '更新者');
+        //$this->setHeaderColumn($sheet, ++$col, $row, '更新者');
         $this->setHeaderColumn($sheet, ++$col, $row, '更新日時');
         $this->setHeaderColumn($sheet, ++$col, $row, '注意事項');
         log_info('受注：配置：',$this->posColumn);
@@ -365,8 +367,10 @@ class HdnOrderListService
         }
         $sheet->setCellValueByColumnAndRow($this->posColumn['受付者'], $row, $Order->getUketsukeName());
         $sheet->setCellValueByColumnAndRow($this->posColumn['紹介者'], $row, $Order->getShoukaiName());
+        $sheet->setCellValueByColumnAndRow($this->posColumn['受付日'], $row, $Order->getCreateDate() ? $Order->getCreateDate()->format('Y-m-d') : '');
+        $sheet->setCellValueByColumnAndRow($this->posColumn['受付店舗'], $row, $Order->getUketsukeTenpo() ? $Order->getUketsukeTenpo()->getTenpoName() : '');
         $sheet->setCellValueByColumnAndRow($this->posColumn['備考'], $row, $Order->getMessage());
-        $sheet->setCellValueByColumnAndRow($this->posColumn['更新者'], $row, '更新者');
+        //$sheet->setCellValueByColumnAndRow($this->posColumn['更新者'], $row, '更新者');
         $sheet->setCellValueByColumnAndRow($this->posColumn['更新日時'], $row, $Order->getUpdateDate()->format('Y-m-d'));
         // キャンセル行
         if ( OrderStatus::CANCEL === $Order->getOrderStatus()->getId() ) {

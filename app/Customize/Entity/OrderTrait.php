@@ -1,4 +1,10 @@
 <?php
+/*----------------------------------------
+ * OrderTrait
+ *----------------------------------------
+ * 2022.05.05 add uketsuke_tenpo_id by inok
+ * 2021.08.01 new by inok
+ *----------------------------------------*/
 
 namespace Customize\Entity;
 
@@ -40,6 +46,16 @@ trait OrderTrait
      * })
      */
     private $Tenpo;
+
+    /**
+     * @var \Customize\Entity\HdnTenpo
+     *
+     * @ORM\ManyToOne(targetEntity="Customize\Entity\HdnTenpo")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="uketsuke_tenpo_id", referencedColumnName="id")
+     * })
+     */
+    private $UketsukeTenpo;
 
     /**
      * @ORM\Column(type="boolean", nullable=true, options={"default":false})
@@ -126,7 +142,7 @@ trait OrderTrait
     /**
      * Set Tenpo.
      *
-     * @param \Customize\Entity\HdnTenpo|null $saiji
+     * @param \Customize\Entity\HdnTenpo|null $tenpo
      *
      * @return Order
      */
@@ -137,13 +153,36 @@ trait OrderTrait
         return $this;
     }
     /**
-     * Get Saiji.
+     * Get Tenpo.
      *
      * @return \Customize\Entity\HdnTenpo|null
      */
     public function getTenpo()
     {
         return $this->Tenpo;
+    }
+
+    /**
+     * Set UketsukeTenpo.
+     *
+     * @param \Customize\Entity\HdnTenpo|null $uketsukeTenpo
+     *
+     * @return Order
+     */
+    public function setUketsukeTenpo(\Customize\Entity\HdnTenpo $uketsukeTenpo = null)
+    {
+        $this->UketsukeTenpo = $uketsukeTenpo;
+
+        return $this;
+    }
+    /**
+     * Get UketsukeTenpo.
+     *
+     * @return \Customize\Entity\HdnTenpo|null
+     */
+    public function getUketsukeTenpo()
+    {
+        return $this->UketsukeTenpo;
     }
 
     public function getWariAFlg(): ?bool

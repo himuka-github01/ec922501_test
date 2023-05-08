@@ -51,6 +51,13 @@ class ProductTypeExtension extends AbstractTypeExtension
         $arrWariMatomeIsrate = [true => '％', false => '円'];
 
         $builder
+        // 商品略称
+        ->add('product_ryaku_name', TextType::class, [
+            'constraints' => [
+                new Assert\NotBlank(),
+                new Assert\Length(['max' => $this->eccubeConfig['eccube_stext_len']]),
+            ],
+        ])
         ->add('bumon_cd', TextType::class, [
             'label' => '部門コード',
             'required' => false,

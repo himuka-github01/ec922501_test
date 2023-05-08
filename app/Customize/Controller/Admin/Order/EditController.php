@@ -242,11 +242,18 @@ class EditController extends BaseEditController
                         $this->entityManager->flush();
 
                         foreach ($OriginItems as $Item) {
+                            log_info('受注登録：元の商品', [$Item->getProductName(),$Item->getProductClass()->getId(),$Item->getProductCode()]);
                             if ($TargetOrder->getOrderItems()->contains($Item) === false) {
+                                log_info('受注登録：削除対象', [$Item->getProductName(),$Item->getProductClass()->getId(),$Item->getProductCode()]);
                                 $this->entityManager->remove($Item);
                             }
                         }
                         $this->entityManager->flush();
+                        // (HDN) 商品リストをLOG
+                        $wTargetItems = $TargetOrder->getOrderItems();
+                        foreach ($wTargetItems as $Item) {
+                            log_info('受注登録：入替商品', [$Item->getProductName(),$Item->getProductClass()->getId(),$Item->getProductCode()]);
+                        }
 
                         // 新規登録時はMySQL対応のためflushしてから採番
                         $this->orderNoProcessor->process($TargetOrder, $purchaseContext);

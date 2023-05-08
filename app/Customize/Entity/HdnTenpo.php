@@ -32,6 +32,11 @@ class HdnTenpo
     private $tenpo_name;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $tenpo_ryaku_name;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $sort_no;
@@ -71,6 +76,18 @@ class HdnTenpo
     public function setTenpoName(string $tenpo_name): self
     {
         $this->tenpo_name = $tenpo_name;
+
+        return $this;
+    }
+
+    public function getTenpoRyakuName(): ?string
+    {
+        return $this->tenpo_ryaku_name;
+    }
+
+    public function setTenpoRyakuName(string $tenpo_ryaku_name): self
+    {
+        $this->tenpo_ryaku_name = $tenpo_ryaku_name;
 
         return $this;
     }

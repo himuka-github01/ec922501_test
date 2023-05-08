@@ -1,4 +1,13 @@
 <?php
+/*----------------------------------------
+ * CartController
+ *----------------------------------------
+ * 注記
+ * 2022.05.15 app/Customize側が無視される為、やむなくsrc側を触ることに
+ *----------------------------------------
+ * 更新履歴
+ * 2022.05.13 受渡日毎の出荷制限対応 by inok
+ *----------------------------------------*/
 
 /*
  * This file is part of EC-CUBE
@@ -14,6 +23,7 @@
 namespace Eccube\Controller;
 
 use Eccube\Entity\BaseInfo;
+use Eccube\Entity\Order;    // (HDN)
 use Eccube\Entity\ProductClass;
 use Eccube\Event\EccubeEvents;
 use Eccube\Event\EventArgs;
@@ -26,6 +36,7 @@ use Eccube\Service\PurchaseFlow\PurchaseFlowResult;
 use Eccube\Service\OrderHelper;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;   // (HDN)
 use Symfony\Component\Routing\Annotation\Route;
 
 class CartController extends AbstractController
@@ -78,6 +89,16 @@ class CartController extends AbstractController
      */
     public function index(Request $request)
     {
+        // (HDN) 催事等が未選択の場合はstartへリダイレクト
+        $session = new Session();
+        if ( empty($session->get('saiji_id')) || empty($session->get('tenpo_id')) ) {
+            log_info('セッション無効：リダイレクト：催事ID：'.$session->get('saiji_id'));
+            return $this->redirectToRoute('start');
+        }
+        log_info('[cart]催事ID='.$session->get('saiji_id')." 店舗ID=".$session->get('tenpo_id'));
+
+        //log_info('[cart]orderHelper:',(array)$this->orderHelper);
+
         // カートを取得して明細の正規化を実行
         $Carts = $this->cartService->getCarts();
         $this->execPurchaseFlow($Carts);
@@ -88,6 +109,9 @@ class CartController extends AbstractController
         $isDeliveryFree = [];
         $totalPrice = 0;
         $totalQuantity = 0;
+
+        // (HDN) 商品IDリスト
+        $ids = [];
 
         foreach ($Carts as $Cart) {
             $quantity[$Cart->getCartKey()] = 0;
@@ -111,10 +135,36 @@ class CartController extends AbstractController
 
             $totalPrice += $Cart->getTotalPrice();
             $totalQuantity += $Cart->getQuantity();
+
+            // (HDN) 商品IDリスト取得
+            $cartItems = $Cart->getCartItems();
+            foreach ($cartItems as $cartItem) {
+                if ( $cartItem->isProduct() ) {
+                    $pc = $cartItem->getProductClass();
+                    $p  = $pc->getProduct();
+                    $ids[] = $p->getId();
+                }
+            }
         }
 
         // カートが分割された時のセッション情報を削除
         $request->getSession()->remove(OrderHelper::SESSION_CART_DIVIDE_FLAG);
+
+        //-------------------------------------------
+        // (HDN) 2022.05.13 受渡日ごとの在庫状況を取得
+        // 1) 催事を取得し受渡日のリストを作成 $shippingDates[]
+        // 2) 商品毎(店舗)の受渡日別受注数を取得 $sumOrdersByTenpo
+        // 3) 商品毎(全店)の受渡日別受注数を取得 $sumOrdersAllTenpo
+        // 4) 商品毎の受渡日別受注状況をセット $infoByProductAndDate[]
+        //-------------------------------------------
+        $orderRepository = $this->entityManager->getRepository(Order::class);
+
+        if ( count($ids) > 0 ) {
+            $infoByProductAndDate
+            = $orderRepository->getStockAndOrderInfo($session->get('saiji_id'),$session->get('tenpo_id'),$ids,$this->entityManager);
+        } else {
+            $infoByProductAndDate = [];
+        }
 
         return [
             'totalPrice' => $totalPrice,
@@ -124,6 +174,7 @@ class CartController extends AbstractController
             'least' => $least,
             'quantity' => $quantity,
             'is_delivery_free' => $isDeliveryFree,
+            'infoByProductAndDate' => $infoByProductAndDate,
         ];
     }
 

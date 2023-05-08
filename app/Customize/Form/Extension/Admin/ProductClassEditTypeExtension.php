@@ -3,7 +3,7 @@
 namespace Customize\Form\Extension\Admin;
 
 use Eccube\Common\EccubeConfig;
-use Eccube\Form\Type\Admin\ProductClassType;
+use Eccube\Form\Type\Admin\ProductClassEditType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints as Assert;
 //use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class ProductClassTypeExtension extends AbstractTypeExtension
+class ProductClassEditTypeExtension extends AbstractTypeExtension
 {
     /**
      * @var EccubeConfig
@@ -32,12 +32,6 @@ class ProductClassTypeExtension extends AbstractTypeExtension
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-        ->add('code', TextType::class, [
-            'required' => true,
-            'constraints' => [
-                new Assert\NotBlank(),
-            ],
-        ])
         ->add('one_day_limit', NumberType::class, [
             'required' => false,
             'constraints' => [
@@ -62,6 +56,6 @@ class ProductClassTypeExtension extends AbstractTypeExtension
      */
     public function getExtendedType()
     {
-        return ProductClassType::class;
+        return ProductClassEditType::class;
     }
 }

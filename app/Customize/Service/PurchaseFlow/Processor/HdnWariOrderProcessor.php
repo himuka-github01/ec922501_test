@@ -83,9 +83,11 @@ class HdnWariOrderProcessor extends ItemHolderValidator
         log_info('[割引判定機] 社割：'.$itemHolder->getWariBFlg()
                         .' 社員割引率：'.$itemHolder->getWariBValue()
                         .' 社員フラグ：'.$itemHolder->getShainFlg());
+        /*
         log_info('[割引判定機] 早割：'.$itemHolder->getWariKikanFlg()
                         .' 早割割引率：'.$itemHolder->getWariKikanValue()
                         .' 早割終了日：'.$itemHolder->getWariKikanEndDt()->format('Y-m-d'));
+        */
 
     }
 

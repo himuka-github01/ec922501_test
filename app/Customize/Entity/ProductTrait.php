@@ -1,4 +1,11 @@
 <?php
+/*----------------------------------------
+ * ProductTrait
+ *----------------------------------------
+ * 2022.05.13 add getTenpoOneDayLimit() by inok
+ * 2022.05.05 add product_ryaku_name by inok
+ * 2021.08.01 new by inok
+ *----------------------------------------*/
 
 namespace Customize\Entity;
 
@@ -12,6 +19,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 trait ProductTrait
 {
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $product_ryaku_name;
+
     /**
      * @ORM\Column(type="boolean", nullable=true, options={"default":true})
      */
@@ -132,6 +144,18 @@ trait ProductTrait
      */
     private $Bumon;
 
+    public function getProductRyakuName(): ?string
+    {
+        return $this->product_ryaku_name;
+    }
+
+    public function setProductRyakuName(?string $product_ryaku_name): self
+    {
+        $this->product_ryaku_name = $product_ryaku_name;
+
+        return $this;
+    }
+
     public function getWariAFlg(): ?bool
     {
         return $this->wari_a_flg;
@@ -161,7 +185,7 @@ trait ProductTrait
         return $this->wari_a_value;
     }
 
-    public function setWariAValue(string $wari_a_value): self
+    public function setWariAValue(?string $wari_a_value): self
     {
         $this->wari_a_value = $wari_a_value;
 
@@ -434,9 +458,42 @@ trait ProductTrait
         if ( is_null($tenpoId) ) {
             return $this->getStockMin();
         }
-        // 店舗ごとの在庫を取得して戻す
-        
-        return 999;
+        // 店舗の在庫を取得して戻す
+        $productClasses = $this->getProductClasses();
+        if ( $productClasses ) {
+            foreach ($productClasses as $pc) {
+                if ( !$pc->isVisible() ) { continue; }
+                if ( $pc->getClassCategory1() ) {
+                    if ( $pc->getClassCategory1()->getId() != $tenpoId ) { continue; }
+                }
+                log_info('[ProductTrait]店舗在庫 ID:'.$this->getId().' PC:'.$pc->getId().' 店舗:'.$tenpoId.' getTenpoStock:'.$pc->getStock());
+                return $pc->getStock();
+            }
+        }        
+        return null;
+
+    }
+    /**
+     * 店舗在庫日別制限取得
+     */
+    public function getTenpoOneDayLimit($tenpoId = null): ?int
+    {
+        // 店舗の日別上限値を取得して戻す
+        $productClasses = $this->getProductClasses();
+        if ( $productClasses ) {
+            foreach ($productClasses as $pc) {
+                //log_info('[ProductTrait] ID:'.$this->getId().' PC:'.$pc->getId());
+                if ( !$pc->isVisible() ) { continue; }
+                if ( $pc->getClassCategory1() ) {
+                    //log_info('[ProductTrait] 店舗:'.$tenpoId.' cc:'.$pc->getClassCategory1()->getId());
+                    if ( $pc->getClassCategory1()->getId() != $tenpoId ) { continue; }
+                }
+                log_info('[ProductTrait]日別上限 ID:'.$this->getId().' PC:'.$pc->getId().' 店舗:'.$tenpoId.' getOneDayLimit:'.$pc->getOneDayLimit());
+                //log_info('[ProductTrait]',(array)$pc);
+                return $pc->getOneDayLimit();
+            }
+        }
+        return null;
 
     }
 }

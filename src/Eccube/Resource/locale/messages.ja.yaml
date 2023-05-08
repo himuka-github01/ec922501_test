@@ -612,6 +612,7 @@ admin.product.permanently_delete__system_error: システムエラーが発生�
 admin.product.copy__confirm_title: 商品を複製します
 admin.product.copy__confirm_message: 商品を複製してよろしいですか？
 admin.product.name: 商品名
+admin.product.product_ryaku_name: 商品略称
 admin.product.image: 商品画像
 admin.product.image__short: 画像
 admin.product.image_size: '推奨サイズ : 600px x 600px以上'
@@ -625,6 +626,7 @@ admin.product.price_tax: 税率
 admin.product.sale_price: 販売価格 # price02
 admin.product.normal_price: 通常価格 # price01
 admin.product.stock: 在庫数
+admin.product.one_day_limit: 1日上限
 admin.product.stock__short: 在庫
 admin.product.stock__in_stock: あり
 admin.product.stock__out_of_stock: なし

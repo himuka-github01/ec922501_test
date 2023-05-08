@@ -1,4 +1,10 @@
 <?php
+/*----------------------------------------
+ * OrderHelper (customized)
+ *----------------------------------------
+ * 2022.05.06 upd uketsuke_tenpo_id, product_ryaku_name by inok
+ * 2021.08.01 new by inok
+ *----------------------------------------*/
 
 /*
  * This file is part of EC-CUBE
@@ -76,6 +82,11 @@ class OrderHelper extends BaseOrderHelper
         // (HDN) Session情報を取得
         $wSaijiId = $this->session->get('saiji_id');
         $wTenpoId = $this->session->get('tenpo_id');
+        $wUketsukeTenpoId = $this->session->get('uketsuke_tenpo_id');
+        // (HDN) 受付店舗の設定がなければ受注店舗を受付店舗としてセット
+        if ( !$wUketsukeTenpoId ) {
+            $wUketsukeTenpoId = $wTenpoId;
+        }
         //$wPaymentId = $this->session->get('payment_id');
         //log_info('[割引計算] 支払ID:'.$wPaymentId);
 
@@ -98,6 +109,10 @@ class OrderHelper extends BaseOrderHelper
         $Order->setTenpo($tenpo);
         //   (4) 店舗コードを取得してOrderにセット
         $Order->setTenpoCd($tenpo->getTenpoCd());
+        //   (5) 受付店舗取得（2022.05.06）
+        $uketsukeTenpo = $tenpoRepository->find($wUketsukeTenpoId);
+        //   (6) 受付店舗をOrderにセット（2022.05.06）
+        $Order->setUketsukeTenpo($uketsukeTenpo);
 
         // (HDN) 支払方法が指定されていればセット
         /*
@@ -272,6 +287,7 @@ class OrderHelper extends BaseOrderHelper
                 ->setProduct($Product)
                 ->setProductClass($ProductClass)
                 ->setProductName($Product->getName())
+                ->setProductRyakuName($Product->getProductRyakuName())
                 ->setBumonCd($Product->getBumonCd())
                 ->setBumon($Product->getBumon())
                 ->setProductCode($ProductClass->getCode())
@@ -323,6 +339,7 @@ class OrderHelper extends BaseOrderHelper
                 ->setProduct($Product)
                 ->setProductClass($ProductClass)
                 ->setProductName($Product->getName())
+                ->setProductRyakuName($Product->getProductRyakuName())
                 ->setBumonCd($Product->getBumonCd())
                 ->setBumon($Product->getBumon())
                 ->setProductCode($ProductClass->getCode())

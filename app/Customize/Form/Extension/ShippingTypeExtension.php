@@ -81,9 +81,12 @@ class ShippingTypeExtension extends AbstractTypeExtension
                 if ( $saiji->getDeliveryStartDt() ) {
                     $startDt = $saiji->getDeliveryStartDt();
                 }
-                $endDt = $saiji->getDispEndDt(); 
+                // (HDN) イミュータブルにしないとmodify等によってEntity値自体が変化してしまう
+                //$endDt = $saiji->getDispEndDt(); 
+                $endDt = \DateTimeImmutable::createFromMutable($saiji->getDispEndDt());
                 if ( $saiji->getDeliveryEndDt() ) {
-                    $endDt = $saiji->getDeliveryEndDt();
+                    //$endDt = $saiji->getDeliveryEndDt();
+                    $endDt = \DateTimeImmutable::createFromMutable($saiji->getDeliveryEndDt());
                 }
 
                 // 配達最大日数期間を設定

@@ -700,11 +700,15 @@ class OrderPdfService extends TcpdfFpdi
             $formData['order_message'] = $Order->getMessage();
 
             // 下段備考を描画する（Y01） parm:備考タイトル
+            $formData['note1'] = trans('admin.order.delivery_note__y01_line1');
+            $formData['note2'] = trans('admin.order.delivery_note__y01_line2');
+            $formData['note3'] = trans('admin.order.delivery_note__y01_line3');
             $formData['note4'] = '';
             if ( $Order->getWariAFlg() ) {
                 $formData['note4'] = trans('admin.order.delivery_note__y01_line4');
             }
-            $this->renderEtcDataY01($formData,'注意事項');
+            $formData['note5'] = trans('admin.order.delivery_note__y01_line5');
+            $this->renderEtcDataY01($formData,20,'注意事項');
         }
 
         return true;
@@ -732,11 +736,16 @@ class OrderPdfService extends TcpdfFpdi
 
         $Order = $Shipping->getOrder();
 
-        // 配置（$x, $x2, $x3）
+        // 配置（$x, $x2, $xBar, $xReceipt, $xGaku, $xTel）
         $x2 = $x + 30;  // 注文情報内容
-        $x3 = $x + 120; // バーコード
-        $x4 = $x + 110; // お支払金額
-        $x5 = $x + 70;  // 電話番号
+        $xBar = $x + 118; // バーコード
+        $xReceipt = $x + 116; // レシート
+        $xGaku = $x + 110; // お支払金額
+        $xTel = $x + 70;  // 電話番号
+
+        // 配置（$y, $yBar, $yReceipt）
+        $yBar = $y + 3; // バーコード
+        $yReceipt = $y + 18; // レシート
 
         // 注文番号
         $this->lfText($x , $y+$height*0, '注文番号', 11);
@@ -776,7 +785,7 @@ class OrderPdfService extends TcpdfFpdi
         $phoneNumber    = ' ('.$Order->getTenpo()->getPhoneNumber().')';
         $this->lfText($x , $y+$height*10.3, 'お引渡し店舗', 11, 'B');
         $this->lfText($x2, $y+$height*10.3, $owatashiTenpo, 11, 'BU');
-        $this->lfText($x5, $y+$height*10.3, $phoneNumber, 11,);
+        $this->lfText($xTel, $y+$height*10.3, $phoneNumber, 11,);
 
         // =========================================
         // 金額＆バーコード
@@ -792,7 +801,7 @@ class OrderPdfService extends TcpdfFpdi
             // 催事コードを取得する
             $saijiCd = $Order->getSaijiCd();
             //　バーコード上部の内容印刷はいったんomit
-            //$this->lfText($x3, $y+$height*2, '催事コード：'.$saijiCd. ' 売価金額：'.$paymentTotalText, 8); // Barcode value
+            //$this->lfText($xBar, $y+$height*2, '催事コード：'.$saijiCd. ' 売価金額：'.$paymentTotalText, 8); // Barcode value
             $kingaku = round($Order->getPaymentTotal());
             // 金額が収まらない場合は印字しない
             if ( $kingaku < 100000 ) {
@@ -805,18 +814,40 @@ class OrderPdfService extends TcpdfFpdi
                 $checkDigit = $this->calcJanCodeDigit($code);
                 log_info('出荷：バーコード：'.$code.' digit:'.$checkDigit);
                 // バーコード印字
-                //$this->print1DBarcode($x3, $y+$height*2+6, $flg.$barSaijiCd.$barKingaku);    
-                $this->print1DBarcode($x3, $y+$height*2+6, $code.$checkDigit);    
+                //$this->print1DBarcode($xBar, $y+$height*2+6, $flg.$barSaijiCd.$barKingaku);
+                // (HDN) 2022.05.29 バーコード配置を上方へシフト
+                //$this->print1DBarcode($xBar, $y+$height*2+6, $code.$checkDigit);    
+                $this->print1DBarcode($xBar, $yBar, $code.$checkDigit);    
             }
+            //------------------------
+            // (HDN) レシート貼付欄
+            //------------------------
+            // 開始座標の設定
+            $this->setBasePosition(0, $yReceipt);
+            // タイトル
+            $this->SetFillColor(216, 216, 216);
+            $this->SetFont(self::FONT_GOTHIC, 'B', 9);
+            $text = trans('admin.order.delivery_note_receipt__y01_title');
+            $this->MultiCell(58, 6, $text, 1, 'C', 1, 1, $xReceipt);
+            // 文言
+            $this->SetFont(self::FONT_SJIS, '', 8);
+            $text = preg_replace('/\s+$/us', ''
+                ,'※'.trans('admin.order.delivery_note_receipt__y01_1')."\n"
+                .'    '.trans('admin.order.delivery_note_receipt__y01_2')."\n"
+                .'※'.trans('admin.order.delivery_note_receipt__y01_3')."\n"
+                .'    '.trans('admin.order.delivery_note_receipt__y01_4')
+            );
+            $this->MultiCell(58, 4, $text, 1, 'L', 0, 1, $xReceipt);
+
             //------------------------
             // (HDN) お支払い金額
             //------------------------
             $this->SetFont(self::FONT_SJIS, 'B', 15);
-            //$this->setBasePosition($x3, $y+$height*9);
+            //$this->setBasePosition($xBar, $y+$height*9);
             //$this->Cell(5, 7, '', 0, 0, '', 0, '');
             //$this->Cell(67, 8, $paymentTotalText, 0, 2, 'R', 0, '');
             //$this->Cell(0, 45, '', 0, 2, '', 0, '');
-            $this->lfText($x4, $y+$height*10.0, 'お支払金額　'.$paymentTotalText, 15, 'U');
+            $this->lfText($xGaku, $y+$height*10.0, 'お支払金額　'.$paymentTotalText, 15, 'U');
 
         }
 
@@ -843,25 +874,35 @@ class OrderPdfService extends TcpdfFpdi
      *
      * @param array $formData
      */
-    protected function renderEtcDataY01(array $formData, $bikouTitle)
+    protected function renderEtcDataY01(array $formData, $x, $tsuikiTitle)
     {
         // フォント情報のバックアップ
         $this->backupFont();
 
         // Cell(矩形領域幅(0は横一杯), 矩形領域高, 印字テキスト, 境界線(0 なし), カーソル移動, テキスト配置, 塗り潰し, リンク)
-        $this->SetFont(self::FONT_SJIS, '', 8);
+        // (HDN) 2022.05.29 備考欄改修
         $this->Ln();
-        $this->Cell(0, 4, '*** '.$formData['order_message'].' ***', 0, 1, 'R', 0, '', 0, false, 'T', 'T');
-
-        // 下段備考タイトル
         $this->SetFont(self::FONT_GOTHIC, 'B', 9);
-        $this->MultiCell(0, 6, '＜ '.$bikouTitle.' ＞', 'T', 2, 'L', 0, '');
+        //$this->Cell(0, 4, '*** '.$formData['order_message'].' ***', 0, 1, 'R', 0, '', 0, false, 'T', 'T');
+        $this->MultiCell(0, 6, '＜ 備考欄 ＞', 0, 2, 'L', 0, '');
+        $this->Ln();
+        $this->SetFont(self::FONT_SJIS, '', 8);
+        $this->MultiCell(0, 6, '     '.$formData['order_message'], '', 2, 'L', 0, '');
+        $this->Ln();
+        $this->Ln();
 
-        //　下段備考文言
+        // 下段注意事項タイトル
+        $this->SetFont(self::FONT_GOTHIC, 'B', 9);
+        //$this->MultiCell(0, 6, '＜ '.$tsuikiTitle.' ＞', 'T', 2, 'L', 0, '');
+        $this->MultiCell(0, 6, '＜ '.$tsuikiTitle.' ＞', 0, 2, 'L', 0, '');
+
+        //　下段注意事項文言
         $this->Ln();
         $this->SetFont(self::FONT_SJIS, '', 8);
         // rtrimを行う
+        // (HDN) 2022.05.29 文言追加 → 2022.06.16 取りやめ
         $text = preg_replace('/\s+$/us', '', $formData['note1']."\n".$formData['note2']."\n".$formData['note3']."\n".$formData['note4']);
+        //$text = preg_replace('/\s+$/us', '', $formData['note1']."\n".$formData['note2']."\n".$formData['note3']."\n".$formData['note5']."\n".$formData['note4']);
         $this->MultiCell(0, 4, $text, '', 2, 'L', 0, '');
 
         // フォント情報の復元
@@ -881,13 +922,14 @@ class OrderPdfService extends TcpdfFpdi
         // テーブルの微調整を行うための購入商品詳細情報をarrayに変換する
 
         // 明細リスト欄の設定
-        //$this->labelCell[0] = '税率';
+        // (HDN) 2022.05.29 略称の追加
         $this->labelCell[0] = '商品名 / オプション';
-        $this->labelCell[1] = '数量';
-        $this->labelCell[2] = '商品代金(税抜)';
-        $this->labelCell[3] = 'お支払額(税抜)';
-        //$this->widthCell = [8, 90, 12, 30, 30];
-        $this->widthCell = [100, 12, 30, 30];
+        $this->labelCell[1] = '略称';
+        $this->labelCell[2] = '数量';
+        $this->labelCell[3] = '商品代金(税抜)';
+        $this->labelCell[4] = 'お支払額(税抜)';
+        //$this->widthCell = [100, 12, 30, 30];
+        $this->widthCell = [75, 25, 12, 30, 30];
 
         // =========================================
         // 受注詳細情報
@@ -968,16 +1010,28 @@ class OrderPdfService extends TcpdfFpdi
             //}
             $arrOrder[$i][0] = $taxKbn.$productName;
 
+            // (HDN) 2022.05.29 略称の追加
+            $wLenRyaku = 6;
+            $wEncode = 'UTF-8';
+            //$arrOrder[$i][1] = $OrderItem->getProductRyakuName();
+            if ( $OrderItem->getProductRyakuName() && $OrderItem->getProductRyakuName() != '' ) {
+                $arrOrder[$i][1] = $OrderItem->getProductRyakuName();
+            } else if ( mb_strlen($OrderItem->getProductName(),$wEncode) >= $wLenRyaku ) {
+                $arrOrder[$i][1] = mb_substr($OrderItem->getProductName(),0,$wLenRyaku,$wEncode);
+            } else {
+                $arrOrder[$i][1] = $OrderItem->getProductName();
+            }
+
             // 購入数量
-            $arrOrder[$i][1] = number_format($suryo);
+            $arrOrder[$i][2] = number_format($suryo);
 
             // 商品代金（値引前単価で計算）
             $baseGaku = $suryo * $OrderItem->getBasePrice();
-            $arrOrder[$i][2] = $this->eccubeExtension->getPriceFilter($baseGaku);
+            $arrOrder[$i][3] = $this->eccubeExtension->getPriceFilter($baseGaku);
 
             // 小計（商品毎）
             $itemGaku = $suryo * $OrderItem->getPrice();
-            $arrOrder[$i][3] = $this->eccubeExtension->getPriceFilter($itemGaku);
+            $arrOrder[$i][4] = $this->eccubeExtension->getPriceFilter($itemGaku);
 
             // 税別集計
             $tax = $OrderItem->getTaxRate();
@@ -1037,8 +1091,9 @@ class OrderPdfService extends TcpdfFpdi
                 //$arrOrder[$i][0] = '';
                 $arrOrder[$i][0] = $wariText;
                 $arrOrder[$i][1] = '';
-                $arrOrder[$i][2] = $this->eccubeExtension->getPriceFilter($wariGaku);
-                $arrOrder[$i][3] = '';
+                $arrOrder[$i][2] = '';
+                $arrOrder[$i][3] = $this->eccubeExtension->getPriceFilter($wariGaku);
+                $arrOrder[$i][4] = '';
                 ++$i;
             }
 
@@ -1084,7 +1139,7 @@ class OrderPdfService extends TcpdfFpdi
             $arrOrder[$i][1] = '';
             $arrOrder[$i][2] = '';
             $arrOrder[$i][3] = '';
-            //$arrOrder[$i][4] = '';
+            $arrOrder[$i][4] = '';
 
             //　(HDN) 税別集計
             /*
@@ -1111,14 +1166,16 @@ class OrderPdfService extends TcpdfFpdi
                 //$arrOrder[$i][0] = '';
                 $arrOrder[$i][0] = '';
                 $arrOrder[$i][1] = '';
-                $arrOrder[$i][2] = '小計('.$taxSum['taxKbn'].$taxSum['tax'].'%対象)';
-                $arrOrder[$i][3] = $this->eccubeExtension->getPriceFilter($taxSum['gaku']);
+                $arrOrder[$i][2] = '';
+                $arrOrder[$i][3] = '小計('.$taxSum['taxKbn'].$taxSum['tax'].'%対象)';
+                $arrOrder[$i][4] = $this->eccubeExtension->getPriceFilter($taxSum['gaku']);
                 ++$i;
                 //$arrOrder[$i][0] = '';
                 $arrOrder[$i][0] = '';
                 $arrOrder[$i][1] = '';
-                $arrOrder[$i][2] = '消費税('.$taxSum['taxKbn'].$taxSum['tax'].'%対象)';
-                $arrOrder[$i][3] = $this->eccubeExtension->getPriceFilter($taxSum['taxGaku']);
+                $arrOrder[$i][2] = '';
+                $arrOrder[$i][3] = '消費税('.$taxSum['taxKbn'].$taxSum['tax'].'%対象)';
+                $arrOrder[$i][4] = $this->eccubeExtension->getPriceFilter($taxSum['taxGaku']);
             }
 
             ++$i;
@@ -1126,7 +1183,7 @@ class OrderPdfService extends TcpdfFpdi
             $arrOrder[$i][1] = '';
             $arrOrder[$i][2] = '';
             $arrOrder[$i][3] = '';
-            //$arrOrder[$i][4] = '';
+            $arrOrder[$i][4] = '';
 
             //　(HDN) 非課税があれば
             foreach($Order->getTaxFreeDiscountItems() as $Item) {
@@ -1134,8 +1191,9 @@ class OrderPdfService extends TcpdfFpdi
                 //$arrOrder[$i][0] = '';
                 $arrOrder[$i][0] = '';
                 $arrOrder[$i][1] = '';
-                $arrOrder[$i][2] = $Item->getProductName();
-                $arrOrder[$i][3] = $this->eccubeExtension->getPriceFilter($Item->getTotalPrice());
+                $arrOrder[$i][2] = '';
+                $arrOrder[$i][3] = $Item->getProductName();
+                $arrOrder[$i][4] = $this->eccubeExtension->getPriceFilter($Item->getTotalPrice());
             }
 
             //　(HDN) お支払合計
@@ -1143,8 +1201,9 @@ class OrderPdfService extends TcpdfFpdi
             //$arrOrder[$i][0] = '';
             $arrOrder[$i][0] = '';
             $arrOrder[$i][1] = '';
-            $arrOrder[$i][2] = 'お支払合計';
-            $arrOrder[$i][3] = $this->eccubeExtension->getPriceFilter($Order->getPaymentTotal());
+            $arrOrder[$i][2] = '';
+            $arrOrder[$i][3] = 'お支払合計';
+            $arrOrder[$i][4] = $this->eccubeExtension->getPriceFilter($Order->getPaymentTotal());
 
             if ($isShowReducedTaxMess) {
                 ++$i;
@@ -1153,6 +1212,7 @@ class OrderPdfService extends TcpdfFpdi
                 $arrOrder[$i][1] = '';
                 $arrOrder[$i][2] = '';
                 $arrOrder[$i][3] = '';
+                $arrOrder[$i][4] = '';
             }
         }
 
@@ -1199,9 +1259,9 @@ class OrderPdfService extends TcpdfFpdi
         $this->SetFont('');
         // Data
         $fill = 0;
-        $h = 5;
+        $h = 6; // (HDN) 2022.05.29 行高 5 -> 6
         foreach ($data as $row) {
-            // 行のの処理
+            // 行の処理
             $i = 0;
             $h = 5;
             $this->Cell(5, $h, '', 0, 0, '', 0, '');
@@ -1213,9 +1273,9 @@ class OrderPdfService extends TcpdfFpdi
                 // TODO: 汎用的ではない処理。この指定は呼び出し元で行うようにしたい。
                 // テキストの整列を指定する
                 if ( $i === 0 ) {
-                //    $align = 'C';
-                //} else if ( $i === 1 ) {
-                    $align = 'L';                
+                    $align = 'L';
+                } else if ( $i === 1 ) {
+                    $align = 'C';
                 } else {
                     $align = 'R';
                 }

@@ -1,4 +1,10 @@
 <?php
+/*----------------------------------------
+ * NonMemberTypeExtension
+ *----------------------------------------
+ * 2022.05.09 add shipping, payment, message and make Order by inok
+ * 2021.08.01 new by inok
+ *----------------------------------------*/
 
 /*
  * This file is part of EC-CUBE
@@ -66,7 +72,7 @@ class NonMemberShoppingController extends BaseNMSController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            log_info('非会員お客様情報登録開始');
+            log_info('[非会員] お客様情報登録開始');
 
             $data = $form->getData();
             $data['name01'] = $data['kana01'];
@@ -104,9 +110,97 @@ class NonMemberShoppingController extends BaseNMSController
                 return $event->getResponse();
             }
 
-            log_info('非会員お客様情報登録完了');
+            log_info('[非会員] お客様情報登録完了');
 
-            return $this->redirectToRoute('shopping');
+            //----------------------------------------------------------------------
+            // (HDN) 注文手続きまでをここでやることで画面遷移を簡略化(注文手続き画面をスキップ)
+            //----------------------------------------------------------------------
+            // (HDN) ShoppingControllerのindexメソッドを移植（ここから）
+
+            // 受注の初期化.
+            log_info('[非会員注文手続] 受注の初期化処理を開始します.');
+            //$Customer = $this->getUser() ? $this->getUser() : $this->orderHelper->getNonMember();
+            $Order = $this->orderHelper->initializeOrder($Cart, $Customer);
+
+            // (HDN) ここでFORMから取得した追加項目(備考,受渡日時,支払方法)をOrderにセット
+            log_info('[非会員注文手続] data内容',$data);
+
+            // 備考
+            $Order->setMessage($data["message"]);
+
+            // 配送情報の取り出し
+            $Shippings = $Order->getShippings();
+            $Shipping = $Shippings[0];
+
+            // 受渡日
+            $DeliveryDate = $form['shipping_delivery_date']->getData();
+            log_info('[非会員注文手続] form shipping_delivery_date',(array)$DeliveryDate);
+            if ($DeliveryDate) {
+                $Shipping->setShippingDeliveryDate(new \DateTime($DeliveryDate));
+            } else {
+                $Shipping->setShippingDeliveryDate(null);
+            }
+
+            // 受渡時刻
+            $DeliveryTime = $form['DeliveryTime']->getData();
+            log_info('[非会員注文手続] form DeliveryTime',(array)$DeliveryTime);
+            if ($DeliveryTime) {
+                $Shipping->setShippingDeliveryTime($DeliveryTime->getDeliveryTime());
+                $Shipping->setTimeId($DeliveryTime->getId());
+            } else {
+                $Shipping->setShippingDeliveryTime(null);
+                $Shipping->setTimeId(null);
+            }
+            // 配送情報の書き換え
+            $Order->removeShipping($Shipping);
+            $Order->addShipping($Shipping);
+
+            // 支払方法
+            log_info('[非会員注文手続] form Payment',(array)$data["Payment"]);
+            log_info('[非会員注文手続] PaymentMethod:'.$data["Payment"]->getMethod());
+            $Order->setPayment($data["Payment"]);
+            $Order->setPaymentMethod($data["Payment"]->getMethod());
+
+
+            // 集計処理.
+            log_info('[非会員注文手続] 集計処理を開始します.', [$Order->getId()]);
+            $flowResult = $this->executePurchaseFlow($Order, false);
+            $this->entityManager->flush();
+
+            if ($flowResult->hasError()) {
+                log_info('[非会員注文手続] Errorが発生したため購入エラー画面へ遷移します.', [$flowResult->getErrors()]);
+
+                return $this->redirectToRoute('shopping_error');
+            }
+
+            if ($flowResult->hasWarning()) {
+                log_info('[非会員注文手続] Warningが発生しました.', [$flowResult->getWarning()]);
+
+                // 受注明細と同期をとるため, CartPurchaseFlowを実行する
+                $cartPurchaseFlow->validate($Cart, new PurchaseContext($Cart, $this->getUser()));
+
+                // 注文フローで取得されるカートの入れ替わりを防止する
+                // @see https://github.com/EC-CUBE/ec-cube/issues/4293
+                $this->cartService->setPrimary($Cart->getCartKey());
+            }
+
+            // マイページで会員情報が更新されていれば, Orderの注文者情報も更新する.
+            // (HDN) ここは不要と思われるのでいったん外す
+            /*
+            if ($Customer->getId()) {
+                $this->orderHelper->updateCustomerInfo($Order, $Customer);
+                $this->entityManager->flush();
+            }
+            */
+
+            log_info('[非会員注文手続] Order.subtotal:'.$Order->getSubTotal().' tax:'.$Order->getTax());
+
+            // (HDN) ShoppingControllerのindexメソッドを移植（ここまで）
+
+            // (HDN) 画面遷移簡略化のためリダイレクト先をconfirmに変更
+            //return $this->redirectToRoute('shopping');
+            return $this->redirectToRoute('shopping_confirm');
+
         }
 
         return [
@@ -121,35 +215,34 @@ class NonMemberShoppingController extends BaseNMSController
      */
     public function customer(Request $request)
     {
-        log_info('Requestお客様情報');
-        log_info('Request,', $request->request->all());
+        log_info('[非会員お客様情報変更]Request,', $request->request->all());
         if (!$request->isXmlHttpRequest()) {
             return $this->json(['status' => 'NG'], 400);
         }
         $this->isTokenValid();
         try {
-            log_info('非会員お客様情報変更処理開始');
+            log_info('[非会員お客様情報変更]処理開始');
             $data = $request->request->all();
-            log_info('request:',$data);
+            log_info('[非会員お客様情報変更]request:',$data);
             // 入力チェック
             $errors = $this->customerValidation($data);
             foreach ($errors as $error) {
                 if ($error->count() != 0) {
-                    log_info('非会員お客様情報変更入力チェックエラー',(array)$error);
+                    log_info('[非会員お客様情報変更]入力チェックエラー',(array)$error);
 
                     return $this->json(['status' => 'NG'], 400);
                 }
             }
             $pref = $this->prefRepository->findOneBy(['name' => $data['customer_pref']]);
             if (!$pref) {
-                log_info('非会員お客様情報変更入力チェックエラー');
+                log_info('[非会員お客様情報変更]入力チェックエラー');
 
                 return $this->json(['status' => 'NG'], 400);
             }
             $preOrderId = $this->cartService->getPreOrderId();
             $Order = $this->orderHelper->getPurchaseProcessingOrder($preOrderId);
             if (!$Order) {
-                log_info('受注が存在しません');
+                log_info('[非会員お客様情報変更]受注が存在しません');
                 $this->addError('front.shopping.order_error');
 
                 return $this->redirectToRoute('shopping_error');
@@ -178,6 +271,19 @@ class NonMemberShoppingController extends BaseNMSController
                 $strOrder = serialize($Order);
                 log_info('Order:',[$strOrder]);
 
+            /*
+            // (HDN)集計処理(商品リスト欄への反映がされないのでここでの計算は取りやめ)
+            log_info('[非会員お客様情報変更] 集計処理を開始します.', [$Order->getId()]);
+            $flowResult = $this->executePurchaseFlow($Order, false);
+            $this->entityManager->flush();
+
+            if ($flowResult->hasError()) {
+                log_info('[非会員お客様情報変更] Errorが発生したため購入エラー画面へ遷移します.', [$flowResult->getErrors()]);
+
+                return $this->redirectToRoute('shopping_error');
+            }
+            */
+
             $Customer = new Customer();
             $Customer
                 ->setName01($data['customer_name01'])
@@ -205,7 +311,7 @@ class NonMemberShoppingController extends BaseNMSController
                 $request
             );
             $this->eventDispatcher->dispatch(EccubeEvents::FRONT_SHOPPING_CUSTOMER_INITIALIZE, $event);
-            log_info('非会員お客様情報変更処理完了', [$Order->getId()]);
+            log_info('[非会員お客様情報変更]処理完了', [$Order->getId()]);
             $message = ['status' => 'OK', 'kana01' => $data['customer_kana01'], 'kana02' => $data['customer_kana02']];
 
             $response = $this->json($message);

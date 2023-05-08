@@ -165,6 +165,7 @@ file that was distributed with this source code.
                     <div class="ec-orderDelivery__item">
                         <ul class="ec-borderedList">
                             {% for orderItem in shipping.productOrderItems %}
+                                {% set Product = orderItem.Product %}
                             <li>
                                 <div class="ec-imageGrid">
                                     <div class="ec-imageGrid__img"><img src="{{ asset((orderItem.product is null ? null : orderItem.product.MainListImage)|no_image_product, 'save_image') }}" alt="{{ orderItem.productName }}"></div>
@@ -184,6 +185,9 @@ file that was distributed with this source code.
                                         {% if orderItem.wariAGaku is not null and orderItem.wariAGaku > 0 %}- FC割{{ orderItem.wariAGaku }}{% endif %}
                                         {% if orderItem.wariBGaku is not null and orderItem.wariBGaku > 0 %}- 社割{{ orderItem.wariBGaku }}{% endif %}
                                         )</p>
+                                        {% if infoByProductAndDate[Product.id] %}
+                                            <p>{{ infoByProductAndDate[Product.id]['disp_simple'] }}</p>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </li>

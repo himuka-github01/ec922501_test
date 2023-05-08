@@ -71,17 +71,21 @@ file that was distributed with this source code.
                     updateSortNo();
                 }
             });
-            {% if has_class == false %}
+            {% if has_class == false %} //在庫数が無制限かどうか
             if ($("#{{ form.class.stock_unlimited.vars.id }}").prop("checked")) {
                 $("#{{ form.class.stock.vars.id }}").attr("disabled", "disabled").val('');
+                $("#{{ form.class.one_day_limit.vars.id }}").attr("disabled", "disabled").val('');
             } else {
                 $("#{{ form.class.stock.vars.id }}").removeAttr("disabled");
+                $("#{{ form.class.one_day_limit.vars.id }}").removeAttr("disabled");
             }
             $("#{{ form.class.stock_unlimited.vars.id }}").on("click change", function() {
                 if ($(this).prop("checked")) {
                     $("#{{ form.class.stock.vars.id }}").attr("disabled", "disabled").val('');
+                    $("#{{ form.class.one_day_limit.vars.id }}").attr("disabled", "disabled").val('');
                 } else {
                     $("#{{ form.class.stock.vars.id }}").removeAttr("disabled");
+                    $("#{{ form.class.one_day_limit.vars.id }}").removeAttr("disabled");
                 }
             });
             {% endif %}
@@ -326,6 +330,17 @@ file that was distributed with this source code.
                                         {{ form_errors(form.name) }}
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-3">
+                                        <div class="d-inline-block">
+                                            <span>{{ 'admin.product.product_ryaku_name'|trans }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col mb-2">
+                                        {{ form_widget(form.product_ryaku_name) }}
+                                        {{ form_errors(form.product_ryaku_name) }}
+                                    </div>
+                                </div>
                                 {% if has_class == false %}
                                     <div class="row hiddenItem">
                                         <div class="col-3">
@@ -378,8 +393,9 @@ file that was distributed with this source code.
                                         </div>
                                     </div>
                                     <div class="col">
-                                        {{ form_widget(form.description_detail, { attr : { rows : "8"} }) }}
+                                        {{ form_widget(form.description_detail, { attr : { rows : "3"} }) }}
                                         {{ form_errors(form.description_detail) }}
+                                        <!--
                                         <div class="d-inline-block mb-2" data-toggle="collapse" href="#addComment"
                                              role="button" aria-expanded="false" aria-controls="addComment">
                                             <a>
@@ -389,9 +405,10 @@ file that was distributed with this source code.
                                                 </span>
                                             </a>
                                         </div>
+                                        -->
                                     </div>
                                 </div>
-                                <div class="collapse ec-collapse" id="addComment">
+                                <div class="collapse show ec-collapse" id="addComment">
                                     <div class="row bg-ec-formGray pt-3 mb-2">
                                         <div class="col-3">
                                             <div class="d-inline-block" data-tooltip="true" data-placement="top"
@@ -402,7 +419,7 @@ file that was distributed with this source code.
                                         </div>
                                         <div class="col mb-4">
                                             <div>
-                                                {{ form_widget(form.description_list, { attr : { rows : "4"} }) }}
+                                                {{ form_widget(form.description_list, { attr : { rows : "3"} }) }}
                                                 {{ form_errors(form.description_list) }}
                                             </div>
                                         </div>
@@ -521,6 +538,17 @@ file that was distributed with this source code.
                                                 {#</div>#}
                                                 {{ form_widget(form.class.stock_unlimited) }}
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="d-inline-block">
+                                                <span>{{ 'admin.product.one_day_limit'|trans }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col mb-2">
+                                            {{ form_widget(form.class.one_day_limit) }}
+                                            {{ form_errors(form.class.one_day_limit) }}
                                         </div>
                                     </div>
                                 {% endif %}
@@ -744,6 +772,7 @@ file that was distributed with this source code.
                                             <th class="pt-2 pb-2">{{ 'admin.product.class_category2__short'|trans }}</th>
                                             <th class="pt-2 pb-2">{{ 'admin.product.product_code__short'|trans }}</th>
                                             <th class="pt-2 pb-2">{{ 'admin.product.stock'|trans }}</th>
+                                            <th class="pt-2 pb-2">{{ 'admin.product.one_day_limit'|trans }}</th><!--上限数-->
                                             <th class="pr-3 pt-2 pb-2">{{ 'admin.product.price'|trans }}</th>
                                             </thead>
                                             <tbody>
@@ -754,6 +783,7 @@ file that was distributed with this source code.
                                                         <td>{% if Class.hasClassCategory2 %}{{ Class.ClassCategory2.name }}{% endif %}</td>
                                                         <td>{{ Class.code }}</td>
                                                         <td>{% if Class.stock_unlimited %}{{ 'admin.product.stock_unlimited__short'|trans }}{% else %}{{ Class.stock }}{% endif %}</td>
+                                                        <td>{% if Class.stock_unlimited %}{{ 'admin.product.stock_unlimited__short'|trans }}{% else %}{{ Class.one_day_limit }}{% endif %}</td><!--上限数-->
                                                         <td class="pr-3">{{ Class.price02|price }}</td>
                                                     </tr>
                                                 {% endif %}

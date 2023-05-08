@@ -45,6 +45,7 @@ common.tax_include_short: 込
 #------------------------------------------------------------------------------------
 # ショッピング
 #------------------------------------------------------------------------------------
+front.shopping.message_placeholder: (3000文字まで)
 
 #====================================================================================
 # 管理画面
@@ -75,7 +76,7 @@ admin.product.product_csv_upload_y01: 商品CSV登録(専用)
 
 # ラベル/メッセージ
 admin.product.bumon: 部門
-admin.product.fc: 電
+admin.product.fc: FC
 admin.product.sya: 社
 admin.product.haya: 早
 admin.product.matome: マト
@@ -94,9 +95,14 @@ admin.product.product_csv.tenpo_cd_description: 店別在庫管理の場合に�
 #------------------------------------------------------------------------------------
 
 # 機能名称
+# 2021.08.xx Version
 admin.order.order_sum_bumon_item: 受注集計
 admin.order.order_sum_tenpo_bumon: 売上集計
 admin.order.order_sum_minou_item: 未引渡商品一覧
+# 2022.05.xx Version（名称は暫定）
+admin.order.order_sum_bumon_item_02: 受注集計(新)
+admin.order.order_sum_tenpo_bumon_02: 売上集計(新)
+admin.order.order_sum_minou_item_02: 未引渡商品一覧(新)
 
 # flashメッセージ
 
@@ -106,7 +112,7 @@ admin.order.saiji_id_label: イベント
 admin.order.list_juchu: 受注一覧
 admin.order.list_shukka: 受渡台帳
 admin.order.list_uriage: 売上集計
-admin.order.tenpo_label: 店舗
+admin.order.tenpo_label: 受渡店舗
 admin.order.bumon_label: 部門
 
 admin.order.multi_search_label: 注文番号・お名前・電話番号・メモ・受付者・紹介者
@@ -114,6 +120,7 @@ admin.order.multi_search_label: 注文番号・お名前・電話番号・メモ
 admin.order.shop_memo_for_delivery: お渡しメモ欄
 admin.order.for_delivery_date: お渡し日
 admin.order.for_delivery_time: お渡し時間
+admin.order.delivery_date: お引渡し日
 
 admin.order.delivery_note_title__y01: お引渡し当日は本証を必ずご持参くださいませ
 
@@ -121,11 +128,18 @@ admin.order.delivery_note_message__y01_1: このたびは、お買上げいた�
 admin.order.delivery_note_message__y01_2: 本証と下記商品をお引き換えいたします。
 admin.order.delivery_note_message__y01_3: お手数おかけしますが、お引渡し当日は本証を必ずご持参くださいませ。
 
+admin.order.delivery_note_receipt__y01_title: レシート貼り付け欄
+admin.order.delivery_note_receipt__y01_1: お引き渡し当日に
+admin.order.delivery_note_receipt__y01_2: 必ず貼り付けた状態でお持ちください。
+admin.order.delivery_note_receipt__y01_3: レシートが必要な方は、
+admin.order.delivery_note_receipt__y01_4: 当日その旨お伝えください。
+
 admin.order.delivery_note__y01_memo: 注意事項
 admin.order.delivery_note__y01_line1: ・ご予約締め切り後のキャンセルはお受けできません。
 admin.order.delivery_note__y01_line2: ・お客様よりお預かりした個人情報は、個人情報保護法に基づきご予約の確認・集計にのみ使用致します。
 admin.order.delivery_note__y01_line3: ・各種割引は税抜金額を記載しております。
-admin.order.delivery_note__y01_line4: ・電子割は、電子マネーカード「ＸＸＸＸＸ」でお支払いいただいた際の割引となります。
+admin.order.delivery_note__y01_line4: ・FC割は、電子マネーカード「フーディーズクラブ」でお支払いいただいた際の割引となります。
+admin.order.delivery_note__y01_line5: ・予定時刻より、早い時間帯でのお引き渡しも可能です。
 
 # 出荷CSV雛形
 

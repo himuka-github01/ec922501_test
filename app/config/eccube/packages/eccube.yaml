@@ -135,12 +135,13 @@ parameters:
     # ユーザ定義定数
     #-------------------------
     hdn_saiji_category_id: 7    # 催事をカテゴリに登録する場合の代表カテゴリＩＤ
-    hdn_saiji_start_dt_default: 2022-02-01  # カテゴリに保持する催事開始日の省略値
+    hdn_saiji_start_dt_default: 2021-01-01  # カテゴリに保持する催事開始日の省略値
     hdn_saiji_end_dt_default: 2026-12-31    # カテゴリに保持する催事終了日の省略値
+    hdn_tenpo_delivery_id: 3    # 配送ＩＤ（店舗受渡）
     hdn_house_payment_id : 5    # 支払ＩＤ（電子マネー）
-    hdn_wari_a_name : '電子マネー割'
+    hdn_wari_a_name : 'フーディーズクラブ割'
     hdn_wari_b_name : '社員割'
-    hdn_wari_kikan_name : '早割'
+    hdn_wari_kikan_name :　'早割'
     hdn_bumon_cd_keta : 4   # 部門コード桁数
     # 税関連
     hdn_tax_default_is_reduced : true   # 標準設定が軽減税率である場合にtrue
