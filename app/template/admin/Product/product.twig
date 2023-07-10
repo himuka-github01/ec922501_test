@@ -48,6 +48,12 @@ file that was distributed with this source code.
             width: 80px;
         }
 
+        .label-flg-use {
+            {% if eccube_config.hdn_label_flg_use is not defined or eccube_config.hdn_label_flg_use == false %}
+                display: none;
+            {% endif %}
+        }
+
         .hiddenItem {
             display: none;
         }
@@ -685,6 +691,20 @@ file that was distributed with this source code.
                                                 {{ form_widget(form.wari_matome_group) }}
                                                 {{ form_errors(form.wari_matome_group) }}
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {# (HDN) ラベル要否 #}
+                                <div class="row label-flg-use">
+                                    <div class="col-3">
+                                        <div class="d-inline-block">
+                                            <span>{{ 'ラベル要否'|trans }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col mb-2">
+                                        <div>
+                                            {{ form_widget(form.label_flg) }}
+                                            {{ form_errors(form.label_flg) }}
                                         </div>
                                     </div>
                                 </div>

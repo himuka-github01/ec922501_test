@@ -131,6 +131,11 @@ class ProductTypeExtension extends AbstractTypeExtension
             'label' => 'グループ',
             'required' => false,
         ])
+        ->add('label_flg', CheckboxType::class, [
+            'label' => 'ラベル要否',
+            'value' => '1',
+            'required' => false,
+        ])
         ;
     }
 

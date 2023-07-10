@@ -137,6 +137,7 @@ parameters:
     # 2023.07.xx for Rocky
     hdn_saiji_by_tenpo_use: false   # 店舗毎催事の使用有無
     hdn_wari_use: false # 各種割引の使用有無
+    hdn_label_flg_use: true # ラベル要否の使用有無
     hdn_zaiko_by_tenpo_use: false   # 店舗毎在庫の使用有無
     hdn_delivery_kikan: 31   # 通年イベントの場合の受付からの受渡期間
     hdn_delivery_address_use: true   # 注文受付時の住所入力有無

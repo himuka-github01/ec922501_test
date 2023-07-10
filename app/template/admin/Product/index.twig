@@ -367,8 +367,10 @@ file that was distributed with this source code.
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.price_tax'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.bumon'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.stock'|trans }}</th>
-                                    {% if eccube_config.hdn_wari_use is defined and eccube_config.hdn_wari_use == false %}
-                                    {% else %}
+                                    {% if eccube_config.hdn_label_flg_use is defined and eccube_config.hdn_label_flg_use == true %}
+                                        <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.label_flg'|trans }}</th>
+                                    {% endif %}
+                                    {% if eccube_config.hdn_wari_use is not defined or eccube_config.hdn_wari_use == true %}
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.fc'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.sya'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.haya'|trans }}</th>
@@ -431,8 +433,16 @@ file that was distributed with this source code.
                                                     {% endif %}
                                                 {% endif %}
                                             </td>
-                                        {% if eccube_config.hdn_wari_use is defined and eccube_config.hdn_wari_use == false %}
-                                        {% else %}
+                                        {% if eccube_config.hdn_label_flg_use is defined and eccube_config.hdn_label_flg_use == true %}
+                                            <td class="align-middle">
+                                                {% if Product.label_flg == TRUE %}
+                                                    ○
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                        {% if eccube_config.hdn_wari_use is not defined or eccube_config.hdn_wari_use == true %}
                                             <td class="align-middle">
                                                 {% if Product.wari_a_flg == TRUE %}
                                                     ○

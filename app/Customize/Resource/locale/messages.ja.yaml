@@ -76,6 +76,7 @@ admin.product.product_csv_upload_y01: 商品CSV登録(専用)
 
 # ラベル/メッセージ
 admin.product.bumon: 部門
+admin.product.label_flg: ラベル
 admin.product.fc: FC
 admin.product.sya: 社
 admin.product.haya: 早

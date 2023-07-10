@@ -2,6 +2,7 @@
 /*----------------------------------------
  * ProductTrait
  *----------------------------------------
+ * 2023.07.11 add label_flg by inok
  * 2022.05.13 add getTenpoOneDayLimit() by inok
  * 2022.05.05 add product_ryaku_name by inok
  * 2021.08.01 new by inok
@@ -19,6 +20,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 trait ProductTrait
 {
+    /**
+     * @ORM\Column(type="boolean", nullable=true, options={"default":true})
+     */
+    private $label_flg;
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
@@ -143,6 +149,18 @@ trait ProductTrait
      * })
      */
     private $Bumon;
+
+    public function getLabelFlg(): ?bool
+    {
+        return $this->label_flg;
+    }
+
+    public function setLabelFlg(?bool $label_flg): self
+    {
+        $this->label_flg = $label_flg;
+
+        return $this;
+    }
 
     public function getProductRyakuName(): ?string
     {
