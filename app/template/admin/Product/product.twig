@@ -34,6 +34,12 @@ file that was distributed with this source code.
             background: #fff;
         }
 
+        .wari-use {
+            {% if eccube_config.hdn_wari_use is defined and eccube_config.hdn_wari_use == false %}
+                display: none;
+            {% endif %}
+        }
+
         .matome-block {
             display: flex;
         }  
@@ -617,7 +623,7 @@ file that was distributed with this source code.
                                     {% endif %}
                                 {% endif %}
                                 {# (HDN) 割引関連 #}
-                                <div class="row">
+                                <div class="row wari-use">
                                     <div class="col-3">
                                         <div class="d-inline-block">
                                             <span>{{ '割引'|trans }}</span>
@@ -638,7 +644,7 @@ file that was distributed with this source code.
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
+                                <div class="row wari-use">
                                     <div class="col-3">
                                         <div class="d-inline-block">
                                             <span>{{ 'まとめ割'|trans }}</span>

@@ -367,10 +367,13 @@ file that was distributed with this source code.
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.price_tax'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.bumon'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.stock'|trans }}</th>
+                                    {% if eccube_config.hdn_wari_use is defined and eccube_config.hdn_wari_use == false %}
+                                    {% else %}
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.fc'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.sya'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.haya'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.product.matome'|trans }}</th>
+                                    {% endif %}
                                         <th class="border-top-0 pt-2 pb-2 text-nowrap">{{ 'admin.product.status'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.common.create_date'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2">{{ 'admin.common.update_date'|trans }}</th>
@@ -428,6 +431,8 @@ file that was distributed with this source code.
                                                     {% endif %}
                                                 {% endif %}
                                             </td>
+                                        {% if eccube_config.hdn_wari_use is defined and eccube_config.hdn_wari_use == false %}
+                                        {% else %}
                                             <td class="align-middle">
                                                 {% if Product.wari_a_flg == TRUE %}
                                                     ○
@@ -456,6 +461,7 @@ file that was distributed with this source code.
                                                     -
                                                 {% endif %}
                                             </td>
+                                        {% endif %}
                                             <td class="align-middle">
                                                 {% if Product.status.name == "非公開" %}
                                                     非
