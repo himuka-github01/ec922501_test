@@ -220,8 +220,13 @@ file that was distributed with this source code.
                         <p class="ec-halfInput hiddenItem">{{ ''|trans }}<span class="customer-edit customer-name01">{{ Order.name01 }}</span> <span class="customer-edit customer-name02">{{ Order.name02 }}</span>{{ ' 様'|trans }}</p>
                         <p class="ec-halfInput">お名前（カナ）：<span class="customer-edit customer-kana01">{{ Order.kana01 }}</span> <span class="customer-edit customer-kana02">{{ Order.kana02 }}</span>{{ ' 様'|trans }}</p>
                         <p class="ec-input hiddenItem"><span class="customer-edit customer-company_name">{{ Order.companyName }}</span></p>
+                    {% if eccube_config.hdn_delivery_address_use %}
+                        <p class="ec-zipInput">郵　便　番　号：<span class="customer-edit customer-postal_code">{{ Order.postal_code }}</span></p>
+                        <p class="ec-input">住　　　　　所：<span class="customer-edit customer-pref">{{ Order.pref }}</span><span class="customer-edit customer-addr01">{{ Order.addr01 }}</span><span class="customer-edit customer-addr02">{{ Order.addr02 }}</span></p>
+                    {% else %}
                         <p class="ec-zipInput hiddenItem">〒<span class="customer-edit customer-postal_code">{{ Order.postal_code }}</span></p>
                         <p class="ec-input hiddenItem"><span class="customer-edit customer-pref">{{ Order.pref }}</span><span class="customer-edit customer-addr01">{{ Order.addr01 }}</span><span class="customer-edit customer-addr02">{{ Order.addr02 }}</span></p>
+                    {% endif %}
                         <p class="ec-telInput">電　話　番　号：<span class="customer-edit customer-phone_number">{{ Order.phone_number }}</span></p>
                         <p class="ec-input hiddenItem"><span class="customer-edit customer-email">{{ Order.email }}</span></p>
                         <p class="ec-input">受　　付　　者：<span class="customer-edit customer-uketsuke_name">{{ Order.uketsuke_name }}</span></p>
@@ -267,7 +272,11 @@ file that was distributed with this source code.
                                     </div>
                                 </dd>
                             </dl>
+                        {% if eccube_config.hdn_delivery_address_use %}
+                            <dl>
+                        {% else %}
                             <dl class="hiddenItem">
+                        {% endif %}
                                 <dt>
                                     <label class="ec-label required">{{ '住所'|trans }}</label>
                                     <span class="ec-required">{{ '必須'|trans }}</span>

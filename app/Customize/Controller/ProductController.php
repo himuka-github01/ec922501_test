@@ -135,6 +135,7 @@ class ProductController extends BaseProductController
 
         // (HDN) 商品がない場合は催事一覧に戻る
         if ( count($ids) <= 0 ) {
+            log_info('商品がないので催事一覧に戻る：ここは検証が必要');
             return $this->redirectToRoute('start/list_saiji');
         }
 
@@ -188,13 +189,16 @@ class ProductController extends BaseProductController
         // 1)-2 受渡開始日と受渡終了日から受渡日のリストを作成
         $deliveryStartDt = $saiji->getDeliveryStartDt();
         $deliveryEndDt = $saiji->getDeliveryEndDt();
-        $period = new \DatePeriod(
-            $deliveryStartDt, new \DateInterval('P1D'), $deliveryEndDt->modify('+1 days')
-        );
-        foreach ($period as $day) {
-            $shippingDates[] = $day->format('Y-m-d');
+        // (HDN) 2023.07.xx 通年対応
+        if ( $deliveryStartDt && $deliveryEndDt ) {
+            $period = new \DatePeriod(
+                $deliveryStartDt, new \DateInterval('P1D'), $deliveryEndDt->modify('+1 days')
+            );
+            foreach ($period as $day) {
+                $shippingDates[] = $day->format('Y-m-d');
+            }
+            log_info('[商品一覧]催事の受渡期間 開始='.$deliveryStartDt->format('Y-m-d').' 終了='.$deliveryEndDt->format('Y-m-d'));
         }
-        log_info('[商品一覧]催事の受渡期間 開始='.$deliveryStartDt->format('Y-m-d').' 終了='.$deliveryEndDt->format('Y-m-d'));
         log_info('[商品一覧]受渡日群：',$shippingDates);
 
         // 2) 商品毎(店舗)の受渡日別受注数を取得 $sumOrdersByTenpo

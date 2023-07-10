@@ -134,9 +134,16 @@ parameters:
     #-------------------------
     # ユーザ定義定数
     #-------------------------
+    # 2023.07.xx for Rocky
+    hdn_saiji_by_tenpo_use: false   # 店舗毎催事の使用有無
+    hdn_wari_use: false # 各種割引の使用有無
+    hdn_zaiko_by_tenpo_use: false   # 店舗毎在庫の使用有無
+    hdn_delivery_kikan: 31   # 通年イベントの場合の受付からの受渡期間
+    hdn_delivery_address_use: true   # 注文受付時の住所入力有無
+
     hdn_saiji_category_id: 7    # 催事をカテゴリに登録する場合の代表カテゴリＩＤ
-    hdn_saiji_start_dt_default: 2021-01-01  # カテゴリに保持する催事開始日の省略値
-    hdn_saiji_end_dt_default: 2026-12-31    # カテゴリに保持する催事終了日の省略値
+    hdn_saiji_start_dt_default: 2023-08-01  # カテゴリに保持する催事開始日の省略値
+    hdn_saiji_end_dt_default: 2029-12-31    # カテゴリに保持する催事終了日の省略値
     hdn_tenpo_delivery_id: 3    # 配送ＩＤ（店舗受渡）
     hdn_house_payment_id : 5    # 支払ＩＤ（電子マネー）
     hdn_wari_a_name : 'フーディーズクラブ割'

@@ -356,98 +356,105 @@ class OrderRepository extends BaseOrderRepository
         
         // 1)-2 受渡開始日と受渡終了日から受渡日のリストを作成
         $deliveryStartDt = $saiji->getDeliveryStartDt();
-        // ※HDN)イミュータブルにしないとmodify等によってEntity値自体が変化してしまう
-        //$deliveryEndDt = $saiji->getDeliveryEndDt();
-        $deliveryEndDt = \DateTimeImmutable::createFromMutable($saiji->getDeliveryEndDt());
-
-        log_info('[OrderRepository]催事の受渡期間(登録内容) 開始='.$deliveryStartDt->format('Y-m-d').' 終了='.$deliveryEndDt->format('Y-m-d'));
-        $period = new \DatePeriod(
-            $deliveryStartDt, new \DateInterval('P1D'), $deliveryEndDt->modify('+1 days')
-        );
-        foreach ($period as $day) {
-            $shippingDates[] = $day->format('Y-m-d');
+        //　(HDN) 2023.07.xx 通年イベントに対応
+        if ($saiji->getDeliveryEndDt()) {
+            // ※HDN)イミュータブルにしないとmodify等によってEntity値自体が変化してしまう
+            //$deliveryEndDt = $saiji->getDeliveryEndDt();
+            $deliveryEndDt = \DateTimeImmutable::createFromMutable($saiji->getDeliveryEndDt());
+        }
+        if ($deliveryStartDt && $deliveryEndDt) {
+            log_info('[OrderRepository]催事の受渡期間(登録内容) 開始='.$deliveryStartDt->format('Y-m-d').' 終了='.$deliveryEndDt->format('Y-m-d'));
+            $period = new \DatePeriod(
+                $deliveryStartDt, new \DateInterval('P1D'), $deliveryEndDt->modify('+1 days')
+            );
+            foreach ($period as $day) {
+                $shippingDates[] = $day->format('Y-m-d');
+            }    
         }
         log_info('[OrderRepository]受渡日群：',$shippingDates);
 
-        // 2) 商品毎(店舗)の受渡日別受注数を取得 $sumOrdersByTenpo
-        // 2)-1 店舗を取得
-        //$hdnTenpoRepository = $this->entityManager->getRepository(HdnTenpo::class);
-        $hdnTenpoRepository = $entityManager->getRepository(HdnTenpo::class);
-        $tenpo = $hdnTenpoRepository->find($tenpo_id);
+        // 受渡日が単日の場合は対象外
+        if ( count($shippingDates) > 1 ) {
+            // 2) 商品毎(店舗)の受渡日別受注数を取得 $sumOrdersByTenpo
+            // 2)-1 店舗を取得
+            //$hdnTenpoRepository = $this->entityManager->getRepository(HdnTenpo::class);
+            $hdnTenpoRepository = $entityManager->getRepository(HdnTenpo::class);
+            $tenpo = $hdnTenpoRepository->find($tenpo_id);
 
-        // 2)-2 催事/店舗を条件に商品/受渡日毎の実績を取得(SQL生成)
-        //$orderRepository = $this->entityManager->getRepository(Order::class);
-        $qb = $this->createQueryBuilder('o')
-            ->select('sj.id as saiji_id')
-            ->addSelect('tp.id as tenpo_id')
-            ->addSelect('p.id as product_id')
-            ->addSelect('s.shipping_delivery_date')
-            ->addSelect('sum(oi.quantity) as quantity')
-            ->leftJoin('o.OrderItems', 'oi')
-            ->leftJoin('oi.Product', 'p')
-            ->leftJoin('oi.Shipping', 's')
-            ->leftJoin('o.Saiji', 'sj')
-            ->leftJoin('o.Tenpo', 'tp')
-            ->where('o.Saiji = :Saiji')
-            ->andwhere('o.Tenpo = :Tenpo')
-            ->andWhere('o.OrderStatus not in (3,8)')
-            ->andWhere('oi.class_name1 is not null')
-            ->groupBy('saiji_id')
-            ->addGroupBy('tenpo_id')
-            ->addGroupBy('product_id')
-            ->addGroupBy('s.shipping_delivery_date')
-            ->orderBy('product_id')
-            ->addOrderBy('s.shipping_delivery_date');
-        $qb->andwhere($qb->expr()->in('p.id', $ids));
-        $qb->setParameter('Saiji', $saiji)
-            ->setParameter('Tenpo', $tenpo);
+            // 2)-2 催事/店舗を条件に商品/受渡日毎の実績を取得(SQL生成)
+            //$orderRepository = $this->entityManager->getRepository(Order::class);
+            $qb = $this->createQueryBuilder('o')
+                ->select('sj.id as saiji_id')
+                ->addSelect('tp.id as tenpo_id')
+                ->addSelect('p.id as product_id')
+                ->addSelect('s.shipping_delivery_date')
+                ->addSelect('sum(oi.quantity) as quantity')
+                ->leftJoin('o.OrderItems', 'oi')
+                ->leftJoin('oi.Product', 'p')
+                ->leftJoin('oi.Shipping', 's')
+                ->leftJoin('o.Saiji', 'sj')
+                ->leftJoin('o.Tenpo', 'tp')
+                ->where('o.Saiji = :Saiji')
+                ->andwhere('o.Tenpo = :Tenpo')
+                ->andWhere('o.OrderStatus not in (3,8)')
+                ->andWhere('oi.class_name1 is not null')
+                ->groupBy('saiji_id')
+                ->addGroupBy('tenpo_id')
+                ->addGroupBy('product_id')
+                ->addGroupBy('s.shipping_delivery_date')
+                ->orderBy('product_id')
+                ->addOrderBy('s.shipping_delivery_date');
+            $qb->andwhere($qb->expr()->in('p.id', $ids));
+            $qb->setParameter('Saiji', $saiji)
+                ->setParameter('Tenpo', $tenpo);
 
-        // 2)-3 実績取得(SQL実行)
-        $sumOrdersByTenpo = $qb->getQuery()->execute();
-        log_info('[OrderRepository]受注実績(店舗):',$sumOrdersByTenpo);
+            // 2)-3 実績取得(SQL実行)
+            $sumOrdersByTenpo = $qb->getQuery()->execute();
+            log_info('[OrderRepository]受注実績(店舗):',$sumOrdersByTenpo);
 
-        // 2)-4 商品毎受渡日別受注状況をワーク配列にセット
-        $wOrders = [];
-        foreach ($sumOrdersByTenpo as $sumOrder) {
-            $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
-            $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
-        }
-        
-        // 3) 商品毎(全店)の受渡日別受注数を取得 $sumOrdersAllTenpo
-        // 3)-1 催事を条件に商品/受渡日毎の実績を取得(SQL生成)
-        $qb = $this->createQueryBuilder('o')
-            ->select('sj.id as saiji_id')
-            //->addSelect('tp.id as tenpo_id')
-            ->addSelect('p.id as product_id')
-            ->addSelect('s.shipping_delivery_date')
-            ->addSelect('sum(oi.quantity) as quantity')
-            ->leftJoin('o.OrderItems', 'oi')
-            ->leftJoin('oi.Product', 'p')
-            ->leftJoin('oi.Shipping', 's')
-            ->leftJoin('o.Saiji', 'sj')
-            //->leftJoin('o.Tenpo', 'tp')
-            ->where('o.Saiji = :Saiji')
-            //->andwhere('o.Tenpo = :Tenpo')
-            ->andwhere($qb->expr()->in('p.id', $ids))
-            ->andWhere('o.OrderStatus not in (3,8)')
-            ->andWhere('oi.class_name1 is null')
-            ->groupBy('saiji_id')
-            //->addGroupBy('tenpo_id')
-            ->addGroupBy('product_id')
-            ->addGroupBy('s.shipping_delivery_date')
-            ->orderBy('product_id')
-            ->addOrderBy('s.shipping_delivery_date');
-        $qb->setParameter('Saiji', $saiji);
-            //->setParameter('Tenpo', $tenpo);
+            // 2)-4 商品毎受渡日別受注状況をワーク配列にセット
+            $wOrders = [];
+            foreach ($sumOrdersByTenpo as $sumOrder) {
+                $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
+                $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
+            }
+            
+            // 3) 商品毎(全店)の受渡日別受注数を取得 $sumOrdersAllTenpo
+            // 3)-1 催事を条件に商品/受渡日毎の実績を取得(SQL生成)
+            $qb = $this->createQueryBuilder('o')
+                ->select('sj.id as saiji_id')
+                //->addSelect('tp.id as tenpo_id')
+                ->addSelect('p.id as product_id')
+                ->addSelect('s.shipping_delivery_date')
+                ->addSelect('sum(oi.quantity) as quantity')
+                ->leftJoin('o.OrderItems', 'oi')
+                ->leftJoin('oi.Product', 'p')
+                ->leftJoin('oi.Shipping', 's')
+                ->leftJoin('o.Saiji', 'sj')
+                //->leftJoin('o.Tenpo', 'tp')
+                ->where('o.Saiji = :Saiji')
+                //->andwhere('o.Tenpo = :Tenpo')
+                ->andwhere($qb->expr()->in('p.id', $ids))
+                ->andWhere('o.OrderStatus not in (3,8)')
+                ->andWhere('oi.class_name1 is null')
+                ->groupBy('saiji_id')
+                //->addGroupBy('tenpo_id')
+                ->addGroupBy('product_id')
+                ->addGroupBy('s.shipping_delivery_date')
+                ->orderBy('product_id')
+                ->addOrderBy('s.shipping_delivery_date');
+            $qb->setParameter('Saiji', $saiji);
+                //->setParameter('Tenpo', $tenpo);
 
-        // 3)-2 実績取得(SQL実行)
-        $sumOrdersAllTenpo = $qb->getQuery()->execute();
-        log_info('[OrderRepository]受注実績(全店):',$sumOrdersAllTenpo);
+            // 3)-2 実績取得(SQL実行)
+            $sumOrdersAllTenpo = $qb->getQuery()->execute();
+            log_info('[OrderRepository]受注実績(全店):',$sumOrdersAllTenpo);
 
-        // 3)-3 商品毎受渡日別受注状況をワーク配列にセット
-        foreach ($sumOrdersAllTenpo as $sumOrder) {
-            $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
-            $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
+            // 3)-3 商品毎受渡日別受注状況をワーク配列にセット
+            foreach ($sumOrdersAllTenpo as $sumOrder) {
+                $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
+                $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
+            }
         }
 
         // 4) 商品毎の受渡日別受注状況をセット $infoByProductAndDate[]

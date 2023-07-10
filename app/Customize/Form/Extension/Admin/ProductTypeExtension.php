@@ -54,7 +54,7 @@ class ProductTypeExtension extends AbstractTypeExtension
         // 商品略称
         ->add('product_ryaku_name', TextType::class, [
             'constraints' => [
-                new Assert\NotBlank(),
+                /* new Assert\NotBlank(), */
                 new Assert\Length(['max' => $this->eccubeConfig['eccube_stext_len']]),
             ],
         ])

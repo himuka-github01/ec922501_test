@@ -84,12 +84,12 @@ trait CategoryTrait {
      *  auto_render=true,
      *  type="\Symfony\Component\Form\Extension\Core\Type\DateType",
      *  options={
-     *    "required": true,
+     *    "required": false,
      *    "label": "受渡開始日"
      *  }
      * )
-     * @Assert\NotBlank(message="受渡開始日を入力してください")
      */
+    // Assert\NotBlank(message="受渡開始日を入力してください")
     private $deliveryStartDt;
 
     public function getDeliveryStartDt() {
@@ -106,12 +106,12 @@ trait CategoryTrait {
      *  auto_render=true,
      *  type="\Symfony\Component\Form\Extension\Core\Type\DateType",
      *  options={
-     *    "required": true,
+     *    "required": false,
      *    "label": "受渡終了日"
      *  }
      * )
-     * @Assert\NotBlank(message="受渡終了日を入力してください")
      */
+    // @Assert\NotBlank(message="受渡終了日を入力してください")
     private $deliveryEndDt;
 
     public function getDeliveryEndDt() {
@@ -125,39 +125,41 @@ trait CategoryTrait {
     /**
      * @ORM\Column(type="decimal", precision=8, scale=1, nullable=true, options={"default":0})
      * @Eccube\FormAppend(
-     *  auto_render=true,
+     *  auto_render=false,
      *  type="\Symfony\Component\Form\Extension\Core\Type\IntegerType",
      *  options={
      *    "required": false,
      *    "label": "ＦＣ割％"
      *  }
      * )
-     * @Assert\NotBlank(message="ＦＣ割引率を入力してください")
      */
+    // @Assert\NotBlank(message="ＦＣ割引率を入力してください")
     private $wari_a_value = 0;
 
     public function getWariAValue(): ?string
     {
         return $this->wari_a_value;
     }
-    public function setWariAValue(string $wari_a_value): self
+    public function setWariAValue(?string $wari_a_value): self
     {
-        $this->wari_a_value = $wari_a_value;
+        if ( $wari_a_value ) {
+            $this->wari_a_value = $wari_a_value;
+        }
         return $this;
     }
 
     /**
      * @ORM\Column(type="decimal", precision=8, scale=1, nullable=true, options={"default":0})
      * @Eccube\FormAppend(
-     *  auto_render=true,
+     *  auto_render=false,
      *  type="\Symfony\Component\Form\Extension\Core\Type\IntegerType",
      *  options={
      *    "required": false,
      *    "label": "社員割％"
      *  }
      * )
-     * @Assert\NotBlank(message="社員割引率を入力してください")
      */
+    // @Assert\NotBlank(message="社員割引率を入力してください")
     private $wari_b_value = 0;
 
     public function getWariBValue(): ?string
@@ -166,22 +168,24 @@ trait CategoryTrait {
     }
     public function setWariBValue(?string $wari_b_value): self
     {
-        $this->wari_b_value = $wari_b_value;
+        if ( $wari_b_value ) {
+            $this->wari_b_value = $wari_b_value;
+        }
         return $this;
     }
 
     /**
      * @ORM\Column(type="decimal", precision=8, scale=1, nullable=true, options={"default":0})
      * @Eccube\FormAppend(
-     *  auto_render=true,
+     *  auto_render=false,
      *  type="\Symfony\Component\Form\Extension\Core\Type\IntegerType",
      *  options={
      *    "required": false,
      *    "label": "早割％"
      *  }
      * )
-     * @Assert\NotBlank(message="早割割引率を入力してください")
      */
+    // @Assert\NotBlank(message="早割割引率を入力してください")
     private $wari_kikan_value = 0;
 
     public function getWariKikanValue(): ?string
@@ -190,22 +194,24 @@ trait CategoryTrait {
     }
     public function setWariKikanValue(?string $wari_kikan_value): self
     {
-        $this->wari_kikan_value = $wari_kikan_value;
+        if ( $wari_kikan_value ) {
+            $this->wari_kikan_value = $wari_kikan_value;
+        }
         return $this;
     }
 
     /**
      * @ORM\Column(type="date", nullable=true)
      * @Eccube\FormAppend(
-     *  auto_render=true,
+     *  auto_render=false,
      *  type="\Symfony\Component\Form\Extension\Core\Type\DateType",
      *  options={
      *    "required": false,
      *    "label": "早割終了日"
      *  }
      * )
-     * @Assert\NotBlank(message="早割終了日を入力してください")
      */
+    // @Assert\NotBlank(message="早割終了日を入力してください")
     private $wari_kikan_end_dt;
 
     public function getWariKikanEndDt(): ?\DateTimeInterface

@@ -81,8 +81,13 @@ file that was distributed with this source code.
                     <p class="ec-halfInput hiddenItem">{{ ''|trans }}{{ Order.name01 }} {{ Order.name02 }}</span>{{ ' 様'|trans }}</p>
                     <p class="ec-halfInput">お名前（カナ）：{{ Order.kana01 }}</span> {{ Order.kana02 }}{{ ' 様'|trans }}</p>
                     <p class="ec-input hiddenItem">{{ Order.companyName }}</span></p>
+                {% if eccube_config.hdn_delivery_address_use %}
+                    <p class="ec-zipInput">郵　便　番　号：{{ Order.postal_code }}</p>
+                    <p class="ec-input">住　　　　　所：{{ Order.pref }}{{ Order.addr01 }}{{ Order.addr02 }}</p>
+                {% else %}
                     <p class="ec-zipInput hiddenItem">{{ '〒'|trans }}{{ Order.postal_code }}</p>
                     <p class="ec-input hiddenItem">{{ Order.pref }}{{ Order.addr01 }}{{ Order.addr02 }}</p>
+                {% endif %}
                     <p class="ec-telInput">電　話　番　号：{{ Order.phone_number }}</span></p>
                     <p class="ec-input hiddenItem">{{ Order.email }}</span></p>
                     <p class="ec-input">受　　付　　者：{{ Order.uketsuke_name }}</span></p>

@@ -109,6 +109,14 @@ class CategoryController extends BaseCategoryController
         if ($request->getMethod() === 'POST') {
             log_info('カテゴリ登録：新規部：Request,', $request->request->all());
             $form->handleRequest($request);
+
+            if (!$form->isValid()) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $errors[] = ['message' => $error->getMessage()];
+                }
+                log_info('カテゴリ登録：新規部：Errors,', $errors);
+            }
             if ($form->isValid()) {
                 if ($this->eccubeConfig['eccube_category_nest_level'] < $TargetCategory->getHierarchy()) {
                     throw new BadRequestHttpException();

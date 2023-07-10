@@ -91,10 +91,16 @@ class NonMemberTypeExtension extends AbstractTypeExtension
         $startDt = $saiji->getDispStartDt();
         if ( $saiji->getDeliveryStartDt() ) {
             $startDt = $saiji->getDeliveryStartDt();
+        } else {
+            $startDt = new \DateTime();
         }
         $endDt = $saiji->getDispEndDt(); 
         if ( $saiji->getDeliveryEndDt() ) {
             $endDt = $saiji->getDeliveryEndDt();
+        } else {
+            // ※HDN)イミュータブルにしないとmodify等によって元の値自体が変化してしまう
+            $endDt = \DateTimeImmutable::createFromMutable($startDt);
+            $endDt = $endDt->modify('+'.$this->eccubeConfig['hdn_delivery_kikan'].' days');
         }
 
         // 配達最大日数期間を設定
