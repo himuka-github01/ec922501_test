@@ -614,6 +614,9 @@ file that was distributed with this source code.
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.delivery_date_label'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.tenpo_label'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.delivery_status_label'|trans }}</th>
+                                        {% if eccube_config.hdn_receipt_no_use %}
+                                            <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.receipt_no_label'|trans }}</th>
+                                        {% endif %}
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.note_label'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center pr-3"></th>
                                     </tr>
@@ -675,6 +678,11 @@ file that was distributed with this source code.
                                                         <i class="fa fa-envelope fa-lg text-secondary" aria-hidden="true" data-tooltip="true" data-placement="top" data-original-title="{{ 'admin.order.shipping_mail__completed'|trans({'%date%': send_mail_date}) }}"></i>
                                                     {% endif %}
                                                 </td>
+                                                {% if eccube_config.hdn_receipt_no_use %}
+                                                    <td class="align-middle text-center">
+                                                        {{ Order.receipt_no }}
+                                                    </td>
+                                                {% endif %}
                                                 <td class="align-middle text-center">
                                                     {{ Order.message }}<!--メモ保留--><br>
                                                     受付：{{ Order.uketsuke_name }}　/　紹介：{{ Order.shoukai_name }}

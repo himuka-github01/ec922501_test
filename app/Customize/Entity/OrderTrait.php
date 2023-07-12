@@ -2,6 +2,7 @@
 /*----------------------------------------
  * OrderTrait
  *----------------------------------------
+ * 2023.07.12 add receipt_no by inok
  * 2022.05.05 add uketsuke_tenpo_id by inok
  * 2021.08.01 new by inok
  *----------------------------------------*/
@@ -91,6 +92,11 @@ trait OrderTrait
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $uketsuke_name;
+
+    /**
+     * @ORM\Column(type="string", length=13, nullable=true)
+     */
+    private $receipt_no;
 
     public function getSaijiCd(): ?int
     {
@@ -266,6 +272,17 @@ trait OrderTrait
     {
         $this->uketsuke_name = $uketsuke_name;
 
+        return $this;
+    }
+
+    public function getReceiptNo(): ?string
+    {
+        return $this->receipt_no;
+    }
+
+    public function setReceiptNo(?string $receipt_no): self
+    {
+        $this->receipt_no = $receipt_no;
         return $this;
     }
     /**

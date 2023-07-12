@@ -58,7 +58,8 @@ admin.common.search_try_set_saiji: イベントを指定して「検索」をお
 admin.common.wari_kikan_flg: 早割
 admin.common.shain_flg: 社員
 admin.common.shoukai.name: 紹介者
-admin.order.uketsuke_name: 受付者
+admin.common.uketsuke_name: 受付者
+admin.common.receipt_no: レシート番号
 
 #------------------------------------------------------------------------------------
 # ホーム
@@ -115,6 +116,7 @@ admin.order.list_shukka: 受渡台帳
 admin.order.list_uriage: 売上集計
 admin.order.tenpo_label: 受渡店舗
 admin.order.bumon_label: 部門
+admin.order.receipt_no_label: レシート
 
 admin.order.multi_search_label: 注文番号・お名前・電話番号・メモ・受付者・紹介者
 

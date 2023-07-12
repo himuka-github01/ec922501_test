@@ -88,6 +88,14 @@ class OrderTypeExtension extends AbstractTypeExtension
                     ]),
                 ],
             ])
+            ->add('receipt_no', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['hdn_receipt_no_len'],
+                    ]),
+                ],
+            ])
             ;
 
     }

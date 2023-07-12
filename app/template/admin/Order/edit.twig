@@ -217,6 +217,11 @@ file that was distributed with this source code.
 
 {% block stylesheet %}
 <style>
+    .delivery-address-use {
+        {% if eccube_config.hdn_delivery_address_use is not defined or eccube_config.hdn_delivery_address_use == false %}
+            display: none;
+        {% endif %}
+    }
     .hiddenItem {
         display: none !important;
     }
@@ -298,7 +303,7 @@ file that was distributed with this source code.
                                             </div>
                                         </div>
                                         <div class="row mb-3 form-group">
-                                            <div class="col-3">{{ 'admin.order.uketsuke_name'|trans }}</div>
+                                            <div class="col-3">{{ 'admin.common.uketsuke_name'|trans }}</div>
                                             <div class="col">
                                                 {{ form_widget(form.uketsuke_name) }}
                                                 {{ form_errors(form.uketsuke_name) }}
@@ -326,14 +331,25 @@ file that was distributed with this source code.
                                             <div class="col-3"><i class="fa fa-refresh fa-fw mr-1 hiddenItem" aria-hidden="true"></i>{{ 'admin.common.update_date'|trans }}</div>
                                             <div class="col">{{ Order.update_date ? Order.update_date|date_sec : '' }}</div>
                                         </div>
-                                        <div class="row mb-3">
-                                            <div class="col-3"><i class="fa fa-mobile fa-fw mr-1 hiddenItem" aria-hidden="true"></i>{{ 'admin.common.wari_kikan_flg'|trans }}</div>
-                                            {% if Order.wari_kikan_flg == true %}
-                                                <div class="col">○対象　{{ Order.wari_kikan_value }}%</div>
-                                            {% else %}
-                                                <div class="col">-</div>
-                                            {% endif %}
-                                        </div>
+                                        {% if eccube_config.hdn_wari_use is not defined or eccube_config.hdn_wari_use %}
+                                            <div class="row mb-3">
+                                                <div class="col-3"><i class="fa fa-mobile fa-fw mr-1 hiddenItem" aria-hidden="true"></i>{{ 'admin.common.wari_kikan_flg'|trans }}</div>
+                                                {% if Order.wari_kikan_flg == true %}
+                                                    <div class="col">○対象　{{ Order.wari_kikan_value }}%</div>
+                                                {% else %}
+                                                    <div class="col">-</div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        {% if eccube_config.hdn_receipt_no_use %}
+                                            <div class="row mb-3">
+                                                <div class="col-3 col-form-label">{{ 'admin.common.receipt_no'|trans }}</div>
+                                                <div class="col">
+                                                    {{ form_widget(form.receipt_no) }}
+                                                    {{ form_errors(form.receipt_no) }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
                                         <div class="row mb-3 form-group">
                                             <label class="col-3 col-form-label">{{ 'admin.common.payment_method'|trans }}</label>
                                             <div class="col">
@@ -342,7 +358,7 @@ file that was distributed with this source code.
                                             </div>
                                         </div>
                                         <div class="row mb-3">
-                                            <div class="col-3">{{ 'admin.common.shoukai.name'|trans }}</div>
+                                            <div class="col-3 col-form-label">{{ 'admin.common.shoukai.name'|trans }}</div>
                                             <div class="col">
                                                 {{ form_widget(form.shoukai_name) }}
                                                 {{ form_errors(form.shoukai_name) }}
@@ -467,7 +483,7 @@ file that was distributed with this source code.
                                                 <div class="col">-</div>
                                             {% endif %}
                                         </div>
-                                        <div class="row form-group hiddenItem">
+                                        <div class="row form-group delivery-address-use">
                                             <label class="col-3 col-form-label">{{ 'admin.common.address'|trans }}<span class="badge badge-primary ml-1">{{ 'admin.common.required'|trans }}</span></label>
                                             <div class="col">
                                                 <div class="row mb-3">
