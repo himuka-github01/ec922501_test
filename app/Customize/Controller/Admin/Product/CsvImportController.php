@@ -271,6 +271,19 @@ class CsvImportController extends BaseCsvImportController
                             }
                         }
 
+                        // (HDN) 2023.07.16 ラベル要否（拡張項目）
+                        if (isset($row[$headerByKey['label_flg']])) {
+                            $Product->setLabelFlg(false);
+                            if (StringUtil::isNotBlank($row[$headerByKey['label_flg']])) {
+                                if ($row[$headerByKey['label_flg']] == (string) Constant::ENABLED) {
+                                    $Product->setLabelFlg(true);
+                                } elseif ($row[$headerByKey['label_flg']] != (string) Constant::DISABLED) {
+                                    $message = trans('admin.common.csv_invalid_value', ['%line%' => $line, '%name%' => $headerByKey['label_flg']]);
+                                    $this->addErrors($message);
+                                }
+                            }
+                        }
+
                         // メモ欄
                         if (isset($row[$headerByKey['note']])) {
                             if (StringUtil::isNotBlank($row[$headerByKey['note']])) {
@@ -952,6 +965,16 @@ class CsvImportController extends BaseCsvImportController
                 'required' => false,
             ],
         ];
+        // (HDN) 2023.07.16 ラベル要否追加対応
+        if ( $this->eccubeConfig['hdn_label_flg_use'] ) {
+            $headers = array_merge($headers,[
+                trans('admin.product.product_csv.label_flg_col') => [
+                    'id' => 'label_flg',
+                    'description' => 'admin.product.product_csv.label_flg_description',
+                    'required' => false,
+                ],
+            ]);
+        }
         if ( $argAll ) {
             $headersPlus = [
                 trans('admin.product.product_csv.keyword_col') => [

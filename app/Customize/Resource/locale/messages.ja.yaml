@@ -60,6 +60,8 @@ admin.common.shain_flg: 社員
 admin.common.shoukai.name: 紹介者
 admin.common.uketsuke_name: 受付者
 admin.common.receipt_no: レシート番号
+# エラーメッセージ
+admin.common.csv_invalid_value: '%line%行目の%name%の値が不正です'
 
 #------------------------------------------------------------------------------------
 # ホーム
@@ -91,6 +93,8 @@ admin.product.product_csv.bumon_cd_col: 部門コード
 admin.product.product_csv.bumon_cd_description: 部門コードを指定します。前ゼロも含めて正確に設定してください。
 admin.product.product_csv.tenpo_cd_col: 店舗コード
 admin.product.product_csv.tenpo_cd_description: 店別在庫管理の場合に店舗コードを指定します。前ゼロも含めて正確に設定してください。
+admin.product.product_csv.label_flg_col: ラベル要否
+admin.product.product_csv.label_flg_description: 0:不要 1:必要を指定します。
 
 #------------------------------------------------------------------------------------
 # 受注
