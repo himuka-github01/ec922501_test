@@ -77,16 +77,23 @@ class ShippingTypeExtension extends AbstractTypeExtension
                 if ( !$saiji ) {
                     return false;
                 }
-                $startDt = $saiji->getDispStartDt();
+                //$startDt = $saiji->getDispStartDt();
                 if ( $saiji->getDeliveryStartDt() ) {
                     $startDt = $saiji->getDeliveryStartDt();
+                } else {
+                    $startDt = new \DateTime();
+                    $startDt->modify('+'.$this->eccubeConfig['hdn_delivery_leadtime'].' days');
                 }
                 // (HDN) イミュータブルにしないとmodify等によってEntity値自体が変化してしまう
                 //$endDt = $saiji->getDispEndDt(); 
-                $endDt = \DateTimeImmutable::createFromMutable($saiji->getDispEndDt());
+                //$endDt = \DateTimeImmutable::createFromMutable($saiji->getDispEndDt());
                 if ( $saiji->getDeliveryEndDt() ) {
                     //$endDt = $saiji->getDeliveryEndDt();
                     $endDt = \DateTimeImmutable::createFromMutable($saiji->getDeliveryEndDt());
+                } else {
+                    // ※HDN)イミュータブルにしないとmodify等によって元の値自体が変化してしまう
+                    $endDt = \DateTimeImmutable::createFromMutable($startDt);
+                    $endDt = $endDt->modify('+'.$this->eccubeConfig['hdn_delivery_kikan'].' days');
                 }
 
                 // 配達最大日数期間を設定

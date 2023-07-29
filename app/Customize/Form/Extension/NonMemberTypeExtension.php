@@ -88,13 +88,14 @@ class NonMemberTypeExtension extends AbstractTypeExtension
         if ( !$saiji ) {
             return false;
         }
-        $startDt = $saiji->getDispStartDt();
+        //$startDt = $saiji->getDispStartDt();
         if ( $saiji->getDeliveryStartDt() ) {
             $startDt = $saiji->getDeliveryStartDt();
         } else {
             $startDt = new \DateTime();
+            $startDt->modify('+'.$this->eccubeConfig['hdn_delivery_leadtime'].' days');
         }
-        $endDt = $saiji->getDispEndDt(); 
+        //$endDt = $saiji->getDispEndDt(); 
         if ( $saiji->getDeliveryEndDt() ) {
             $endDt = $saiji->getDeliveryEndDt();
         } else {
