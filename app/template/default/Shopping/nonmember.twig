@@ -256,7 +256,16 @@ file that was distributed with this source code.
                     <dd>
                         <div class="ec-input{{ has_errors(form.message) ? ' error' }}">
                             {{ form_widget(form.message, {'attr': {'class': 'form-control', 'placeholder': '(3000文字まで)'|trans, 'rows': '6'}}) }}
-                            {{ form_errors(form.message) }}
+                            {{ form_errors(form.message) }}<br>
+                            <font size="1em">
+                            ----------------------------<br>
+                            ・お届け先氏名：<br>
+                            ・電話番号：<br>
+                            ・お届けご希望時間帯：<br>
+                            ・〒：<br>
+                            ・お届け先ご住所：<br>
+                            ----------------------------
+                            </font>
                         </div>
                     </dd>
                 </dl>
