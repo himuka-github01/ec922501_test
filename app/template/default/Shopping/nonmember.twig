@@ -122,7 +122,8 @@ file that was distributed with this source code.
                 {% if eccube_config.hdn_delivery_address_use %}
                 <dl>
                     <dt>
-                        {{ form_label(form.address, '住所', { 'label_attr': { 'class': 'ec-label' }}) }}
+                        {{ form_label(form.address, 'ご注文者様住所', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
+                        <font size="0.5em" color="red">※配送の場合のみ記入してください。</font>
                     </dt>
                     <dd>
                         <div class="ec-zipInput{{ has_errors(form.postal_code) ? ' error' }}"><span>{{ '〒'|trans }}</span>
@@ -250,7 +251,7 @@ file that was distributed with this source code.
                 <dl>
                     <dt>
                         {{ form_label(form.message, '備考', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
-                        <font size="0.5em" color="red">※配送の場合は必ずお届け時間帯をご記入ください。</font>
+                        <font size="0.5em" color="red">※1）配送の場合は必ずお届け時間帯をご記入ください。<br>※2）ご注文者様とお届け先様が異なる場合は配送先情報を必ずご記入ください。</font>
                     </dt>
                     <dd>
                         <div class="ec-input{{ has_errors(form.message) ? ' error' }}">
