@@ -123,7 +123,7 @@ file that was distributed with this source code.
                 <dl>
                     <dt>
                         {{ form_label(form.address, 'ご注文者様住所', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
-                        <font size="0.6em" color="red">※配送の場合のみ記入してください。</font>
+                        <font color="red">※配送の場合のみ記入してください。</font>
                     </dt>
                     <dd>
                         <div class="ec-zipInput{{ has_errors(form.postal_code) ? ' error' }}"><span>{{ '〒'|trans }}</span>
@@ -188,7 +188,7 @@ file that was distributed with this source code.
                 <dl>
                     <dt>
                         {{ form_label(form.DeliveryTime, 'お引き渡し時間', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
-　　　　　　　　　　　　　<font size="0.6em" color="red">※配送の場合は時間選択せずに、必ずヤマトの指定時間帯を備考欄にご記入ください。</font>
+　　　　　　　　　　　　　<font color="red" style="float:left;">※配送の場合は時間選択せずに、必ずヤマトの指定時間帯を備考欄にご記入ください。</font>
                     </dt>
                     <dd>
                         <div class="ec-select ec-select__time">
@@ -250,23 +250,14 @@ file that was distributed with this source code.
                 </dl>
                 <dl>
                     <dt>
-                        {{ form_label(form.message, '備考', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
-                        <font size="0.6em" color="red">※1）配送の場合は必ずお届け時間帯をご記入ください。<br>※2）ご注文者様とお届け先様が異なる場合は配送先情報を必ずご記入ください。</font>
+                        {{ form_label(form.message, '備考（3,000文字以内）', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
+                        <font color="red">※1）配送の場合は必ずお届け時間帯をご記入ください。<br>※2）ご注文者様とお届け先様が異なる場合は配送先情報を必ずご記入ください。</font>
                     </dt>
                     <dd>
                         <div class="ec-input{{ has_errors(form.message) ? ' error' }}">
                             {{ form_widget(form.message, {'attr': {'class': 'form-control', 'placeholder': '(3000文字まで)'|trans, 'rows': '6'}}) }}
-                            {{ form_errors(form.message) }}<br>
-                            <font size="1em">
-                            ----------------------------<br>
-                            <font size="1em" color="red">※ご注文者様とお届け先様が異なる場合のみ記入</font><br>
-                            ・お届け先氏名：<br>
-                            ・電話番号：<br>
-                            ・お届けご希望時間帯<br><font size="0.7em" color="red">※配送注文時は記入必須</font>：<br>
-                            ・〒：<br>
-                            ・お届け先ご住所：<br>
-                            ----------------------------
-                            </font>
+                            {{ form_errors(form.message) }}
+                            
                         </div>
                     </dd>
                 </dl>
