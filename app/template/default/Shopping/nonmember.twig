@@ -251,7 +251,15 @@ file that was distributed with this source code.
                 <dl>
                     <dt>
                         {{ form_label(form.message, '備考（3,000文字以内）', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
-                        <font color="red">※1）配送の場合は必ずお届け時間帯をご記入ください。<br>※2）ご注文者様とお届け先様が異なる場合は配送先情報を必ずご記入ください。</font>
+                        <font color="red">
+                        ※1）配送の場合は必ずお届け時間帯をご記入ください。<br>
+                        ※2）ご注文者様とお届け先様が異なる場合は配送先情報を必ずご記入ください。<br>
+                            ・郵便番号：<br>
+                            ・電話番号：<br>
+                            ・お届け先ご住所：<br>
+                            ・お届け先氏名：<br>
+                            ・お届けご希望時間帯<br>
+                        </font>
                     </dt>
                     <dd>
                         <div class="ec-input{{ has_errors(form.message) ? ' error' }}">
