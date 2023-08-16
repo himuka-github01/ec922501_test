@@ -255,9 +255,16 @@ file that was distributed with this source code.
                     </dt>
                     <dd>
                         <div class="ec-input{{ has_errors(form.message) ? ' error' }}">
-                            {{ form_widget(form.message, {'attr': {'class': 'form-control', 'placeholder': '(3000文字まで)'|trans, 'rows': '6'}}) }}
-                            {{ form_errors(form.message) }}
                             
+                            {{ form_widget(form.message, {'attr':  { 'class': 'form-control', ''value' : "----------------------------
+※ご注文者様とお届け先様が異なる場合のみ記入
+・お届け先氏名：
+・電話番号：
+・お届けご希望時間帯
+※配送注文時は記入必須：
+・〒：
+・お届け先ご住所：
+----------------------------, 'rows': '6'}}) }}
                         </div>
                     </dd>
                 </dl>
