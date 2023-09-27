@@ -168,7 +168,9 @@ class EditController extends BaseEditController
         $form->handleRequest($request);
         $purchaseContext = new PurchaseContext($OriginOrder, $OriginOrder->getCustomer());
 
-        if ($form->isSubmitted() && $form['OrderItems']->isValid()) {
+        // (HDN) 2023.09.25 フォームのチェックをすり抜けていたのを修正
+        //if ($form->isSubmitted() && $form['OrderItems']->isValid()) {
+        if ($form->isSubmitted() && $form['OrderItems']->isValid() && $form->isValid()) {
             $event = new EventArgs(
                 [
                     'builder' => $builder,

@@ -144,6 +144,13 @@ file that was distributed with this source code.
         .c-directoryTree ul > li > ul li:last-of-type > label:before {
             margin-right: 1.6em;
         }
+        {% if eccube_config.hdn_saiji_by_tenpo_use %}
+            .hiddenTenpo {}
+        {% else %}
+            .hiddenTenpo {
+                display: none;
+            }
+        {% endif %}
     </style>
 {% endblock %}
 
@@ -227,7 +234,7 @@ file that was distributed with this source code.
                                                     </div>
                                                 {% endif %}
                                             {% endfor %}
-                                            <div class="form-row mb-3">
+                                            <div class="form-row mb-3 hiddenTenpo">
                                                 <div class="col-3">
                                                     <span>{{ '対象店舗'|trans }}</span>
                                                 </div>
@@ -358,7 +365,7 @@ file that was distributed with this source code.
                                                         </div>
                                                     </div>
                                                     {% endfor %}
-                                                    <div class="col-auto align-items-center" style="width:90%; padding-top: 10px;">
+                                                    <div class="col-auto align-items-center hiddenTenpo" style="width:90%; padding-top: 10px;">
                                                         <div class="row">
                                                             <div class="col-3">
                                                                 <span>{{ '対象店舗'|trans }}</span>

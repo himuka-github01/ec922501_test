@@ -16,7 +16,9 @@ namespace Customize\Controller\Admin\Product;
 
 use Eccube\Controller\Admin\Product\CategoryController as BaseCategoryController;   // 元のコントローラ
 
-use Customize\Entity\HdnSaijiTenpo;
+use Customize\Entity\HdnTenpo;    // Entity
+use Customize\Repository\HdnTenpoRepository;    // Repository
+use Customize\Entity\HdnSaijiTenpo; // Entity
 use Eccube\Controller\AbstractController;
 use Eccube\Entity\Category;
 use Eccube\Entity\Master\CsvType;
@@ -70,6 +72,10 @@ class CategoryController extends BaseCategoryController
         }
 
         $Categories = $this->categoryRepository->getList($Parent);
+
+        // (HDN) 2023.09.27 全店舗リストを取得。店舗選択不要の場合、全店舗選択済みとする
+        $tenpoRepository = $this->entityManager->getRepository(HdnTenpo::class);
+        $allTenpos = $tenpoRepository->getList();
 
         // ツリー表示のため、ルートからのカテゴリを取得
         $TopCategories = $this->categoryRepository->getList(null);
@@ -138,7 +144,15 @@ class CategoryController extends BaseCategoryController
                 }
 
                 // (HDN) 催事店舗を改めて登録
-                $Tenpos = $form->get('Tenpo')->getData();
+                // (HDN) 2023.09.27 店舗選択不要の場合、全店舗を強制登録する
+                //$Tenpos = $form->get('Tenpo')->getData();
+                if ($this->eccubeConfig['hdn_saiji_by_tenpo_use']) {
+                    // FORM指定店舗
+                    $Tenpos = $form->get('Tenpo')->getData();
+                } else {
+                    // 全店舗
+                    $Tenpos = $allTenpos;
+                }
                 foreach ($Tenpos as $Tenpo) {
                     $SaijiTenpo = new HdnSaijiTenpo();
                     $SaijiTenpo
@@ -200,7 +214,15 @@ class CategoryController extends BaseCategoryController
                     $this->entityManager->flush();
     
                     // (HDN) 催事店舗を改めて登録
-                    $Tenpos = $editForm->get('Tenpo')->getData();
+                    // (HDN) 2023.09.27 店舗選択不要の場合、全店舗を強制登録する
+                    //$Tenpos = $editForm->get('Tenpo')->getData();
+                    if ($this->eccubeConfig['hdn_saiji_by_tenpo_use']) {
+                        // FORM指定店舗
+                        $Tenpos = $editForm->get('Tenpo')->getData();
+                    } else {
+                        // 全店舗
+                        $Tenpos = $allTenpos;
+                    }
                     foreach ($Tenpos as $Tenpo) {
                         $SaijiTenpo = new HdnSaijiTenpo();
                         $SaijiTenpo

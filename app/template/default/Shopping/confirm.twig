@@ -91,7 +91,7 @@ file that was distributed with this source code.
                     <p class="ec-telInput">電　話　番　号：{{ Order.phone_number }}</span></p>
                     <p class="ec-input hiddenItem">{{ Order.email }}</span></p>
                     <p class="ec-input">受　　付　　者：{{ Order.uketsuke_name }}</span></p>
-                    <p class="ec-input">紹　　介　　者：{{ Order.shoukai_name }}</span></p>
+                    <p class="ec-input hiddenItem">紹　　介　　者：{{ Order.shoukai_name }}</span></p>
                     <p class="ec-input">社　　　　　員：{{ Order.shain_flg }}</span>
                     {% if Order.shain_flg == 1 %}
                         <span>社員</span>

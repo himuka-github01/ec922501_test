@@ -230,7 +230,7 @@ file that was distributed with this source code.
                         <p class="ec-telInput">電　話　番　号：<span class="customer-edit customer-phone_number">{{ Order.phone_number }}</span></p>
                         <p class="ec-input hiddenItem"><span class="customer-edit customer-email">{{ Order.email }}</span></p>
                         <p class="ec-input">受　　付　　者：<span class="customer-edit customer-uketsuke_name">{{ Order.uketsuke_name }}</span></p>
-                        <p class="ec-input">紹　　介　　者：<span class="customer-edit customer-shoukai_name">{{ Order.shoukai_name }}</span></p>
+                        <p class="ec-input hiddenItem">紹　　介　　者：<span class="customer-edit customer-shoukai_name">{{ Order.shoukai_name }}</span></p>
                         <p class="ec-input">社　　　　　員：<span class="customer-edit customer-shain_flg">{{ Order.shain_flg }}</span>
                             <span id="customer-shain">
                             </span>
@@ -340,7 +340,7 @@ file that was distributed with this source code.
                                     </div>
                                 </dd>
                             </dl>
-                            <dl>
+                            <dl class="hiddenItem">
                                 <dt>
                                     <label class="ec-label" for="nonmember_shoukai_name">{{ '紹介者'|trans }}</label>
                                 </dt>

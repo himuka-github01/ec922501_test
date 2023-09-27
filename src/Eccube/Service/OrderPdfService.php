@@ -804,7 +804,8 @@ class OrderPdfService extends TcpdfFpdi
             //$this->lfText($xBar, $y+$height*2, '催事コード：'.$saijiCd. ' 売価金額：'.$paymentTotalText, 8); // Barcode value
             $kingaku = round($Order->getPaymentTotal());
             // 金額が収まらない場合は印字しない
-            if ( $kingaku < 100000 ) {
+            // (HDN) 2023.09.25 eccube.yamlで不要指定された場合は印字omit
+            if ( $kingaku < 100000 && !$this->eccubeConfig->get('hdn_order_pdf_barcode_omit') ) {
                 // バーコード内容編集
                 $flg = '25';    // バーコードフラグを設定
                 $barSaijiCd = str_pad($saijiCd,5,'0',STR_PAD_LEFT);
@@ -923,13 +924,18 @@ class OrderPdfService extends TcpdfFpdi
 
         // 明細リスト欄の設定
         // (HDN) 2022.05.29 略称の追加
+        // (HDN) 2022.09.25 略称欄を予備エリアとし使い分け
         $this->labelCell[0] = '商品名 / オプション';
         $this->labelCell[1] = '略称';
+        if ( $this->eccubeConfig->get('hdn_order_pdf_yobi_area') ) {
+            $this->labelCell[1] = $this->eccubeConfig->get('hdn_order_pdf_yobi_area');
+        }
         $this->labelCell[2] = '数量';
         $this->labelCell[3] = '商品代金(税抜)';
         $this->labelCell[4] = 'お支払額(税抜)';
         //$this->widthCell = [100, 12, 30, 30];
-        $this->widthCell = [75, 25, 12, 30, 30];
+        //$this->widthCell = [75, 25, 12, 30, 30];
+        $this->widthCell = [74, 27, 11, 30, 30];
 
         // =========================================
         // 受注詳細情報
@@ -1011,15 +1017,20 @@ class OrderPdfService extends TcpdfFpdi
             $arrOrder[$i][0] = $taxKbn.$productName;
 
             // (HDN) 2022.05.29 略称の追加
-            $wLenRyaku = 6;
-            $wEncode = 'UTF-8';
-            //$arrOrder[$i][1] = $OrderItem->getProductRyakuName();
-            if ( $OrderItem->getProductRyakuName() && $OrderItem->getProductRyakuName() != '' ) {
-                $arrOrder[$i][1] = $OrderItem->getProductRyakuName();
-            } else if ( mb_strlen($OrderItem->getProductName(),$wEncode) >= $wLenRyaku ) {
-                $arrOrder[$i][1] = mb_substr($OrderItem->getProductName(),0,$wLenRyaku,$wEncode);
+            // (HDN) 2022.09.25 略称欄を予備エリアとし使い分け
+            if ( $this->eccubeConfig->get('hdn_order_pdf_yobi_area') == 'コード' ) {
+                $arrOrder[$i][1] = $OrderItem->getProductCode();
             } else {
-                $arrOrder[$i][1] = $OrderItem->getProductName();
+                $wLenRyaku = 6;
+                $wEncode = 'UTF-8';
+                //$arrOrder[$i][1] = $OrderItem->getProductRyakuName();
+                if ( $OrderItem->getProductRyakuName() && $OrderItem->getProductRyakuName() != '' ) {
+                    $arrOrder[$i][1] = $OrderItem->getProductRyakuName();
+                } else if ( mb_strlen($OrderItem->getProductName(),$wEncode) >= $wLenRyaku ) {
+                    $arrOrder[$i][1] = mb_substr($OrderItem->getProductName(),0,$wLenRyaku,$wEncode);
+                } else {
+                    $arrOrder[$i][1] = $OrderItem->getProductName();
+                }
             }
 
             // 購入数量

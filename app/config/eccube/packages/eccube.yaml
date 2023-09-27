@@ -144,7 +144,9 @@ parameters:
     hdn_delivery_time_required: false   # 注文受付時の受渡時間指定要否
     hdn_delivery_address_use: true   # 注文受付時の住所入力有無
     hdn_receipt_no_use: true # レシート番号の使用有無
-    hdn_receipt_no_len: 9 # レシート番号の桁数
+    hdn_receipt_no_len: 13 # レシート番号の桁数
+    hdn_order_pdf_barcode_omit: true # 引換証へのバーコード印刷をOMIT
+    hdn_order_pdf_yobi_area: 'コード' # 商品明細欄の予備エリアへの印字内容（略称/コード）
 
     hdn_saiji_category_id: 7    # 催事をカテゴリに登録する場合の代表カテゴリＩＤ
     hdn_saiji_start_dt_default: 2023-08-01  # カテゴリに保持する催事開始日の省略値
