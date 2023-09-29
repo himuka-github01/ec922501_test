@@ -2228,8 +2228,8 @@ class OrderController extends BaseOrderController
         }
 
         $lines = [];
-        // ④催事が複数日かを判定
-        if ( $objSaiji->getDeliveryStartDt() != $objSaiji->getDeliveryEndDt() ) {
+        // ④催事が複数日かを判定（単日の場合は全日集計をOmit）
+        if ( !$objSaiji->getDeliveryStartDt() || !$objSaiji->getDeliveryEndDt() || $objSaiji->getDeliveryStartDt() != $objSaiji->getDeliveryEndDt() ) {
             // ⑤ 1) 催事/日付/部門/商品/店舗の実績を取得
             $dtls = $qb->getQuery()->execute();
             //log_debug('[未引渡商品一覧(02]dtls by execute()',$dtls);
