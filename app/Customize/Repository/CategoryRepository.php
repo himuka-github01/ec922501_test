@@ -54,7 +54,9 @@ class CategoryRepository extends BaseCategoryRepository
         }
         // 日付指定
         if ( is_null($dt) ) {
-            $dt = new \DateTime();
+            // (HDN) 日付のみとする
+            $wDt = new \DateTime();
+            $dt = new \DateTime($wDt->format('Y-m-d'));
             log_info("getSaijiList dt=".$dt->format('Y-m-d'));
         }
         // 日付指定
