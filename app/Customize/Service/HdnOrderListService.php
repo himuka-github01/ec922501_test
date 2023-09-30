@@ -86,6 +86,11 @@ class HdnOrderListService
 	const SHEET_NM_SHUKKA_LIST = '出荷一覧';
 	const FILE_NM_SHUKKA_LIST = 'shukka_list.xlsx';
 
+	/** 未引渡一覧プロパティ */
+	const FILE_PROP_MINOU_LIST = '未引渡一覧';
+	const SHEET_NM_MINOU_LIST = '未引渡一覧';
+	const FILE_NM_MINOU_LIST = 'minou_list.xlsx';
+
     /** FONT ゴシック */
     //const FONT_GOTHIC = 'kozgopromedium';
     /** FONT 明朝 */
@@ -603,6 +608,194 @@ class HdnOrderListService
         $sheet->getStyleByColumnAndRow($this->posColumn['注文内容'], $row)->getAlignment()->setWrapText(true);
         $sheet->setCellValueByColumnAndRow($this->posColumn['キャンセル'], $row, $this->dispStatus(OrderStatus::CANCEL,$Order->getOrderStatus()->getId()));
         $sheet->setCellValueByColumnAndRow($this->posColumn['お引渡し済'], $row, $this->dispStatus(OrderStatus::DELIVERED,$Order->getOrderStatus()->getId()));
+        return $row;
+    }
+
+    /**
+     * 未引渡一覧：メイン
+     *
+     * @param array $arrData
+     *
+     * @return bool
+     */
+    public function makeMinouExcel($searchData,$posOfTenpo,$arrData)
+    {
+        log_info('未引渡リスト：searchData:',$searchData);
+        log_info('未引渡リスト：posOfTenpo:',$posOfTenpo);
+        log_info('未引渡リスト：arrData 件数:'.count($arrData));
+
+        if ( !isset($searchData['saiji_id']) ) {
+            $searchData['saiji_id'] = 9;
+        }
+
+        // スプレッドシートを作成
+        $spreadsheet = new Spreadsheet();
+        
+        // ファイルのプロパティを設定
+        $spreadsheet->getProperties()
+                    ->setTitle(self::FILE_PROP_MINOU_LIST);
+        
+        // シート作成
+        $spreadsheet->getActiveSheet('sheet1')->UnFreezePane();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle(self::SHEET_NM_MINOU_LIST);
+
+        //
+        // ヘッダー＆明細パターン 
+        //
+
+        // ヘッダ作成
+        //$row = $this->editHeaderJuchuList($sheet,$this->baseOffsetX,$this->baseOffsetY,$searchData,$posOfTenpo);
+        // ヘッダを見出し行とする
+        //$sheet -> getPageSetup()-> setRowsToRepeatAtTopByStartAndEnd(1, $row);
+        // １注文を1行に出力
+        $row = $this->baseOffsetY;
+        foreach ($arrData as $line) {
+            log_info('未納データ：line=',$line);
+
+            if ( $line['kbn'] == 'header' ) {
+                $row = $this->editHeaderMinouList($sheet,$this->baseOffsetX,$row,$searchData,$posOfTenpo,$line);
+            } else if ( $line['kbn'] == 'item' ) {
+                $row = $this->editDetailMinouList($sheet,$this->baseOffsetX,$row,$searchData,$posOfTenpo,$line);
+            } else {
+                $row = $this->editDetailMinouList($sheet,$this->baseOffsetX,$row,$searchData,$posOfTenpo,$line);
+            }
+        }
+
+        // 整形
+        $max_row = $sheet -> getHighestRow(); //最終行（最下段）の取得
+        $max_col = $sheet -> getHighestColumn(); //最終列（右端）の取得
+        $maxCellAddress = $max_col.$max_row; //最終セルのアドレスを格納する変数
+        // 全体のスタイル
+        $objStyle = $sheet->getStyle('A1:'.$maxCellAddress);
+        // 枠線設定、背景色設定、縦書き設定
+        $objStyle->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+        $objStyle->getBorders()->getVertical()->setBorderStyle(Border::BORDER_THIN);
+        $objStyle->getBorders()->getHorizontal()->setBorderStyle(Border::BORDER_THIN);
+        // ページ設定
+        $sheet -> getPageSetup()-> setPrintArea('A1:'.$maxCellAddress); //印刷範囲の設定
+        $sheet -> getPageSetup()-> setOrientation(PageSetup::ORIENTATION_LANDSCAPE); //横向き
+        $sheet -> getHeaderFooter()-> setOddHeader('&C '.self::SHEET_NM_MINOU_LIST); //&Cはセンタリング
+        $sheet -> getHeaderFooter()-> setOddFooter("&P/&N"); //&Nは全ページ数、&Pは現在ページの付与
+
+        // バッファをクリア
+        ob_end_clean();
+        
+        $fileName = $this->getFileNm(self::FILE_NM_MINOU_LIST);
+        
+        // ダウンロード（詳細は要確認）
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="'.$fileName.'"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+        
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        
+        exit();
+
+    }
+
+    /**
+     * 未納一覧：ヘッダ編集
+     *
+     * @return boolean 
+     */
+    public function editHeaderMinouList($sheet,$offsetX,$offsetY,$searchData,$posOfTenpo,$line)
+    {
+        // ヘッダー1行目
+        $col = $offsetX;
+        $row = $offsetY+1;
+        // 日付
+        $date = $line['shipping_delivery_date'] == null ? '全日' : $line['shipping_delivery_date']->format('Y-m-d');
+        $this->setHeaderColumn($sheet, ++$col, $row, $date);
+        $this->setHeaderColumn($sheet, ++$col, $row, '【未引渡数量】'.$line['saiji_name']);
+
+        // ヘッダー2行目
+        $col = $offsetX;
+        $row++;
+        //　部門、商品、各店舗名
+        $this->setHeaderColumn($sheet, ++$col, $row, '部門');
+        $this->setHeaderColumn($sheet, ++$col, $row, '商品名');
+        foreach($posOfTenpo as $name=>$pos) {
+            /*
+            log_info('受注：催事商品：'.$Product['code'].':'.$Product['name']);
+            $sheet->setCellValueByColumnAndRow(++$col, $row, $Product['name']);
+            */
+            $this->setHeaderColumn($sheet, ++$col, $row, $name);
+        }
+        $this->setHeaderColumn($sheet, ++$col, $row, '合計');
+        // ヘッダ全体のスタイルを取得
+        $objStyle = $sheet->getStyleByColumnAndRow($offsetX+1,$row,$col,$row);
+        // 枠線設定、背景色設定、縦書き設定
+        //$objStyle->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+        //$objStyle->getBorders()->getVertical()->setBorderStyle(Border::BORDER_THIN);
+        $objStyle->getFill()->setFillType(Fill::FILL_SOLID);
+        $objStyle->getFill()->getStartColor()->setARGB('dddddddd');
+        //$objStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $objStyle->getAlignment()->setTextRotation(-165);   // 縦書き：-165(特殊)
+        return $row;
+    }
+
+    /**
+     * 未納一覧：明細編集
+     *
+     * @return boolean 
+     */
+    public function editDetailMinouList($sheet,$offsetX,$offsetY,$searchData,$posOfTenpo,$line)
+    {
+        $col = $offsetX;
+        $row = $offsetY+1;
+
+        if ( $line['kbn'] == 'item' ) {
+            // 商品行
+            $sheet->setCellValueByColumnAndRow(++$col, $row, $line['bumon_name']);
+            $sheet->setCellValueByColumnAndRow(++$col, $row, $line['product_name']);
+            foreach($posOfTenpo as $name=>$pos) {
+                /*
+                log_info('受注：催事商品：'.$Product['code'].':'.$Product['name']);
+                $sheet->setCellValueByColumnAndRow(++$col, $row, $Product['name']);
+                */
+                if ( $line['quantity'][$pos] == 0 ) {
+                    $minouSuryo = '';
+                } else {
+                    $minouSuryo = number_format($line['quantity'][$pos] - $line['shukka_quantity'][$pos]);
+                }
+                $sheet->setCellValueByColumnAndRow(++$col, $row, $minouSuryo);
+            }    
+            // 商品計列
+            $minouSumSuryo = number_format($line['sum_quantity'] - $line['sum_shukka_quantity']);
+            $sheet->setCellValueByColumnAndRow(++$col, $row, $minouSumSuryo);
+        } else {
+            // 合計行
+            $sheet->setCellValueByColumnAndRow(++$col, $row, '');
+            $date = $line['shipping_delivery_date'] == null ? '全日' : $line['shipping_delivery_date']->format('Y-m-d');
+            $sheet->setCellValueByColumnAndRow(++$col, $row, $date.'【未引渡数量】** 合計 **');
+            foreach($posOfTenpo as $name=>$pos) {
+                /*
+                log_info('受注：催事商品：'.$Product['code'].':'.$Product['name']);
+                $sheet->setCellValueByColumnAndRow(++$col, $row, $Product['name']);
+                */
+                if ( $line['quantity'][$pos] == 0 ) {
+                    $minouSuryo = '';
+                } else {
+                    $minouSuryo = number_format($line['quantity'][$pos] - $line['shukka_quantity'][$pos]);
+                }
+                $sheet->setCellValueByColumnAndRow(++$col, $row, $minouSuryo);
+            }
+            // 商品計列
+            $minouSumSuryo = number_format($line['sum_quantity'] - $line['sum_shukka_quantity']);
+            $sheet->setCellValueByColumnAndRow(++$col, $row, $minouSumSuryo);
+            
+            // 合計行のスタイルを取得
+            $objStyle = $sheet->getStyleByColumnAndRow($offsetX+1,$row,$col,$row);
+            $objStyle->getFill()->setFillType(Fill::FILL_SOLID);
+            $objStyle->getFill()->getStartColor()->setARGB('eeeeeeee');    
+        }
         return $row;
     }
 

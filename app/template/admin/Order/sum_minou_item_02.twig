@@ -95,7 +95,7 @@ file that was distributed with this source code.
                 event.preventDefault();
                 $('#list_type').val('juchu');
                 $('#search_form').attr('action', "{{ url('admin_order_list_juchu') }}").submit();
-                $('#search_form').attr('action', "{{ url('admin_order') }}");
+                $('#search_form').attr('action', "{{ url('admin_order_sum_minou_item_02') }}");
                 $('#list_type').val('');
                 return false;
             });
@@ -105,7 +105,17 @@ file that was distributed with this source code.
                 event.preventDefault();
                 $('#list_type').val('shukka');
                 $('#search_form').attr('action', "{{ url('admin_order_list_shukka') }}").submit();
-                $('#search_form').attr('action', "{{ url('admin_order') }}");
+                $('#search_form').attr('action', "{{ url('admin_order_sum_minou_item_02') }}");
+                $('#list_type').val('');
+                return false;
+            });
+
+            // (HDN) 未納リスト
+            $('#btn_list_minou').on('click', function(event) {
+                event.preventDefault();
+                $('#list_type').val('minou');
+                $('#search_form').attr('action', "{{ url('admin_order_list_minou') }}").submit();
+                $('#search_form').attr('action', "{{ url('admin_order_sum_minou_item_02') }}");
                 $('#list_type').val('');
                 return false;
             });
@@ -464,6 +474,10 @@ file that was distributed with this source code.
                             <button type="button" class="btn btn-ec-regular" id="btn_list_shukka">
                                 <i class="fa fa-cloud-download mr-1 text-secondary"></i>
                                 <span>{{ 'admin.order.list_shukka'|trans }}</span>
+                            </button>
+                            <button type="button" class="btn btn-ec-regular" id="btn_list_minou">
+                                <i class="fa fa-cloud-download mr-1 text-secondary"></i>
+                                <span>{{ 'admin.order.list_minou'|trans }}</span>
                             </button>
                         </div>
                     </div>

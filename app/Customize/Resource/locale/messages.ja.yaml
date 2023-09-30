@@ -118,6 +118,7 @@ admin.order.saiji_id_label: イベント
 admin.order.list_juchu: 受注一覧
 admin.order.list_shukka: 受渡台帳
 admin.order.list_uriage: 売上集計
+admin.order.list_minou: 未引渡一覧
 admin.order.tenpo_label: 受渡店舗
 admin.order.bumon_label: 部門
 admin.order.receipt_no_label: レシート

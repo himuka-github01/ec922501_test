@@ -2037,6 +2037,7 @@ class OrderController extends BaseOrderController
      *
      * @Route("/%eccube_admin_route%/order/sum_minou_item_02", name="admin_order_sum_minou_item_02")
      * @Route("/%eccube_admin_route%/order/sum_minou_item_02/{saiji_id}", requirements={"saiji_id" = "\d+"}, name="admin_order_sum_minou_item_02_saiji")
+     * @Route("/%eccube_admin_route%/order/list/minou", name="admin_order_list_minou")
      * @Template("@admin/Order/sum_minou_item_02.twig")
      */
     public function sumMinouItem02(Request $request, $saiji_id = null, PaginatorInterface $paginator)
@@ -2260,6 +2261,36 @@ class OrderController extends BaseOrderController
         log_debug('[未引渡商品一覧(02]all lines',$lines);
 
         log_info('[未引渡商品一覧(02]lines',$lines);
+
+        // (HDN)
+        if ( $request->request->get('list_type') ) {
+            //$this->hdnOrderListService = new HdnOrderListService();
+            log_info('受注：帳票作成：list_type='.$request->request->get('list_type'));
+            // query実行
+            if ( $request->request->get('list_type') == 'minou' ) {
+                $status = $this->hdnOrderListService->makeMinouExcel($searchData,$posOfTenpo,$lines);
+            } else {
+                $status = false;
+            }
+            // 異常終了した場合の処理
+            if (!$status) {
+                $this->addError('EXCELの生成に失敗しました。条件をご確認ください。', 'admin');
+                log_info('Unable to create excel files! Process have problems!');
+                return [
+                    'searchForm' => $searchForm->createView(),
+                    'has_errors' => true,
+                    'posOfTenpo' => $posOfTenpo,
+                    'lines' => $lines,
+                    ];
+            }
+            // 暫定的に
+            return [
+                'searchForm' => $searchForm->createView(),
+                'has_errors' => false,
+                'posOfTenpo' => $posOfTenpo,
+                'lines' => $lines,
+            ];
+        }
 
         $event = new EventArgs(
             [
