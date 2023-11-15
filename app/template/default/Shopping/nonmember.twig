@@ -216,7 +216,8 @@ file that was distributed with this source code.
 
                 <dl>
                     <dt>
-                        {{ form_label(form.uketsuke_name, '受付担当', { 'label_attr': { 'class': 'ec-label' }}) }}
+                        {{ form_label(form.uketsuke_name, '受付担当', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
+　　　　　　　　　　　　　<font color="red" style="float:left;">※必ず所属店名と氏名を入力してください。</font>
                     </dt>
                     <dd>
                         <div class="ec-halfInput{{ has_errors(form.uketsuke_name) ? ' error' }}">
