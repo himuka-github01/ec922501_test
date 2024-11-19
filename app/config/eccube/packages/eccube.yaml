@@ -1,0 +1,165 @@
+parameters:
+    # EC-CUBE default env parameters
+    env(ECCUBE_ADMIN_ROUTE): 'admin'
+    env(ECCUBE_USER_DATA_ROUTE): 'user_data'
+    env(ECCUBE_ADMIN_ALLOW_HOSTS): '[]'
+    env(ECCUBE_FORCE_SSL): false
+    env(ECCUBE_TEMPLATE_CODE): 'default'
+    env(ECCUBE_AUTH_MAGIC): '<change.me>'
+    env(ECCUBE_COOKIE_NAME): 'eccube'
+    env(ECCUBE_COOKIE_PATH): '/'
+    env(ECCUBE_COOKIE_LIFETIME): 0
+    env(ECCUBE_GC_MAXLIFETIME): 1440
+    env(ECCUBE_PACKAGE_API_URL): 'https://package-api.ec-cube.net'
+    env(ECCUBE_OWNERS_STORE_URL): 'https://www.ec-cube.net'
+    env(ECCUBE_MAINTENANCE_FILE_PATH): '%kernel.project_dir%/.maintenance'
+
+    # EC-CUBE parameter
+    eccube_database_url: '%env(DATABASE_URL)%'
+    eccube_mailer_url: '%env(MAILER_URL)%'
+    eccube_admin_route: '%env(ECCUBE_ADMIN_ROUTE)%'
+    eccube_user_data_route: '%env(ECCUBE_USER_DATA_ROUTE)%'
+    eccube_admin_allow_hosts: '%env(json:ECCUBE_ADMIN_ALLOW_HOSTS)%'
+    eccube_force_ssl: '%env(bool:ECCUBE_FORCE_SSL)%'
+    eccube.theme: '%env(ECCUBE_TEMPLATE_CODE)%'
+    eccube_theme_code: '%eccube.theme%'
+    eccube_auth_magic: '%env(ECCUBE_AUTH_MAGIC)%'
+    #eccube_auth_type: HMAC
+    eccube_auth_type: PLAIN
+    eccube_password_hash_algos: SHA256
+    eccube_theme_app_dir: '%kernel.project_dir%/app/template'
+    eccube_theme_src_dir: '%kernel.project_dir%/src/Eccube/Resource/template'
+    eccube_theme_user_data_dir: '%eccube_theme_app_dir%/user_data'
+    eccube_theme_front_dir: '%eccube_theme_app_dir%/%eccube.theme%'
+    eccube_theme_front_default_dir: '%eccube_theme_src_dir%/default'
+    eccube_theme_admin_dir: '%eccube_theme_app_dir%/admin'
+    eccube_theme_admin_default_dir: '%eccube_theme_src_dir%/admin'
+    eccube_html_dir: '%kernel.project_dir%/html'
+    eccube_html_plugin_dir: '%kernel.project_dir%/html/plugin'
+    eccube_html_front_dir: '%eccube_html_dir%/template/%eccube.theme%'
+    eccube_html_admin_dir: '%eccube_html_dir%/template/admin'
+    eccube_twig_block_templates: []
+    eccube_save_image_dir: '%kernel.project_dir%/html/upload/save_image'
+    eccube_temp_image_dir: '%kernel.project_dir%/html/upload/temp_image'
+    eccube_csv_size: 5                 # post_max_size, upload_max_filesize に任せればよい？
+    eccube_csv_temp_realdir: '%kernel.cache_dir%/%kernel.environment%/eccube' # upload_tmp_dir に任せればよい？
+    eccube_csv_split_lines: 100
+    eccube_default_password: '**********'
+    eccube_deliv_addr_max: 20
+    eccube_deliv_date_end_max: 21
+    eccube_id_max_len: 50
+    eccube_id_min_len: 4
+    eccube_int_len: 9                              # 最大値で制御したい
+    eccube_category_nest_level: 5
+    eccube_lltext_len: 99999
+    eccube_ltext_len: 3000
+    eccube_max_total_fee: 9999999999
+    eccube_mltext_len: 1000
+    eccube_mtext_len: 200
+    plugin_html_realdir: '%eccube_html_dir%/plugin/'
+    plugin_html_urlpath: /plugin/ # asset 使う
+    plugin_realdir: '%kernel.project_dir%/app/Plugin'
+    plugin_data_realdir: '%kernel.project_dir%/app/PluginData'
+    plugin_temp_realdir: /PATH/TO/WEB_ROOT/src/Eccube/Repository/Master/upload/temp_plugin/ # upload_tmp_dir に任せればよい？
+    eccube_price_len: 8                                                    # 最大値で制御したい
+    eccube_search_pmax: 12
+    eccube_stext_len: 255
+    eccube_sltext_len: 500
+    eccube_smtext_len: 100
+    eccube_tax_rule_priority: ['product_id','product_class_id','pref_id','country_id']
+    eccube_url_len: 1024
+    eccube_default_page_count: 50
+    eccube_admin_product_stock_status: 3
+    eccube_customer_reset_expire: 10
+    # CSVの区切り文字(タブ区切りにしたい場合は'\t'ではなく'    'で設定する
+    eccube_csv_export_separator: ,
+    # 出力エンコーディング
+    eccube_csv_export_encoding: SJIS-win
+    # 入力エンコーディング
+    eccube_csv_import_encoding: ['UTF-8', 'SJIS-win', 'SJIS', 'EUC-JP', 'ASCII', 'JIS']
+    # 日付のフォーマット
+    eccube_csv_export_date_format: 'Y-m-d H:i:s'
+    # 複数データの区切り文字
+    eccube_csv_export_multidata_separator: ,
+    eccube_csv_import_delimiter: ,
+    eccube_csv_import_enclosure: '"'
+    eccube_csv_import_escape: \
+    eccube_info_url: 'https://www.ec-cube.net/info/4/'
+    eccube_owners_store_url: '%env(ECCUBE_OWNERS_STORE_URL)%'
+    eccube_official_site_url: https://www.ec-cube.net
+    eccube_community_site_url: https://xoops.ec-cube.net
+    eccube_document_url: http://doc4.ec-cube.net
+    eccube_name_len: 16
+    eccube_kana_len: 25
+    eccube_address1_len: 32
+    eccube_address2_len: 32
+    eccube_birth_max: 110
+    eccube_product_order_price_lower: 1
+    eccube_product_order_newer: 2
+    eccube_product_order_price_higher: 3
+    eccube_product_order_name: 4
+    eccube_price_max: 2147483647
+    eccube_tel_len_max: 14
+    eccube_postal_code: 8
+    eccube_password_min_len: 8
+    eccube_password_max_len: 32
+    eccube_composer_memory_limit: 1536M
+    eccube_order_mail_template_id: 1 #注文受付メール
+    eccube_entry_confirm_mail_template_id: 2 #会員仮登録メール
+    eccube_entry_complete_mail_template_id: 3 #会員本登録メール
+    eccube_customer_withdraw_mail_template_id: 4 #会員退会メール
+    eccube_contact_mail_template_id: 5 #問合受付メール
+    eccube_forgot_mail_template_id: 6 #パスワードリセット
+    eccube_reset_complete_mail_template_id: 7 #パスワードリマインダー
+    eccube_shipping_notify_mail_template_id: 8 #出荷通知メール
+    # メールアドレスをRFC準拠でチェックするか true: チェックする、false: チェックしない
+    eccube_rfc_email_check: false
+    eccube_package_api_url: '%env(ECCUBE_PACKAGE_API_URL)%'
+    # 注文番号のフォーマット. 以下のフォーマットが利用可能です. フォーマットを空にした場合, dtb_order.idを出力します.
+    # {yyyy} : 西暦(4桁)
+    # {yy}: 西暦(2桁)
+    # {mm}: 月(09)
+    # {dd}: 日(01)
+    # {id,桁数}: dtb_order.idの桁数分0埋め(桁数を超えたらそのまま表示)
+    # {random,桁数}: ランダムな数値を桁数分作成
+    # {random_alnum,桁数} : ランダムな半角英数大文字を桁数分作成
+    eccube_order_no_format: ''
+    # eccube_order_pdf_message_len: 30
+    eccube_order_pdf_message_len: 35
+    eccube_news_start_year: 2000
+    eccube_result_cache_lifetime: 3600 # doctrineのresult cacheのlifetime.
+    eccube_result_cache_lifetime_short: 10  # doctrineのresult cacheのlifetime. 商品一覧画面など長期間キャッシュできない箇所で使用する.
+    eccube_content_maintenance_file_path: '%env(ECCUBE_MAINTENANCE_FILE_PATH)%'
+
+    #-------------------------
+    # ユーザ定義定数
+    #-------------------------
+    # 2023.07.xx for Rocky
+    hdn_saiji_by_tenpo_use: false   # 店舗毎催事の使用有無
+    hdn_wari_use: false # 各種割引の使用有無
+    hdn_label_flg_use: true # ラベル要否の使用有無
+    hdn_zaiko_by_tenpo_use: false   # 店舗毎在庫の使用有無
+    hdn_delivery_leadtime: 3   # 通年イベントの場合の受付日からの受渡必要期間
+    hdn_delivery_kikan: 31   # 通年イベントの場合の受付からの受渡期間
+    hdn_delivery_time_required: false   # 注文受付時の受渡時間指定要否
+    hdn_delivery_address_use: true   # 注文受付時の住所入力有無
+    hdn_receipt_no_use: true # レシート番号の使用有無
+    hdn_receipt_no_len: 13 # レシート番号の桁数
+    hdn_order_pdf_barcode_omit: true # 引換証へのバーコード印刷をOMIT
+    hdn_order_pdf_yobi_area: 'コード' # 商品明細欄の予備エリアへの印字内容（略称/コード）
+
+    hdn_saiji_category_id: 7    # 催事をカテゴリに登録する場合の代表カテゴリＩＤ
+    hdn_saiji_start_dt_default: 2023-08-01  # カテゴリに保持する催事開始日の省略値
+    hdn_saiji_end_dt_default: 2029-12-31    # カテゴリに保持する催事終了日の省略値
+    hdn_tenpo_delivery_id: 3    # 配送ＩＤ（標準）
+    hdn_house_payment_id : 5    # 支払ＩＤ（ＦＣ電子マネー）使用しない
+    hdn_wari_a_name : 'フーディーズクラブ割'
+    hdn_wari_b_name : '社員割'
+    hdn_wari_kikan_name :　'早割'
+    hdn_bumon_cd_keta : 4   # 部門コード桁数
+    # 税関連
+    hdn_tax_default_is_reduced : true   # 標準設定が軽減税率である場合にtrue
+    hdn_tax_calc_timing : total  # 集計後に計算する（total / item）
+    hdn_tax_rounding_type : 1   # 税計算時の端数処理（1:四捨五入 2:切り捨て 3:切り上げ）
+    hdn_tax_rounding_for_disp : 3   # 表示売価用の税計算端数処理（同上）
+    

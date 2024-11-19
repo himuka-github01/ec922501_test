@@ -1,0 +1,33 @@
+{#
+This file is part of EC-CUBE
+
+Copyright(c) EC-CUBE CO.,LTD. All Rights Reserved.
+
+http://www.ec-cube.co.jp/
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+#}
+<div class="ec-headerRole">
+    <div class="ec-headerRole__title">
+        <div class="ec-headerTitle">
+            <div class="ec-headerTitle__title">
+                <h1>
+                    {% if Page.url == 'start/list_saiji' %}
+                        <a href="">
+                            {{ 'イベントを選択してください'|trans }}
+                        </a>
+                    {% elseif Page.url == 'start/list_tenpo' %}
+                        <a href="">
+                            {{ 'お引渡し店舗を選択してください'|trans }}
+                        </a>
+                    {% else %}
+                        <a href="{{ url('homepage') }}">
+                            {{ BaseInfo.shop_name }}
+                        </a>
+                    {% endif %}
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>

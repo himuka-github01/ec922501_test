@@ -1,0 +1,364 @@
+<?php
+
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Extension\SandboxExtension;
+use Twig\Markup;
+use Twig\Sandbox\SecurityError;
+use Twig\Sandbox\SecurityNotAllowedTagError;
+use Twig\Sandbox\SecurityNotAllowedFilterError;
+use Twig\Sandbox\SecurityNotAllowedFunctionError;
+use Twig\Source;
+use Twig\Template;
+
+/* ProductOption/Service/ProductOptionCartService.php */
+class __TwigTemplate_d58b0ff1cb12661b1cfc25c802610c4b98bc5ef42cc299a4782f96265ca4a1f6 extends \Eccube\Twig\Template
+{
+    private $source;
+    private $macros = [];
+
+    public function __construct(Environment $env)
+    {
+        parent::__construct($env);
+
+        $this->source = $this->getSourceContext();
+
+        $this->parent = false;
+
+        $this->blocks = [
+        ];
+    }
+
+    protected function doDisplay(array $context, array $blocks = [])
+    {
+        $macros = $this->macros;
+        $__internal_085b0142806202599c7fe3b329164a92397d8978207a37e79d70b8c52599e33e = $this->extensions["Symfony\\Bundle\\WebProfilerBundle\\Twig\\WebProfilerExtension"];
+        $__internal_085b0142806202599c7fe3b329164a92397d8978207a37e79d70b8c52599e33e->enter($__internal_085b0142806202599c7fe3b329164a92397d8978207a37e79d70b8c52599e33e_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "template", "ProductOption/Service/ProductOptionCartService.php"));
+
+        $__internal_319393461309892924ff6e74d6d6e64287df64b63545b994e100d4ab223aed02 = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
+        $__internal_319393461309892924ff6e74d6d6e64287df64b63545b994e100d4ab223aed02->enter($__internal_319393461309892924ff6e74d6d6e64287df64b63545b994e100d4ab223aed02_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "template", "ProductOption/Service/ProductOptionCartService.php"));
+
+        // line 1
+        echo "<?php
+/*
+ * Plugin Name : ProductOption
+ *
+ * Copyright (C) BraTech Co., Ltd. All Rights Reserved.
+ * http://www.bratech.co.jp/
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Plugin\\ProductOption\\Service;
+
+use Doctrine\\ORM\\EntityManagerInterface;
+use Doctrine\\ORM\\UnitOfWork;
+use Eccube\\Entity\\Cart;
+use Eccube\\Entity\\CartItem;
+use Eccube\\Entity\\Customer;
+use Eccube\\Entity\\ItemHolderInterface;
+use Eccube\\Entity\\ProductClass;
+use Eccube\\Repository\\CartRepository;
+use Eccube\\Repository\\OrderRepository;
+use Eccube\\Repository\\ProductClassRepository;
+use Eccube\\Service\\Cart\\CartItemAllocator;
+use Eccube\\Service\\Cart\\CartItemComparator;
+use Eccube\\Service\\CartService;
+use Eccube\\Service\\TaxRuleService;
+use Eccube\\Util\\StringUtil;
+use Plugin\\ProductOption\\Entity\\Option;
+use Plugin\\ProductOption\\Entity\\OptionCategory;
+use Plugin\\ProductOption\\Util\\CommonUtil;
+use Symfony\\Component\\HttpFoundation\\Session\\SessionInterface;
+use Symfony\\Component\\Security\\Core\\Authentication\\Token\\Storage\\TokenStorageInterface;
+use Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface;
+
+class ProductOptionCartService extends CartService
+{
+    protected \$taxRuleService;
+
+    public function __construct(
+        SessionInterface \$session,
+        EntityManagerInterface \$entityManager,
+        ProductClassRepository \$productClassRepository,
+        CartRepository \$cartRepository,
+        CartItemComparator \$cartItemComparator,
+        CartItemAllocator \$cartItemAllocator,
+        OrderRepository \$orderRepository,
+        TokenStorageInterface \$tokenStorage,
+        AuthorizationCheckerInterface \$authorizationChecker,
+        TaxRuleService \$taxRuleService
+    ) {
+        \$this->session = \$session;
+        \$this->entityManager = \$entityManager;
+        \$this->productClassRepository = \$productClassRepository;
+        \$this->cartRepository = \$cartRepository;
+        \$this->cartItemComparator = \$cartItemComparator;
+        \$this->cartItemAllocator = \$cartItemAllocator;
+        \$this->orderRepository = \$orderRepository;
+        \$this->tokenStorage = \$tokenStorage;
+        \$this->authorizationChecker = \$authorizationChecker;
+        \$this->taxRuleService = \$taxRuleService;
+    }
+
+    public function addProductOption(\$productClassId, \$Options, \$quantity = 1)
+    {
+        \$ProductClass = \$this->productClassRepository->find(\$productClassId);
+        if(!\$ProductClass)return false;
+        log_info('規格ID',[\$productClassId]);
+        log_info('オプション',[\$Options]);
+
+        \$exist_flg = false;
+        \$newItem = new CartItem();
+        \$newItem->setQuantity(\$quantity);
+        \$newItem->setPrice(\$ProductClass->getPrice02IncTax());
+        \$newItem->setProductClass(\$ProductClass);
+        \$newItem->setOptionSerial(serialize(\$Options));
+
+        \$allCartItems = [];
+        foreach(\$this->getCarts() as \$Cart){
+            \$CartItems = \$Cart->getCartItems();
+            foreach(\$CartItems as \$CartItem){
+                if(\$CartItem->getOptionSerial() == null)\$CartItems->removeElement(\$CartItem);
+            }
+            \$allCartItems = array_merge(\$allCartItems, \$CartItems->toArray());
+            foreach(\$CartItems as \$cartItem){
+                if(\$this->cartItemComparator->compare(\$newItem, \$cartItem)){
+                    \$cartItem->setQuantity(\$cartItem->getQuantity() + \$quantity);
+                    \$exist_flg = true;
+                    break;
+                }
+            }
+        }
+        if(\$exist_flg){
+            \$this->restoreCarts(\$allCartItems);
+            return;
+        }
+
+        \$allCartItems[] = \$newItem;
+
+        \$optionRepository = \$this->entityManager->getRepository(Option::class);
+        \$optionCategoryRepository = \$this->entityManager->getRepository(OptionCategory::class);
+
+        \$total_option_price = 0;
+        foreach(\$Options as \$optionId => \$value){
+            \$Option = \$optionRepository->find(\$optionId);
+            if(!is_array(\$value))\$value = [\$value];
+            foreach(\$value as \$val){
+                if(
+                    \$Option->getType() == Option::SELECT_TYPE
+                    || \$Option->getType() == Option::RADIO_TYPE
+                    || \$Option->getType() == Option::CHECKBOX_TYPE
+                  ){
+                    \$OptionCategory = \$optionCategoryRepository->find(\$val);
+                }else{
+                    \$OptionCategory = null;
+                    \$OptionCategories = \$Option->getOptionCategories();
+                    if(count(\$OptionCategories) > 0)\$OptionCategory = \$OptionCategories[0];
+                }
+                if(!is_null(\$OptionCategory)){
+                    \$option_price = \$OptionCategory->getValue();
+                    if(\$Option->getType() == Option::NUMBER_TYPE){
+                        if(\$OptionCategory->getMultipleFlg())\$option_price *= \$val;
+                    }
+                    \$total_option_price += \$option_price;
+                }
+            }
+        }
+        \$price = \$ProductClass->getPrice02() + \$total_option_price;
+        \$newItem->setPrice(\$price + \$this->taxRuleService->getTax(\$price,\$ProductClass->getProduct(),\$ProductClass));
+        \$this->restoreCarts(\$allCartItems);
+
+        return;
+    }
+
+    public function removeCartItem(\$CartItem)
+    {
+        \$allCartItems = \$this->mergeAllCartItems();
+        \$foundIndex = -1;
+        foreach (\$allCartItems as \$index => \$itemInCart) {
+            if (\$this->cartItemComparator->compare(\$itemInCart, \$CartItem)) {
+                \$foundIndex = \$index;
+                break;
+            }
+        }
+
+        array_splice(\$allCartItems, \$foundIndex, 1);
+        \$this->restoreCarts(\$allCartItems);
+    }
+}
+";
+        
+        $__internal_085b0142806202599c7fe3b329164a92397d8978207a37e79d70b8c52599e33e->leave($__internal_085b0142806202599c7fe3b329164a92397d8978207a37e79d70b8c52599e33e_prof);
+
+        
+        $__internal_319393461309892924ff6e74d6d6e64287df64b63545b994e100d4ab223aed02->leave($__internal_319393461309892924ff6e74d6d6e64287df64b63545b994e100d4ab223aed02_prof);
+
+    }
+
+    public function getTemplateName()
+    {
+        return "ProductOption/Service/ProductOptionCartService.php";
+    }
+
+    public function getDebugInfo()
+    {
+        return array (  43 => 1,);
+    }
+
+    public function getSourceContext()
+    {
+        return new Source("<?php
+/*
+ * Plugin Name : ProductOption
+ *
+ * Copyright (C) BraTech Co., Ltd. All Rights Reserved.
+ * http://www.bratech.co.jp/
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Plugin\\ProductOption\\Service;
+
+use Doctrine\\ORM\\EntityManagerInterface;
+use Doctrine\\ORM\\UnitOfWork;
+use Eccube\\Entity\\Cart;
+use Eccube\\Entity\\CartItem;
+use Eccube\\Entity\\Customer;
+use Eccube\\Entity\\ItemHolderInterface;
+use Eccube\\Entity\\ProductClass;
+use Eccube\\Repository\\CartRepository;
+use Eccube\\Repository\\OrderRepository;
+use Eccube\\Repository\\ProductClassRepository;
+use Eccube\\Service\\Cart\\CartItemAllocator;
+use Eccube\\Service\\Cart\\CartItemComparator;
+use Eccube\\Service\\CartService;
+use Eccube\\Service\\TaxRuleService;
+use Eccube\\Util\\StringUtil;
+use Plugin\\ProductOption\\Entity\\Option;
+use Plugin\\ProductOption\\Entity\\OptionCategory;
+use Plugin\\ProductOption\\Util\\CommonUtil;
+use Symfony\\Component\\HttpFoundation\\Session\\SessionInterface;
+use Symfony\\Component\\Security\\Core\\Authentication\\Token\\Storage\\TokenStorageInterface;
+use Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface;
+
+class ProductOptionCartService extends CartService
+{
+    protected \$taxRuleService;
+
+    public function __construct(
+        SessionInterface \$session,
+        EntityManagerInterface \$entityManager,
+        ProductClassRepository \$productClassRepository,
+        CartRepository \$cartRepository,
+        CartItemComparator \$cartItemComparator,
+        CartItemAllocator \$cartItemAllocator,
+        OrderRepository \$orderRepository,
+        TokenStorageInterface \$tokenStorage,
+        AuthorizationCheckerInterface \$authorizationChecker,
+        TaxRuleService \$taxRuleService
+    ) {
+        \$this->session = \$session;
+        \$this->entityManager = \$entityManager;
+        \$this->productClassRepository = \$productClassRepository;
+        \$this->cartRepository = \$cartRepository;
+        \$this->cartItemComparator = \$cartItemComparator;
+        \$this->cartItemAllocator = \$cartItemAllocator;
+        \$this->orderRepository = \$orderRepository;
+        \$this->tokenStorage = \$tokenStorage;
+        \$this->authorizationChecker = \$authorizationChecker;
+        \$this->taxRuleService = \$taxRuleService;
+    }
+
+    public function addProductOption(\$productClassId, \$Options, \$quantity = 1)
+    {
+        \$ProductClass = \$this->productClassRepository->find(\$productClassId);
+        if(!\$ProductClass)return false;
+        log_info('規格ID',[\$productClassId]);
+        log_info('オプション',[\$Options]);
+
+        \$exist_flg = false;
+        \$newItem = new CartItem();
+        \$newItem->setQuantity(\$quantity);
+        \$newItem->setPrice(\$ProductClass->getPrice02IncTax());
+        \$newItem->setProductClass(\$ProductClass);
+        \$newItem->setOptionSerial(serialize(\$Options));
+
+        \$allCartItems = [];
+        foreach(\$this->getCarts() as \$Cart){
+            \$CartItems = \$Cart->getCartItems();
+            foreach(\$CartItems as \$CartItem){
+                if(\$CartItem->getOptionSerial() == null)\$CartItems->removeElement(\$CartItem);
+            }
+            \$allCartItems = array_merge(\$allCartItems, \$CartItems->toArray());
+            foreach(\$CartItems as \$cartItem){
+                if(\$this->cartItemComparator->compare(\$newItem, \$cartItem)){
+                    \$cartItem->setQuantity(\$cartItem->getQuantity() + \$quantity);
+                    \$exist_flg = true;
+                    break;
+                }
+            }
+        }
+        if(\$exist_flg){
+            \$this->restoreCarts(\$allCartItems);
+            return;
+        }
+
+        \$allCartItems[] = \$newItem;
+
+        \$optionRepository = \$this->entityManager->getRepository(Option::class);
+        \$optionCategoryRepository = \$this->entityManager->getRepository(OptionCategory::class);
+
+        \$total_option_price = 0;
+        foreach(\$Options as \$optionId => \$value){
+            \$Option = \$optionRepository->find(\$optionId);
+            if(!is_array(\$value))\$value = [\$value];
+            foreach(\$value as \$val){
+                if(
+                    \$Option->getType() == Option::SELECT_TYPE
+                    || \$Option->getType() == Option::RADIO_TYPE
+                    || \$Option->getType() == Option::CHECKBOX_TYPE
+                  ){
+                    \$OptionCategory = \$optionCategoryRepository->find(\$val);
+                }else{
+                    \$OptionCategory = null;
+                    \$OptionCategories = \$Option->getOptionCategories();
+                    if(count(\$OptionCategories) > 0)\$OptionCategory = \$OptionCategories[0];
+                }
+                if(!is_null(\$OptionCategory)){
+                    \$option_price = \$OptionCategory->getValue();
+                    if(\$Option->getType() == Option::NUMBER_TYPE){
+                        if(\$OptionCategory->getMultipleFlg())\$option_price *= \$val;
+                    }
+                    \$total_option_price += \$option_price;
+                }
+            }
+        }
+        \$price = \$ProductClass->getPrice02() + \$total_option_price;
+        \$newItem->setPrice(\$price + \$this->taxRuleService->getTax(\$price,\$ProductClass->getProduct(),\$ProductClass));
+        \$this->restoreCarts(\$allCartItems);
+
+        return;
+    }
+
+    public function removeCartItem(\$CartItem)
+    {
+        \$allCartItems = \$this->mergeAllCartItems();
+        \$foundIndex = -1;
+        foreach (\$allCartItems as \$index => \$itemInCart) {
+            if (\$this->cartItemComparator->compare(\$itemInCart, \$CartItem)) {
+                \$foundIndex = \$index;
+                break;
+            }
+        }
+
+        array_splice(\$allCartItems, \$foundIndex, 1);
+        \$this->restoreCarts(\$allCartItems);
+    }
+}
+", "ProductOption/Service/ProductOptionCartService.php", "/var/www/htdocs/ec922501/app/Plugin/ProductOption/Service/ProductOptionCartService.php");
+    }
+}

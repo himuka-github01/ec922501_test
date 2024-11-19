@@ -1,0 +1,123 @@
+{#
+This file is part of EC-CUBE
+
+Copyright(c) EC-CUBE CO.,LTD. All Rights Reserved.
+
+http://www.ec-cube.co.jp/
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+#}
+{% block stylesheet %}
+    <style>
+    .header-space {
+        height: 100px;
+    }
+    
+    .header-navi-role {
+        position: fixed;
+        left: 50%;
+        top: 5%;
+        transform: translateX(-50%)
+                   translateY(-50%);
+        /*position: -webkit-sticky;*/
+        /*position: sticky;*/
+        /*top: -1px;*/
+    }
+    
+    /*
+    .header-navi {
+        padding-right: 50px;
+        width: 100%;
+        display: flex;
+        position: fixed;
+        background-color: rgb(255, 255, 255);
+        z-index: 9999;
+    }
+    */
+
+    /*    
+    .header-navi {
+        position: fixed;
+    }
+    */
+
+    .ec-headerNaviRole .ec-headerNaviRole__left {
+        width: calc(100% / 2);
+        display: flex;
+        align-items: center; }
+    .ec-headerNaviRole .ec-headerNaviRole__right {
+        width: calc(100% * 2 / 4);
+        display: flex;
+        /*justify-content: flex-end;*/
+        align-items: center; }
+    .nav-front {
+        padding: 5px;
+        background-color: rgb(246, 246, 246);
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        text-align: center;
+        height: 33px;
+        width: 100px;
+    }
+
+    .nav-front a {
+        color: #525263;
+    }
+
+    .front-block {
+        margin-top: 20px;
+    }
+
+    .select-saiji {
+        margin-left: 20px;
+    }
+
+    .hiddenItem {
+        display: none;
+    }
+    </style>
+{% endblock %}
+<div class="ec-headerNaviRole header-navi-role">
+    <!--<div class="header-navi">-->
+        <!--
+        <div class="hiddenItem">
+            <div class="ec-headerNaviRole__search hiddenItem">
+                {{ render(path('block_search_product')) }}
+            </div>
+            <div class="ec-headerRole__navSP hiddenItem">
+                {{ include('Block/nav_sp.twig') }}
+            </div>
+        </div>
+        -->
+        <div class="ec-headerNaviRole__left">
+            <div class="nav-front">
+                <a href="{{ url('admin_homepage') }}">管理画面</a>
+            </div>
+            <div class="nav-front">
+                <a href="{{ path('start') }}">催事選択</a>
+            </div>
+            <div class="nav-front">
+                <a href="{{ url('product_list') }}">商品一覧</a>
+            </div>
+        </div>
+        <!--<div class="header-navi">-->
+            <div class="ec-headerNaviRole__right">
+                <div class="front-block select-saiji">
+                    {{ render(path('block_select_saiji')) }}
+                </div>
+                <div class="front-block select-tenpo">
+                    {{ render(path('block_select_tenpo')) }}
+                </div>
+                <!--
+                <div class="ec-headerNaviRole__nav">
+                    {{ include('Block/login.twig') }}
+                </div>
+                -->
+                <div class="ec-headerRole__cart">
+                    {{ include('Block/cart.twig') }}
+                </div>
+            </div>
+    <!--</div>-->
+</div>
+<div class="header-space"></div>

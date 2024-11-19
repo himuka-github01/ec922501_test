@@ -1,0 +1,61 @@
+{#
+This file is part of EC-CUBE
+
+Copyright(c) EC-CUBE CO.,LTD. All Rights Reserved.
+
+http://www.ec-cube.co.jp/
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+#}
+{% form_theme form 'Form/form_div_layout.twig' %}
+
+<script>
+    window.addEventListener('load',event => {
+        console.log('onload select_saiji')
+        const select_url = document.querySelector('.selectform_saiji').action
+        const select_saiji = document.getElementById('saiji_id')
+        select_saiji.addEventListener('change', event => {
+            console.log('onchange select_saiji')
+            if (select_saiji.value=='') {
+                alert('イベントを選択して下さい');
+                return;
+            }
+            if (!window.confirm('イベントを変更しますか？')) {
+                return;
+            }
+            const select_path = select_url + '/' + select_saiji.value
+            fetch(select_path, {
+                method: 'post',
+                headers: {
+                    'x-csrf-token': '{{ csrf_token('x-csrf-token') }}'
+                }
+            })
+            .then((res) => {
+                if (res.ok) {
+                    if ( confirm('イベントを変更しました。商品を入れ替えますか？') ) {
+                        location.reload();
+                    }
+                } else {
+                    alert('イベントの変更に失敗しました')
+                }
+            })
+        })
+    })
+</script>
+
+<style>
+    .select-saiji select {
+        width: 120px;
+    }
+</style>
+
+<div class="ec-headerSearch">
+    <form method="get" class="selectform_saiji" action="{{ url('block_select_saiji') }}">
+        <div class="">
+            <div class="ec-select ec-select_search select-saiji">
+                {{ form_widget(form.saiji_id, {'id': 'saiji_id', 'attr': {'class': 'saiji_id'}}) }}
+            </div>
+        </div>
+    </form>
+</div>
