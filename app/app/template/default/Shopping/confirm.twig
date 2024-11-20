@@ -90,6 +90,11 @@ file that was distributed with this source code.
                     <p class="ec-input">受　取　方　法：{{ Order.uketori|trans }}</p>
                     <p class="ec-telInput">お 支 払 い 方 法：{{ Order.Payment }}</p>
                     <p class="ec-telInput">電　話　番　号：{{ Order.phone_number }}</p>
+                    <p class="ec-input hiddenItem">{{ Order.email }}</p>
+                    {% if Order.uketori != 'ヤマト配送' %}
+                    <p class="ec-input">受　取　来　店　日：{{ Order.Ukedate|date("Y年m月d日") }}</p>
+                    <p class="ec-input">受　取　時　間：{{ Order.visit_t }}</p>
+                    {% endif %}
                     {% if Order.uketori == 'ヤマト配送' %}
                     <p class="ec-zipInput">郵　便　番　号：{{ Order.postal_code }}</p>
                     <p class="ec-input">住　　　　　所：{{Order.pref}} {{ Order.addr01 }} {{ Order.addr02 }}</p>
@@ -99,11 +104,6 @@ file that was distributed with this source code.
                     <p class="ec-halfInput">お届け先　お名前（漢字）：{{ Order.h_name1 }}&emsp;{{ Order.h_name2 }}{{'様'|trans}}</p>
                     <p class="ec-input">お届け先　お名前（カナ）：{{ Order.h_kana1 }}&emsp;{{ Order.h_kana2 }}{{'様'|trans}}</p>
                     <p class="ec-telInput">お届け先　お電話番号：{{ Order.h_phone_number }}</p>
-                    {% endif %}
-                    <p class="ec-input hiddenItem">{{ Order.email }}</p>
-                    {% if Order.uketori != 'ヤマト配送' %}
-                    <p class="ec-input">受　取　来　店　日：{{ Order.Ukedate|date("Y年m月d日") }}</p>
-                    <p class="ec-input">受　取　時　間：{{ Order.visit_t }}</p>
                     {% endif %}
                     <p class="ec-input">受　付　店　鋪：{{ Order.tenpos }}</p>
                     <p class="ec-input">受　　付　　者：{{ Order.uketsuke_name }}</p>

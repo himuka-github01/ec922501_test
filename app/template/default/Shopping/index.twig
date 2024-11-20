@@ -154,27 +154,28 @@ file that was distributed with this source code.
     //     $('#customer-shain').text(customerShainFlg == 1 ? '社員' : '一般');
     // } 
             $(function() {
-           textShainFlg();
+            textShainFlg();
             
-           var $redirectCallback = function() {
-               loadingOverlay();
-               $('#shopping_order_redirect_to').val($(this).attr('data-path'));
-               $('#shopping-form').attr('action', '{{ url("shopping_redirect_to") }}').submit();
-               setTimeout(function () {
-                   loadingOverlay("hide");
-               }, 2000);
-           };
-           $('[data-trigger]').each(function() {
-               $(this).on($(this).attr('data-trigger'), $redirectCallback);
-           });
+            var $redirectCallback = function() {
+                loadingOverlay();
+                $('#shopping_order_redirect_to').val($(this).attr('data-path'));
+                $('#shopping-form').attr('action', '{{ url("shopping_redirect_to") }}').submit();
+                setTimeout(function () {
+                    loadingOverlay("hide");
+                }, 2000);
+            };
+            
+            $('[data-trigger]').each(function() {
+                $(this).on($(this).attr('data-trigger'), $redirectCallback);
+            });
 
-           {% if is_granted('ROLE_USER') == false %}
-           var edit = $('.customer-edit');
-           var hidden = $('.customer-in');
-           var form = $('.customer-form');
+            {% if is_granted('ROLE_USER') == false %}
+            var edit = $('.customer-edit');
+            var hidden = $('.customer-in');
+            var form = $('.customer-form');
 
-           //編集ボタンクリック時の処理
-           $('#customer').click(function() {
+            //編集ボタンクリック時の処理
+            $('#customer').click(function() {
                $(edit).each(function(index) {
                    //alert('hidden'+index+':'+$(hidden[index]).attr('name'));
                    var shainFlgName = $(hidden[index]).attr('name');
@@ -198,8 +199,8 @@ file that was distributed with this source code.
 
            //更新確定ボタンクリック時の処理
            $('#customer-ok').click(function() {
-               $(form).each(function(index) {
-                   var shainFlgName = $(hidden[index]).attr('name');
+            $(form).each(function(index) {
+                var shainFlgName = $(hidden[index]).attr('name');
                    if(shainFlgName == 'customer_shain_flg') {
                        if ( $(form[index]).children('input').prop('checked') ) {
                            $(hidden[index]).val('1');
@@ -216,30 +217,30 @@ file that was distributed with this source code.
                //$('#customer-name01').val($('#customer-kana01').val());
                //$('#customer-name02').val($('#customer-kana02').val());
                var postData = {};
-               $(hidden).each(function() {
-                   postData[$(this).attr('name')] = $(this).val();
-               });
+                $(hidden).each(function() {
+                    postData[$(this).attr('name')] = $(this).val();
+                });
 
-               loadingOverlay();
-               console.log(postData);
+                loadingOverlay();
+                //POSTDATA
+                console.log(postData);
 
-               $.ajax({
-                   url: "{{ url('shopping_customer') }}",
-                   type: 'POST',
-                   data: postData,
-                   dataType: 'json'
-               }).done(function(data) {
+            $.ajax({
+                url: "{{ url('shopping_customer') }}",
+                type: 'POST',
+                data: postData,
+                dataType: 'json'
+            }).done(function(data) {
+                console.log(data);
 
-                   console.log(data);
-
-                   if (data.status == 'OK') {
-                    //画面の表示を更新
+                if (data.status == 'OK') {
+                    // 画面の表示を更新
                     updateDisplayValues(data); 
-                    updateHiddenValues(dara);
-                       $(form).each(function(index) {
-                           $(edit[index]).empty().text($(form[index]).children('input').val());
-                           $(form[index]).empty();
-                       });
+                    updateHiddenValues(data);
+                    $(form).each(function(index) {
+                        $(edit[index]).empty().text($(form[index]).children('input').val());
+                        $(form[index]).empty();
+                    });
 
                        //Fixed更新用フィールド　2024/11/13 田中
                        $(edit[0]).empty().text(data.name01);
@@ -308,14 +309,35 @@ file that was distributed with this source code.
            {% endif %}
         });
 
+        //社員フラグのテキスト表示更新関数
         function textShainFlg() {
-           let customerShainFlg = $('#customer-shain_flg').val();
-           if(customerShainFlg == 1) {
-               $('#customer-shain').text('社員');
-           } else {
-               $('#customer-shain').text('一般');
-           }
+            const customerShainFlg = $('#customer-shain_flg').val();
+            $('#customer-shain').text(customerShainFlg == 1 ? '社員' : '一般');
         }
+        
+         //お引き渡し情報　お引き渡し日バリデーション無効化 2024/11/19
+         $(function() {
+    
+                $('#form-control').submit(function(e) {
+                    // お引き渡し日の必須チェックを削除
+                    $('#shopping_order_Shippings_0_shipping_delivery_date').removeAttribute('require');
+                    
+                    return true; // フォームの送信を許可
+                });
+                console.log('require削除');
+
+                //「確認する」ボタンクリック時の処理
+                $('.ec-orderRole__summary .ec-submitButton').click(function() {
+                    //お引き渡し日関連のエラー表示をクリア
+                    $('.ec-errorMessage').filter(function() {
+                        return $(this).text().includes('お引き渡し日');
+                    }).remove();
+                    
+                    //フォームの送信を許可
+                    return true;
+                });
+            });
+        
     </script>
 
     <style>
@@ -449,12 +471,12 @@ file that was distributed with this source code.
                             </dl>
                             <dl>
                                 <dt>
-                                    <label class="ec-label" for="nonmember_uketori">{{ '受取方法'|trans }}</label>
+                                    <label class="ec-label" for="nonmember-uketori">{{ '受取方法'|trans }}</label>
                                     <span class="ec-required">{{ '必須'|trans }}</span>
                                 </dt>
                                 <dd>
                                     <div class="ec-telInput">
-                                    <span class="customer-edit customer_uketori">{{ Order.uketori }}</p>
+                                    <span class="customer-edit customer-uketori">{{ Order.uketori }}</p>
                                     </div>
                                 </dd>
                             </dl>
@@ -471,42 +493,22 @@ file that was distributed with this source code.
                         </dl>
                             <dl class="hiddenItem">
                                 <dt>
-                                    <label class="ec-label" for="nonmember_uketori">{{ '会社名'|trans }}</label>
+                                    <label class="ec-label" for="customer-company">{{ '会社名'|trans }}</label>
                                 </dt>
                                 <dd>
                                     <div class="ec-halfInput">
-                                        <span class="customer-form customer_uketori"></span>
+                                        <span class="customer-form customer-company"></span>
                                     </div>
                                 </dd>
                             </dl>
-                            <dl class="hiddenItem">
-                                <dt>
-                                    <label class="ec-label" for="nonmember_company_name">{{ '会社名'|trans }}</label>
-                                </dt>
-                                <dd>
-                                    <div class="ec-halfInput">
-                                        <span class="customer-form customer-company_name"></span>
-                                    </div>
-                                </dd>
-                            </dl>
-                            <!-- <dl class="hiddenItem">
-                                <dt>
-                                    <label class="ec-label" for="nonmember_company_name">{{ '会社名'|trans }}</label>
-                                </dt>
-                                <dd>
-                                    <div class="ec-halfInput">
-                                        <span class="customer-form customer-company_name"></span>
-                                    </div>
-                                </dd>
-                            </dl>
-                        <dl> -->
+                          <dl>  
                             <dt>
                                 <label class="ec-label">{{ '来店受取日'|trans }}</label>
                                 <span class="ec-required">{{ '必須'|trans }}</span>
                             </dt>
                             <dd>
                                 <div class="ec-input">
-                                    <input type="date" class="form-control customer-form customer_Ukedate" value="{{ Order.Ukedate|date('Y-m-d') }}">
+                                    <input type="date" class="form-control customer-form customer-ukedate" value="{{ Order.Ukedate|date('Y-m-d') }}">
                                 </div>
                             </dd>
                         </dl>
@@ -517,7 +519,7 @@ file that was distributed with this source code.
                                 </dt>
                                 <dd>
                                     <div class="ec-telInput">
-                                    <span class="customer-edit customer_visit_t">{{ Order.visit_t }}</p>
+                                    <span class="customer-edit customer-visit_t">{{ Order.visit_t }}</p>
                                     </div>
                                 </dd>
                             </dl>
@@ -604,7 +606,7 @@ file that was distributed with this source code.
                                         <span class="customer-form customer-h_phone_number">{{ Order.h_phone_number }}</span>
                                     </div>
                                 </dd>
-                            </dl>
+                            <!-- </dl>
                                 <dl class="hiddenItem">
                                 <dt>
                                     <label class="ec-label" for ="nomember_email">{{ 'メールアドレス'|trans }}</label>
@@ -615,7 +617,7 @@ file that was distributed with this source code.
                                         <span class="customer-form customer-email"></span>
                                     </div>
                                 </dd>
-                            </dl>
+                            </dl> -->
                            {% endif %}
                         <dl>
                             <dt>
@@ -680,8 +682,8 @@ file that was distributed with this source code.
                         <input type="hidden" id="customer-kana01" class="customer-in" name="customer_kana01" value="{{ Order.kana01 }}">
                         <input type="hidden" id="customer-kana02" class="customer-in" name="customer_kana02" value="{{ Order.kana02 }}">
                         <input type="hidden" id="customer-uketori" class="customer-in" name="customer_uketori" value="{{ Order.uketori }}">
-                        <!-- <input type="hidden" id="customer-company-name" class="customer-in" name="customer_company_name" value="{{ Order.companyName }}"> -->
                         <input type="hidden" id="customer-phone_number" class="customer-in" name="customer_phone_number" value="{{ Order.phone_number }}">
+                        <input type="hidden" id="customer-company-name" class="customer-in" name="customer_company_name" value="{{ Order.companyName }}">
                         <input type="hidden" id="customer-postal_code" class="customer-in" name="customer_postal_code" value="{{ Order.postal_code }}">
                         <input type="hidden" id="customer-pref" class="customer-in" name="customer_pref" value="{{ Order.pref }}">
                         <input type="hidden" id="customer-addr01" class="customer-in" name="customer_addr01" value="{{ Order.addr01 }}">
@@ -694,7 +696,7 @@ file that was distributed with this source code.
                         <input type="hidden" id="customer-shain_flg" class="customer-in" name="customer_shain_flg" value="{{ Order.shain_flg }}">
                         <input type="hidden" id="customer-shiharai" class="customer-in" name="customer_shiharai" value="{{ Order.shiharai }}">
                         <input type="hidden" id="customer_tenpos" class="customer-in" name="customer_tenpos" value="{{ Order.tenpos }}">
-                        {# <input type="hidden" id="customer_DeliveryTime" class="customer-in" name="customer_DeliveryTime" value="{{ Order.DeliveryTime }}"> #}
+                        <!-- <input type="hidden" id="customer_DeliveryTime" class="customer-in" name="customer_DeliveryTime" value="{{ Order.DeliveryTime }}"> -->
                         {# <input type="hidden" id ="customer_Shipping_delivery_date" class ="customer_in"name="customer_Shipping_delivery_date"value="{{Order.Shipping_delivery_date}}">  #}
                     {% endif %}
                 </div>

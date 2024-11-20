@@ -133,7 +133,7 @@ class ShippingTypeExtension extends AbstractTypeExtension
                     ChoiceType::class,
                     [
                         'choices' => array_flip($deliveryDurations),
-                        'required' => true,
+                        'required' => false,
                         'placeholder' => 'common.select__unspecified',
                         'mapped' => false,
                         'data' => $Shipping->getShippingDeliveryDate() ? $Shipping->getShippingDeliveryDate()->format('Y/m/d') : null,

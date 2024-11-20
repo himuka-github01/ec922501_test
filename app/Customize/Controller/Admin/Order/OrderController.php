@@ -4083,12 +4083,14 @@ class OrderController extends BaseOrderController
                         //log_info((string)$wData);
                         $ExportCsvRow->setData($csvService->getData($Csv, $Order));
                         if ($ExportCsvRow->isDataNull()) {
-                            //受注データにない場合は, 受注明細を検索.
+                            // 受注データにない場合は, 受注明細を検索.
                             $ExportCsvRow->setData($csvService->getData($Csv, $OrderItem));
+                            log_info($csvService->getData($Csv, $OrderItem));
                         }
                         if ($ExportCsvRow->isDataNull() && $Shipping = $OrderItem->getShipping()) {
-                            //受注明細データにない場合は, 出荷を検索.
+                            // 受注明細データにない場合は, 出荷を検索.
                             $ExportCsvRow->setData($csvService->getData($Csv, $Shipping));
+                            log_info($csvService->getData($Csv, $Shipping));
                         }
                 
                         $event = new EventArgs(
@@ -4180,6 +4182,7 @@ class OrderController extends BaseOrderController
                     
 
                     // var_dump('時間帯',$deliveryTime);
+                    
                     log_info('rowData2', $rowData);
 
                     //$wColの文字形式変換s

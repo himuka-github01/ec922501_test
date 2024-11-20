@@ -165,7 +165,7 @@ class NonMemberShoppingController extends BaseNMSController
                 $Ukedate = null;
             }
 
-               //県のダミー情報　2024/11/18 田中
+            //県のダミー情報　2024/11/18 田中
             $pref = $form['pref']->getData();
             if ($data['pref'] === null) {
                 //ID 48の都道府県オブジェクトを取得
@@ -179,6 +179,11 @@ class NonMemberShoppingController extends BaseNMSController
                     $pref = $this->prefRepository->find(48);
                 }
             }
+            //会社のダミー情報 2024/11/19 田中
+            $companyName = $form['company_name']->getData();
+            if($companyName === null || ''){
+                $companyName = 'なし';
+            }
 
             $Customer = new Customer();
             $Customer
@@ -190,7 +195,6 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setEmail($data['email'])
                 ->setPhonenumber($data['phone_number'])
                 ->setPostalcode($data['postal_code'])
-                 // 取り出したオブジェクト
                 ->setPref($pref)
                 ->setAddr01($data['addr01'])
                 ->setAddr02($data['addr02'])
@@ -355,6 +359,7 @@ class NonMemberShoppingController extends BaseNMSController
             log_info('[非会員お客様情報変更]処理開始');
             $data = $request->request->all();
             log_info('[非会員お客様情報変更]request:',$data);
+            if($data[''])
             // 入力チェック
             $errors = $this->customerValidation($data);
             foreach ($errors as $error) {
