@@ -83,11 +83,11 @@ class NonMemberShoppingController extends BaseNMSController
             log_info('[非会員] お客様情報登録開始');
 
             $data = $form->getData();
-            
+
             //支払い状況・支払い方法の値取得
             //$Shiharai = $form['Shiharai']->getData();
             $Payment = $form['Payment']->getData();
-            //$Uketori =$form['Uketori']->getData();   
+            //$Uketori =$form['Uketori']->getData();
 
             //支払い状況または支払い方法のどちらも選択されていない場合のバリデーション　2024/10/09
             // if($Uketori == '店頭受取'){
@@ -114,7 +114,7 @@ class NonMemberShoppingController extends BaseNMSController
 
             //店頭受取の場合にダミー用の郵便番号を格納　2024/09/03 田中
             if (empty($data['postal_code'])) {
-                $data['postal_code'] = '0000000'; 
+                $data['postal_code'] = '0000000';
             }
             //店頭受取の場合にダミー用の住所を格納　2024/09/03 田中
             if(empty($data['addr01'])){
@@ -157,7 +157,7 @@ class NonMemberShoppingController extends BaseNMSController
              //ヤマト配送時間帯　2024/09/20 田中
              $DeliveryTime = $form['DeliveryTime']->getData();
              log_info('[非会員注文手続：お届け時間] form shipping_delivery_time',(array)$DeliveryTime);
-             
+
              //ヤマト配送日　2024/09/19 田中
              $Shipping_delivery_date = $form['shipping_delivery_date']->getData();
              log_info('[非会員注文手続：お届け日] form shipping_delivery_date',(array)$Shipping_delivery_date);
@@ -180,12 +180,12 @@ class NonMemberShoppingController extends BaseNMSController
             //log_info('受取日1',$form['ukedate']);
             //$DateTimez =[];
             //ここでDateTimeオブジェクトを生成しているが、失敗しているためfalseが返ってくる　2024/09/25 田中
-          
+
             //$Ukedate = \DateTime::createFromFormat('Y-m-d', substr($Ukedate, 0, 10));
-            
+
             //DateTimeオブジェクトへ変換
             //$Ukedate = \DateTime::createFromFormat('Y-m-d(EEEE)', $Ukedate);
-            //dump('受取日２', $form['Ukedate']); //ここまではUkeDateはプロパティOK    
+            //dump('受取日２', $form['Ukedate']); //ここまではUkeDateはプロパティOK
 
                //県のダミー情報　2024/11/18 田中
             if ($data['pref'] === 'なし') {
@@ -194,7 +194,7 @@ class NonMemberShoppingController extends BaseNMSController
             } else {
                 //都道府県名から対応するPrefオブジェクトを取得
                 $pref = $this->prefRepository->findOneBy(['name' => $data['pref']]);
-                
+
                 // 該当する都道府県が見つからない場合はデフォルトの都道府県を設定
                 if (!$pref) {
                     $pref = $this->prefRepository->find(48);
@@ -234,10 +234,10 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setH_Pref($h_pref)
                 ->setH_addr1($data['h_addr1'])
                 ->setH_addr2($data['h_addr2']);
-                
+
                 log_info('Customer:来店受取日（UkeDate）：',array($Ukedate));
                 //dump($Customer->getUkedate());
-                
+
             // 非会員用セッションを作成
             $this->session->set(OrderHelper::SESSION_NON_MEMBER, $Customer);
             $this->session->set(OrderHelper::SESSION_NON_MEMBER_ADDRESSES, serialize([]));
@@ -287,7 +287,7 @@ class NonMemberShoppingController extends BaseNMSController
             }
             //OrderDBへセット　2024/09/26 田中
             //$Order->setShipping_delivery_date($DeliveryDate);
-           
+
             //$Ukedate = $form['Ukedate']->getData();
             //$data['customer_ukedate']= "";
             //$UkeDate = new \DateTime($data['customer_ukedate']);
@@ -304,11 +304,11 @@ class NonMemberShoppingController extends BaseNMSController
                 $Shipping->setTimeId(null);
             }
             //$Order-setDeliveryTime(DeliveryTime);
-            
+
             // 配送情報の書き換え
             $Order->removeShipping($Shipping);
             $Order->addShipping($Shipping);
-                
+
             log_info('[非会員注文手続] form Payment',(array)$data["Payment"]);
             log_info('[非会員注文手続] PaymentMethod:'.$data["Payment"]->getMethod());
             $Order->setPayment($data["Payment"]);
@@ -400,6 +400,12 @@ class NonMemberShoppingController extends BaseNMSController
 
                 return $this->redirectToRoute('shopping_error');
             }
+            $uketori = $this->RecieveRepository->findOneBy(['name' => $data['customer_uketori']]);
+            if ($uketori) {
+                log_info('[非会員お客様情報変更]入力チェックエラー');
+
+                return $this->json(['status' => 'NG'], 400);
+            }
             //漢字入力時、Nomember.twigでエラーが発生するため不要となった
             //$data['customer_name01'] = $data['customer_kana01'];
             //$data['customer_name02'] = $data['customer_kana02'];
@@ -419,7 +425,7 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setShoukaiName($data['customer_shoukai_name'])
                 ->setUketsukeName($data['customer_uketsuke_name'])
                 ->setShainFlg($data['customer_shain_flg'])
-                ->setUketori($data['customer_uketori'])
+                ->setUketori($uketori)
                 ->setShiharai($data['customer_shiharai'])
                 ->setVisit($data['customer_visit_t'])
                 -setUkeTenpo($data['customer_uke_tenpo'])
@@ -491,7 +497,7 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setShipping_delivery_date($data['shipping_delivery_date']);
 
             $this->session->set(OrderHelper::SESSION_NON_MEMBER, $Customer);
-            
+
             log_info('Customer:来店受取日（UkeDate）お客様情報変更：',$data['customer_UkeDate']);
 
             $event = new EventArgs(
