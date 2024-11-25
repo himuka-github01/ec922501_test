@@ -415,7 +415,7 @@ class NonMemberShoppingController extends BaseNMSController
                 return $this->json(['status' => 'NG'], 400);
             }
             $tenpoRepository = $this->entityManager->getRepository(\Customize\Entity\HdnTenpo::class);
-            $tenpo = $tenpoRepository->findOneBy(['uke_tenpo' => $data['customer_uke_tenpo']]);
+            $tenpo = $tenpoRepository->findOneBy(['uke_tenpo' => $data['customer_tenpos']]);
             if (!$tenpo) {
                 log_info('[非会員お客様情報変更4]入力チェックエラー');
 

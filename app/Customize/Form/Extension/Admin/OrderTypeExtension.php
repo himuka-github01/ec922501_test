@@ -125,7 +125,7 @@ class OrderTypeExtension extends AbstractTypeExtension
                 'expanded' => false,
                 'multiple' => false,
                 'placeholder' => 'common.select__unspecified',
-//                'mapped' => false,
+                'mapped' => false,
             ])
 
              //受け取り方法追加　2024/08/23 田中
@@ -251,5 +251,10 @@ class OrderTypeExtension extends AbstractTypeExtension
     public function getExtendedType()
     {
         return OrderType::class;
+    }
+
+    public static function getExtendedTypes(): iterable
+    {
+        yield OrderType::class;
     }
 }
