@@ -380,7 +380,7 @@ class NonMemberShoppingController extends BaseNMSController
             $errors = $this->customerValidation($data);
             foreach ($errors as $error) {
                 if ($error->count() != 0) {
-                    log_info('[非会員お客様情報変更]入力チェックエラー',(array)$error);
+                    log_info('[非会員お客様情報変更1]入力チェックエラー',(array)$error);
 
                     return $this->json(['status' => 'NG'], 400);
                 }
@@ -388,7 +388,7 @@ class NonMemberShoppingController extends BaseNMSController
 
             $pref = $this->prefRepository->findOneBy(['name' => $data['customer_pref']]);
             if (!$pref) {
-                log_info('[非会員お客様情報変更]入力チェックエラー');
+                log_info('[非会員お客様情報変更2]入力チェックエラー');
 
                 return $this->json(['status' => 'NG'], 400);
             }
@@ -403,7 +403,7 @@ class NonMemberShoppingController extends BaseNMSController
             $recieveRepository = $this->entityManager->getRepository(\Customize\Entity\Recieve::class);
             $uketori = $recieveRepository->findOneBy(['name' => $data['customer_uketori']]);
             if ($uketori) {
-                log_info('[非会員お客様情報変更]入力チェックエラー');
+                log_info('[非会員お客様情報変更3]入力チェックエラー');
 
                 return $this->json(['status' => 'NG'], 400);
             }
