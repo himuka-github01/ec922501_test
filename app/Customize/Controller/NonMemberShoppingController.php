@@ -400,7 +400,8 @@ class NonMemberShoppingController extends BaseNMSController
 
                 return $this->redirectToRoute('shopping_error');
             }
-            $uketori = $this->RecieveRepository->findOneBy(['name' => $data['customer_uketori']]);
+            $recieveRepository = $this->entityManager->getRepository(\Customize\Entity\Recieve::class);
+            $uketori = $recieveRepository->findOneBy(['name' => $data['customer_uketori']]);
             if ($uketori) {
                 log_info('[非会員お客様情報変更]入力チェックエラー');
 
