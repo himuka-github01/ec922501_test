@@ -261,11 +261,11 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Uketori.
-     * 
+     *
      * @param \Customize\Entity\Recieve|null $uketori
-     * 
+     *
      * @return Order
      */
     public function getUketori()
@@ -277,7 +277,7 @@ trait OrderTrait
     //支払い状況追加　2024/09/02 田中
     /**
      * Set Shiharai
-     * 
+     *
      */
     public function setShiharai( $shiharai): self
     {
@@ -285,9 +285,9 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Shiharai.
-     * 
+     *
      */
     public function getShiharai()
     {
@@ -298,7 +298,7 @@ trait OrderTrait
     //来店時間追加　2024/09/09 田中
     /**
      * Summary of setVisit
-     * 
+     *
      * @param \Customize\Entity\Visit|null $visit_t
      * @return mixed
      */
@@ -308,11 +308,11 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Visit.
-     * 
+     *
      * @param \Customize\Entity\Visit $visit_t
-     * 
+     *
      * @return Order
      */
     public function getVisit_t()
@@ -321,10 +321,34 @@ trait OrderTrait
     }
     //来店時間ここまで
 
+    /**
+     * Summary of setVisit
+     *
+     * @param \Customize\Entity\Visit|null $visit_t
+     * @return mixed
+     */
+    public function setVisitT(\Customize\Entity\Visit $visit_t): self
+    {
+        $this->visit_t = $visit_t;
+        return $this;
+    }
+    /**
+     *
+     * Get Visit.
+     *
+     * @param \Customize\Entity\Visit $visit_t
+     *
+     * @return Order
+     */
+    public function getVisitT()
+    {
+        return $this->visit_t;
+    }
+
     //受付店鋪追加　2024/09/10 田中
     /**
      * Set Tenpos.
-     * 
+     *
      * @param \Customize\Entity\Tenpos|null $uke_tenpo
      * @return $this
      */
@@ -336,7 +360,7 @@ trait OrderTrait
 
     /**
     * Get Tenpos.
-    * 
+    *
     * @return \Customize\Entity\Tenpos|null
     */
     public function getTenpos()
@@ -394,7 +418,7 @@ trait OrderTrait
 
     /**
      * Set Hpref
-     * 
+     *
      * @param \Customize\Entity\Hpref|null $h_pref
      * @return mixed
      */
@@ -404,11 +428,11 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Hpref.
-     * 
+     *
      * @param \Customize\Entity\Hpref $h_pref
-     * 
+     *
      * @return Order
      */
     public function getH_pref()
@@ -453,14 +477,14 @@ trait OrderTrait
      */
     public function setUkedate(?\DateTimeInterface $Ukedate)
     {
-        
+
         $this->Ukedate = $Ukedate;
         return $this;
     }
 
     /**
      * Get Ukedate.
-     * 
+     *
      */
     public function getUkedate()
     {
@@ -468,7 +492,7 @@ trait OrderTrait
     }
 
     //ここまで
-    
+
     //ヤマト配送日時Gtter・Setter 2024/09/20 田中　2024/09/25 @paramタグ修正
     /**
      * Set DeliveryTime.
@@ -497,7 +521,7 @@ trait OrderTrait
     /**
      * Set shipping_delivery_date.
      *
-     * @param Eccube/Entity/DeliveryTime|null 
+     * @param Eccube/Entity/DeliveryTime|null
      *
      * @return Order
      */
@@ -510,8 +534,8 @@ trait OrderTrait
 
     /**
      * Get shipping_delivery_date.
-     * 
-     * @return Eccube/Entity/Shipping|null 
+     *
+     * @return Eccube/Entity/Shipping|null
      */
     public function getShipping_delivery_date()
     {
