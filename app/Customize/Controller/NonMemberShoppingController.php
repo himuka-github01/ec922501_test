@@ -407,6 +407,13 @@ class NonMemberShoppingController extends BaseNMSController
 
                 return $this->json(['status' => 'NG'], 400);
             }
+            $visitRepository = $this->entityManager->getRepository(\Customize\Entity\Visit::class);
+            $visit = $visitRepository->findOneBy(['visit_t' => $data['customer_visit_t']]);
+            if (!$visit) {
+                log_info('[非会員お客様情報変更4]入力チェックエラー');
+
+                return $this->json(['status' => 'NG'], 400);
+            }
             //漢字入力時、Nomember.twigでエラーが発生するため不要となった
             //$data['customer_name01'] = $data['customer_kana01'];
             //$data['customer_name02'] = $data['customer_kana02'];
@@ -428,7 +435,7 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setShainFlg($data['customer_shain_flg'])
                 ->setUketori($uketori)
                 ->setShiharai($data['customer_shiharai'])
-                ->setVisit_t($data['customer_visit_t'])
+                ->setVisit_t($visit)
                 -setUkeTenpo($data['customer_uke_tenpo'])
                 ->setHname01($data['customer_h_name1'])
                 ->setHname02($data['customer_h_name2'])
