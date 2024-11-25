@@ -110,7 +110,7 @@ class OrderTypeExtension extends AbstractTypeExtension
                     ]),
                 ],
             ])
-            ->add('ukedate', DateType::class, [
+            ->add('Ukedate', DateType::class, [
                 'widget' => 'single_text',
                 'format' => 'yyyy-MM-dd',
                 'required' => false,
@@ -118,14 +118,14 @@ class OrderTypeExtension extends AbstractTypeExtension
                 // エンティティから取得した日付データを表示
                 //'data' => $order->getUkedate() ?? new \DateTime(),
             ])
-            ->add('visit_t', ChoiceType::class, [
+            ->add('Visit_t', ChoiceType::class, [
                 'choices' => $Visit,
                 'choice_label' => 'visit_t',
                 'required' => false,
                 'expanded' => false,
                 'multiple' => false,
                 'placeholder' => 'common.select__unspecified',
-//                'mapped' => false,
+                'mapped' => false,
             ])
 
              //受け取り方法追加　2024/08/23 田中
