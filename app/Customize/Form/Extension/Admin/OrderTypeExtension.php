@@ -14,6 +14,7 @@
 //namespace Eccube\Form\Type\Admin;
 namespace Customize\Form\Extension\Admin;
 
+use Customize\Repository\VisitRepository;
 use Eccube\Form\Type\Admin\OrderType; // 元のFormType
 
 use Symfony\Component\Form\AbstractTypeExtension;   // これが必要
