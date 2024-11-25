@@ -70,10 +70,6 @@ class OrderTypeExtension extends AbstractTypeExtension
         // $order =
 
         $Visit = $this->visitRepository->findAll();
-        $list = [];
-        foreach($Visit as $item) {
-            $list[$item->getVisitT()] = $item->getVisitT();
-        }
 
         $builder
             ->remove('postal_code')
@@ -123,13 +119,13 @@ class OrderTypeExtension extends AbstractTypeExtension
                 //'data' => $order->getUkedate() ?? new \DateTime(),
             ])
             ->add('VisitT', ChoiceType::class, [
-                'choices' => $list,
+                'choices' => $Visit,
                 'choice_label' => 'visit_t',
                 'required' => false,
                 'expanded' => false,
                 'multiple' => false,
                 'placeholder' => 'common.select__unspecified',
-//                'mapped' => false,
+                'mapped' => false,
             ])
 
              //受け取り方法追加　2024/08/23 田中
