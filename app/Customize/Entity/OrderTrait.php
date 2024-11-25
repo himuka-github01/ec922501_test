@@ -106,6 +106,10 @@ trait OrderTrait
      * @ORM\JoinColumn(name="visit_t", referencedColumnName="visit_t")
      * })
      */
+
+     /**
+      * @ORM\Column(type="string", length=255, nullable=true)
+      */
     private $visit_t;
 
     //県情報プルダウン追加　2024/09/13 田中
