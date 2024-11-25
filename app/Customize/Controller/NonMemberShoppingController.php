@@ -436,7 +436,7 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setUketori($uketori)
                 ->setShiharai($data['customer_shiharai'])
                 ->setVisit_t($visit)
-                -setUkeTenpo($data['customer_uke_tenpo'])
+                ->setUkeTenpo($data['customer_uke_tenpo'])
                 ->setHname01($data['customer_h_name1'])
                 ->setHname02($data['customer_h_name2'])
                 ->setHkana01($data['customer_h_kana1'])
