@@ -118,9 +118,9 @@ class OrderTypeExtension extends AbstractTypeExtension
                 // エンティティから取得した日付データを表示
                 //'data' => $order->getUkedate() ?? new \DateTime(),
             ])
-            ->add('Visit', ChoiceType::class, [
+            ->add('VisitT', ChoiceType::class, [
                 'choices' => $Visit,
-                'choice_label' => 'visit',
+                'choice_label' => 'visit_t',
                 'required' => false,
                 'expanded' => false,
                 'multiple' => false,

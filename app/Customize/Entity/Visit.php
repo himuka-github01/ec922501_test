@@ -56,17 +56,6 @@ class Visit
         return $this;
     }
 
-    public function getVisit() : ?string
-    {
-        return $this->visit_t;
-    }
-    
-    public function setVisit(?string $visit): self
-    {
-        $this->visit_t = $visit;
-
-        return $this;
-    }
     public function getSortNo(): ?int
     {
         return $this->sort_no;
