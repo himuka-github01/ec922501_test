@@ -402,7 +402,7 @@ class NonMemberShoppingController extends BaseNMSController
             }
             $recieveRepository = $this->entityManager->getRepository(\Customize\Entity\Recieve::class);
             $uketori = $recieveRepository->findOneBy(['uketori' => $data['customer_uketori']]);
-            if ($uketori) {
+            if (!$uketori) {
                 log_info('[非会員お客様情報変更3]入力チェックエラー');
 
                 return $this->json(['status' => 'NG'], 400);
