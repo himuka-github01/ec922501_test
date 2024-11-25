@@ -428,7 +428,7 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setShainFlg($data['customer_shain_flg'])
                 ->setUketori($uketori)
                 ->setShiharai($data['customer_shiharai'])
-                ->setVisit($data['customer_visit_t'])
+                ->setVisitT($data['customer_visit_t'])
                 -setUkeTenpo($data['customer_uke_tenpo'])
                 ->setHname01($data['customer_h_name1'])
                 ->setHname02($data['customer_h_name2'])
