@@ -36,6 +36,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType; //2024/11/15 田中
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class OrderTypeExtension extends AbstractTypeExtension
 {
@@ -119,8 +120,7 @@ class OrderTypeExtension extends AbstractTypeExtension
             ])
             ->add('Visit', ChoiceType::class, [
                 'choices' => $Visit,
-                'choice_label' => 'visit_t',
-                'label' => 'front.shopping.delivery_time',
+                'choice_label' => 'visit',
                 'required' => false,
                 'expanded' => false,
                 'multiple' => false,
