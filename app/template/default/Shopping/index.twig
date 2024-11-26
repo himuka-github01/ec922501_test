@@ -16,7 +16,7 @@ file that was distributed with this source code.
     <script>
     //     $(function() {
     //     textShainFlg();
-        
+
     //     var $redirectCallback = function() {
     //         loadingOverlay();
     //         $('#shopping_order_redirect_to').val($(this).attr('data-path'));
@@ -25,7 +25,7 @@ file that was distributed with this source code.
     //             loadingOverlay("hide");
     //         }, 2000);
     //     };
-        
+
     //     $('[data-trigger]').each(function() {
     //         $(this).on($(this).attr('data-trigger'), $redirectCallback);
     //     });
@@ -40,7 +40,7 @@ file that was distributed with this source code.
     //         $(edit).each(function(index) {
     //             var originalValue = $(hidden[index]).val();
     //             var fieldName = $(hidden[index]).attr('name');
-                
+
     //             //社員フラグの場合はチェックボックスを表示
     //             if(fieldName === 'customer_shain_flg') {
     //                 var isChecked = originalValue == 1 ? 'checked' : '';
@@ -61,24 +61,24 @@ file that was distributed with this source code.
     //     //更新確定ボタンクリック時の処理
     //     $('#customer-ok').click(function() {
     //         var postData = {};
-            
+
     //         //フォームの値を収集
     //         $(form).each(function(index) {
     //             var fieldName = $(this).attr('name');
     //             var value;
-                
+
     //             if(fieldName === 'customer_shain_flg') {
     //                 value = $(this).find('input').prop('checked') ? '1' : '0';
     //             } else {
     //                 value = $(this).find('input').val();
     //             }
-                
+
     //             postData[fieldName] = value;
     //             $(hidden[index]).val(value);
     //         });
 
     //         loadingOverlay();
-            
+
     //         //APIリクエストを送信
     //         $.ajax({
     //             url: "{{ url('shopping_customer') }}",
@@ -90,11 +90,11 @@ file that was distributed with this source code.
     //                 //画面の表示を更新
     //                 updateDisplayValues(data);
     //                 updateHiddenValues(data);
-                    
+
     //                 $('.non-customer-display').show();
     //                 $('.non-customer-edit').hide();
     //                 $('.mod-button').hide();
-                    
+
     //                 textShainFlg();
     //             } else {
     //                 alert('更新に失敗しました: ' + (data.message || '不明なエラー'));
@@ -124,7 +124,7 @@ file that was distributed with this source code.
     //         'h_name1', 'h_name2', 'h_kana1', 'h_kana2',
     //         'postal_code', 'addr01', 'addr02', 'phone_number'
     //     ];
-        
+
     //     displayFields.forEach((field, index) => {
     //         if (data[field] !== undefined) {
     //             $(`.customer-edit:eq(${index})`).text(data[field]);
@@ -140,7 +140,7 @@ file that was distributed with this source code.
     //         'h_name1', 'h_name2', 'h_kana1', 'h_kana2',
     //         'postal_code', 'addr01', 'addr02', 'phone_number'
     //     ];
-        
+
     //     hiddenFields.forEach(field => {
     //         if (data[field] !== undefined) {
     //             $(`#customer-${field}`).val(data[field]);
@@ -152,10 +152,10 @@ file that was distributed with this source code.
     // function textShainFlg() {
     //     const customerShainFlg = $('#customer-shain_flg').val();
     //     $('#customer-shain').text(customerShainFlg == 1 ? '社員' : '一般');
-    // } 
+    // }
             $(function() {
             textShainFlg();
-            
+
             var $redirectCallback = function() {
                 loadingOverlay();
                 $('#shopping_order_redirect_to').val($(this).attr('data-path'));
@@ -164,7 +164,7 @@ file that was distributed with this source code.
                     loadingOverlay("hide");
                 }, 2000);
             };
-            
+
             $('[data-trigger]').each(function() {
                 $(this).on($(this).attr('data-trigger'), $redirectCallback);
             });
@@ -235,7 +235,7 @@ file that was distributed with this source code.
 
                 if (data.status == 'OK') {
                     // 画面の表示を更新
-                    updateDisplayValues(data); 
+                    updateDisplayValues(data);
                     updateHiddenValues(data);
                     $(form).each(function(index) {
                         $(edit[index]).empty().text($(form[index]).children('input').val());
@@ -314,14 +314,14 @@ file that was distributed with this source code.
             const customerShainFlg = $('#customer-shain_flg').val();
             $('#customer-shain').text(customerShainFlg == 1 ? '社員' : '一般');
         }
-        
+
          //お引き渡し情報　お引き渡し日バリデーション無効化 2024/11/19
          $(function() {
-    
+
                 $('#form-control').submit(function(e) {
                     // お引き渡し日の必須チェックを削除
                     $('#shopping_order_Shippings_0_shipping_delivery_date').removeAttribute('require');
-                    
+
                     return true; // フォームの送信を許可
                 });
                 console.log('require削除');
@@ -332,12 +332,12 @@ file that was distributed with this source code.
                     $('.ec-errorMessage').filter(function() {
                         return $(this).text().includes('お引き渡し日');
                     }).remove();
-                    
+
                     //フォームの送信を許可
                     return true;
                 });
             });
-        
+
     </script>
 
     <style>
@@ -411,7 +411,7 @@ file that was distributed with this source code.
                     </div>
                     {% if is_granted('ROLE_USER') == false %}
                         <div class="ec-orderAccount__change non-customer-display">
-                            <button id="customer" class="ec-inlineBtn" type="button">{{ '変更'|trans }}</button>
+{#                            <button id="customer" class="ec-inlineBtn" type="button">{{ '変更'|trans }}</button>#}
                         </div>
                     {% endif %}
                     <div class="ec-orderAccount__account non-customer-display">
@@ -501,7 +501,7 @@ file that was distributed with this source code.
                                     </div>
                                 </dd>
                             </dl>
-                          <dl>  
+                          <dl>
                             <dt>
                                 <label class="ec-label">{{ '来店受取日'|trans }}</label>
                                 <span class="ec-required">{{ '必須'|trans }}</span>

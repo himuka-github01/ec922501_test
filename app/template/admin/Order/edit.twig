@@ -362,9 +362,9 @@ file that was distributed with this source code.
                                         <div class="row mb-3 form-group">
                                             <label class="col-3 col-form-label">{{ 'admin.common.visit'|trans }}</label>
                                             <div class="col">
-                                                {{ form_widget(form.VisitT) }}
+{#                                                {{ form_widget(form.VisitT) }}#}
 {#                                                {{ form_errors(form.VisitT) }}#}
-                                                <span class="customer-edit customer-visit_t"><p>{{ Order.visit_t }}</p></span>
+                                                <span class="customer-edit customer-visit_t">{{ Order.visit_t }}</span>
 {#                                                {{ block _admin_order_VisitT_widget }}#}
 {#                                                    {{ spaceless }}#}
 {#                                                <select id="order_VisitT" name="order[VisitT]" class="form-control">#}
