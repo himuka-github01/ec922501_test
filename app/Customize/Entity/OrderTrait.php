@@ -791,6 +791,90 @@ trait OrderTrait
         }
         return null;
     }
+
+    public function getHName1()
+    {
+        return $this->h_name1;
+    }
+    public function setHName1(?string $h_name1): self
+    {
+        $this->h_name1 = $h_name1;
+        return $this;
+    }
+    public function getHName2()
+    {
+        return $this->h_name2;
+    }
+    public function setHName2(?string $h_name2): self
+    {
+        $this->h_name2 = $h_name2;
+        return $this;
+    }
+    public function getHKana1()
+    {
+        return $this->h_kana1;
+    }
+    public function setHKana1(?string $h_kana1): self
+    {
+        $this->h_kana1 = $h_kana1;
+        return $this;
+    }
+    public function getHKana2()
+    {
+        return $this->h_kana2;
+    }
+    public function setHKana2(?string $h_kana2): self
+    {
+        $this->h_kana2 = $h_kana2;
+        return $this;
+    }
+    public function getHPostalCode()
+    {
+        return $this->h_postal_code;
+    }
+    public function setHPostalCode(?int $h_postal_code): self
+    {
+        $this->h_postal_code = $h_postal_code;
+        return $this;
+    }
+    public function setHPref(\Customize\Entity\Hpref $h_pref): self
+    {
+        $this->h_pref = $h_pref;
+        return $this;
+    }
+    public function getHPref()
+    {
+        return $this->h_pref;
+    }
+
+    public function getHAddr1()
+    {
+        return $this->h_addr1;
+    }
+    public function setHAddr1(?string $h_addr1): self
+    {
+        $this->h_addr1 = $h_addr1;
+        return $this;
+    }
+    public function getHAddr2()
+    {
+        return $this->h_addr2;
+    }
+    public function setHAddr2(?string $h_addr2): self
+    {
+        $this->h_addr2 = $h_addr2;
+        return $this;
+    }
+    public function getHPhoneNumber()
+    {
+        return $this->h_phone_number;
+    }
+    public function setHPhoneNumber(?string $h_phone_number): self
+    {
+        $this->h_phone_number = $h_phone_number;
+        return $this;
+    }
+
     /**
      * 同一商品の注文総数を取得
      * @param \Eccube\Entity\OrderItem|null $orderItem
