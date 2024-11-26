@@ -421,6 +421,12 @@ class NonMemberShoppingController extends BaseNMSController
 //
 //                return $this->json(['status' => 'NG'], 400);
 //            }
+//            $Hpref = $this->prefRepository->findOneBy(['name' => $data['customer_h_pref']]);
+//            if (!$Hpref) {
+//                log_info('[非会員お客様情報変更5]入力チェックエラー');
+//
+//                return $this->json(['status' => 'NG'], 400);
+//            }
             //漢字入力時、Nomember.twigでエラーが発生するため不要となった
             //$data['customer_name01'] = $data['customer_kana01'];
             //$data['customer_name02'] = $data['customer_kana02'];
@@ -444,13 +450,13 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setShiharai($data['customer_shiharai'])
                 ->setVisit_t($visit)
 //                ->setUkeTenpo($tenpo)
-                ->setHname01($data['customer_h_name1'])
-                ->setHname02($data['customer_h_name2'])
-                ->setHkana01($data['customer_h_kana1'])
-                ->setHkana02($data['customer_h_kana2'])
+                ->setH_name1($data['customer_h_name1'])
+                ->setH_name2($data['customer_h_name2'])
+                ->setH_kana1($data['customer_h_kana1'])
+                ->setH_kana2($data['customer_h_kana2'])
                 ->setH_phone_number($data['customer_h_phone_number'])
                 ->setH_postal_code($data['customer_h_postal_code'])
-                ->setHPref($data['customer_h_pref'])
+//                ->setH_pref($Hpref)
                 ->setH_addr1($data['customer_h_addr1'])
                 ->setH_addr2($data['customer_h_addr2'])
                 ->setUkeDate($data['customer_UkeDate'])
