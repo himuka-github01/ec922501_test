@@ -369,7 +369,7 @@ file that was distributed with this source code.
                                                 <select id="order_VisitT" name="order[VisitT]" class="form-control">
                                                     <option value="">指定なし</option>
                                                     {{ for choice in choices }}
-                                                    <option value="{{ choice.value }}" id="order_VisitT_{{ loop.index }}"{{ if choice.label is value) }} selected="selected"{{ endif }}>
+                                                    <option value="{{ choice.value }}" id="order_VisitT_{{ loop.index }}"{{ if choice.label is value }} selected="selected"{{ endif }}>
                                                         {{ choice.label }}
                                                     </option>
                                                     {{ endfor }}
