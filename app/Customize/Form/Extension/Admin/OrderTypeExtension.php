@@ -70,6 +70,10 @@ class OrderTypeExtension extends AbstractTypeExtension
         // $order =
 
         $Visit = $this->visitRepository->findAll();
+        $list = [];
+        foreach($Visit as $item) {
+            $list[$item->getVisitT()] = $item->getVisitT();
+        }
 
         $builder
             ->remove('postal_code')
@@ -119,7 +123,7 @@ class OrderTypeExtension extends AbstractTypeExtension
                 //'data' => $order->getUkedate() ?? new \DateTime(),
             ])
             ->add('VisitT', ChoiceType::class, [
-                'choices' => $Visit,
+                'choices' => $list,
                 'choice_label' => 'visit_t',
                 'required' => false,
                 'expanded' => false,
