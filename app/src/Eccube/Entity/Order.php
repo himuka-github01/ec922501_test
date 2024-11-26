@@ -42,8 +42,7 @@ if (!class_exists('\Eccube\Entity\Order')) {
     class Order extends \Eccube\Entity\AbstractEntity implements PurchaseInterface, ItemHolderInterface
     {
         use NameTrait, PointTrait;
-        use \Customize\Entity\OrderTrait;
-        
+
         /**
          * 課税対象の明細を返す.
          *
