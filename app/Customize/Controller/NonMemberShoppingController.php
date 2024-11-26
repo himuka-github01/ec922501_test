@@ -459,7 +459,7 @@ class NonMemberShoppingController extends BaseNMSController
 //                ->setH_pref($Hpref)
 //                ->setH_addr1($data['customer_h_addr1'])
 //                ->setH_addr2($data['customer_h_addr2'])
-                ->setUkeDate($data['customer_UkeDate'])
+//                ->setUkeDate($data['customer_UkeDate'])
 //                ->setDeliveryTime($data['customer_deliverytime'])
 //                ->setShipping_delivery_date($data['shipping_delivery_date'])
                 ;
