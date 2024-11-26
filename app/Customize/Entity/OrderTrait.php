@@ -352,7 +352,7 @@ trait OrderTrait
      * @param \Customize\Entity\Tenpos|null $uke_tenpo
      * @return $this
      */
-    public function setUkeTenpo(\Customize\Entity\Tenpos $uke_tenpo = null)
+    public function setTenpos(\Customize\Entity\Tenpos $uke_tenpo = null)
     {
         $this->uke_tenpo = $uke_tenpo;
         return $this;
@@ -363,11 +363,33 @@ trait OrderTrait
     *
     * @return \Customize\Entity\Tenpos|null
     */
-    public function getUkeTenpo()
+    public function getTenpos()
     {
         return $this->uke_tenpo;
     }
     //受付店鋪ここまで
+
+    /**
+     * Set UkeTenpo
+     *
+     * @param \Customize\Entity\Tenpos|null $uke_tenpo
+     * @return $this
+     */
+    public function setUkeTenpo(\Customize\Entity\Tenpos $uke_tenpo = null)
+    {
+        $this->uke_tenpo = $uke_tenpo;
+        return $this;
+    }
+
+    /**
+     * Get UkeTenpo.
+     *
+     * @return \Customize\Entity\Tenpos|null
+     */
+    public function getUkeTenpo()
+    {
+        return $this->uke_tenpo;
+    }
 
     //配送先住所追加　2024/09/11 修正　2024/09/13 田中
     public function getH_name1()
