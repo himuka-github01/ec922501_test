@@ -352,7 +352,7 @@ trait OrderTrait
      * @param \Customize\Entity\Tenpos|null $uke_tenpo
      * @return $this
      */
-    public function setTenpos(\Customize\Entity\Tenpos $uke_tenpo = null)
+    public function setUkeTenpo(\Customize\Entity\Tenpos $uke_tenpo = null)
     {
         $this->uke_tenpo = $uke_tenpo;
         return $this;
@@ -363,7 +363,7 @@ trait OrderTrait
     *
     * @return \Customize\Entity\Tenpos|null
     */
-    public function getTenpos()
+    public function getUkeTenpo()
     {
         return $this->uke_tenpo;
     }
