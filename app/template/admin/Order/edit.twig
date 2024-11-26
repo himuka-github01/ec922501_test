@@ -15,7 +15,7 @@ file that was distributed with this source code.
 {% block title %}{{ 'admin.order.order_registration'|trans }}{% endblock %}
 {% block sub_title %}{{ 'admin.order.order_management'|trans }}{% endblock %}
 
-{% form_theme form '@admin/Form/bootstrap_4_horizontal_layout.html.twig' %}
+{% form_theme form '@admin/Form/bootstrap_4_horizontal_layout.html.twig', 'Order/edit.twig' %}
 {% form_theme searchCustomerModalForm '@admin/Form/bootstrap_4_horizontal_layout.html.twig' %}
 {% form_theme searchProductModalForm '@admin/Form/bootstrap_4_horizontal_layout.html.twig' %}
 
@@ -363,7 +363,19 @@ file that was distributed with this source code.
                                             <label class="col-3 col-form-label">{{ 'admin.common.visit'|trans }}</label>
                                             <div class="col">
                                                 {{ form_widget(form.VisitT) }}
-                                                {{ form_errors(form.VisitT) }}
+{#                                                {{ form_errors(form.VisitT) }}#}
+                                                {{ block _order_VisitT_widget }}
+                                                    {{ spaceless }}
+                                                <select id="order_VisitT" name="order[VisitT]" class="form-control">
+                                                    <option value="">指定なし</option>
+                                                    {{ for choice in choices }}
+                                                    <option value="{{ choice.value }}" id="order_VisitT_{{ loop.index }}"{{ if choice.label is value) }} selected="selected"{{ endif }}>
+                                                        {{ choice.label }}
+                                                    </option>
+                                                    {{ endfor }}
+                                                </select>
+                                                    {{ endspaceless }}
+                                                {{ endblock _order_VisitT_widget }}
                                             </div>
                                         </div>
                                         <div class="row mb-3 form-group">
