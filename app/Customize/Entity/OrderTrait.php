@@ -71,7 +71,7 @@ trait OrderTrait
      */
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="uke_tenpo", type="string", length=255, nullable=true)
      */
     private $uke_tenpo;
 
@@ -123,7 +123,7 @@ trait OrderTrait
      */
 
      /**
-      * @ORM\Column(type="string", length=255, nullable=true)
+      * @ORM\Column(name="h_pref", type="string", length=255, nullable=true)
       */
     private $h_pref;
 
@@ -168,35 +168,35 @@ trait OrderTrait
     private $receipt_no;
     //配送先追加項目　2024/09/11 田中
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_name1", type="string", length=20, nullable=true)
     */
     private $h_name1;
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_name2", type="string", length=20, nullable=true)
     */
     private $h_name2;
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_kana1", type="string", length=20, nullable=true)
     */
     private $h_kana1;
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_kana2", type="string", length=20, nullable=true)
     */
     private $h_kana2;
     /**
-    * @ORM\Column(type="integer", length=7, nullable=true)
+    * @ORM\Column(name="h_postal_code", type="integer", length=7, nullable=true)
     */
     private $h_postal_code;
     /**
-    * @ORM\Column(type="string", length=25, nullable=true)
+    * @ORM\Column(name="h_addr1", type="string", length=25, nullable=true)
     */
     private $h_addr1;
     /**
-    * @ORM\Column(type="string", length=25, nullable=true)
+    * @ORM\Column(name="h_addr2", type="string", length=25, nullable=true)
     */
     private $h_addr2;
     /**
-    * @ORM\Column(type="string", length=14, nullable=true)
+    * @ORM\Column(name="h_phone_number", type="string", length=14, nullable=true)
     */
     private $h_phone_number;
     //ここまで
