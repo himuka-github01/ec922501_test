@@ -414,13 +414,13 @@ class NonMemberShoppingController extends BaseNMSController
 
                 return $this->json(['status' => 'NG'], 400);
             }
-            $tenpoRepository = $this->entityManager->getRepository(\Customize\Entity\HdnTenpo::class);
-            $tenpo = $tenpoRepository->findOneBy(['uke_tenpo' => $data['customer_tenpos']]);
-            if (!$tenpo) {
-                log_info('[非会員お客様情報変更4]入力チェックエラー');
-
-                return $this->json(['status' => 'NG'], 400);
-            }
+//            $tenpoRepository = $this->entityManager->getRepository(\Customize\Entity\HdnTenpo::class);
+//            $tenpo = $tenpoRepository->findOneBy(['uke_tenpo' => $data['customer_tenpos']]);
+//            if (!$tenpo) {
+//                log_info('[非会員お客様情報変更4]入力チェックエラー');
+//
+//                return $this->json(['status' => 'NG'], 400);
+//            }
             //漢字入力時、Nomember.twigでエラーが発生するため不要となった
             //$data['customer_name01'] = $data['customer_kana01'];
             //$data['customer_name02'] = $data['customer_kana02'];
@@ -443,7 +443,7 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setUketori($uketori)
                 ->setShiharai($data['customer_shiharai'])
                 ->setVisit_t($visit)
-                ->setUkeTenpo($tenpo)
+//                ->setUkeTenpo($tenpo)
                 ->setHname01($data['customer_h_name1'])
                 ->setHname02($data['customer_h_name2'])
                 ->setHkana01($data['customer_h_kana1'])
