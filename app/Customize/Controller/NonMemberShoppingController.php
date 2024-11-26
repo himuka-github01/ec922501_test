@@ -450,18 +450,19 @@ class NonMemberShoppingController extends BaseNMSController
                 ->setShiharai($data['customer_shiharai'])
                 ->setVisit_t($visit)
 //                ->setUkeTenpo($tenpo)
-                ->setH_name1($data['customer_h_name1'])
-                ->setH_name2($data['customer_h_name2'])
-                ->setH_kana1($data['customer_h_kana1'])
-                ->setH_kana2($data['customer_h_kana2'])
-                ->setH_phone_number($data['customer_h_phone_number'])
-                ->setH_postal_code($data['customer_h_postal_code'])
+//                ->setH_name1($data['customer_h_name1'])
+//                ->setH_name2($data['customer_h_name2'])
+//                ->setH_kana1($data['customer_h_kana1'])
+//                ->setH_kana2($data['customer_h_kana2'])
+//                ->setH_phone_number($data['customer_h_phone_number'])
+//                ->setH_postal_code($data['customer_h_postal_code'])
 //                ->setH_pref($Hpref)
-                ->setH_addr1($data['customer_h_addr1'])
-                ->setH_addr2($data['customer_h_addr2'])
+//                ->setH_addr1($data['customer_h_addr1'])
+//                ->setH_addr2($data['customer_h_addr2'])
                 ->setUkeDate($data['customer_UkeDate'])
-                ->setDeliveryTime($data['customer_deliverytime'])
-                ->setShipping_delivery_date($data['shipping_delivery_date']);
+//                ->setDeliveryTime($data['customer_deliverytime'])
+//                ->setShipping_delivery_date($data['shipping_delivery_date'])
+                ;
 
                 //var_dump('[dump]',$Order);
                 $this->entityManager->flush();
