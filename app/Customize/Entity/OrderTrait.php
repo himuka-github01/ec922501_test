@@ -202,9 +202,9 @@ trait OrderTrait
     //ここまで
     //受取来店日追加　2024/09/19 田中
     /**
-     * @ORM\Column(name="ukedate", type="datetime", nullable=true)
+     * @ORM\Column(name="Ukedate", type="datetime", nullable=true)
      */
-    private $ukedate;
+    private $Ukedate;
 
     //OrderTableにヤマト配送日時追加　2024/09/20 田中
     /**
