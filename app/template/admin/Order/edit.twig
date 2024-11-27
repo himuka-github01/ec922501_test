@@ -360,6 +360,26 @@ file that was distributed with this source code.
                                             </div>
                                         </div>
                                         <div class="row mb-3 form-group">
+                                            <label class="col-3 col-form-label">{{ 'admin.common.visit'|trans }}</label>
+                                            <div class="col">
+{#                                                {{ form_widget(form.VisitT) }}#}
+{#                                                {{ form_errors(form.VisitT) }}#}
+                                                <span class="customer-edit customer-visit_t">{{ Order.visit_t }}</span>
+{#                                                {{ block _admin_order_VisitT_widget }}#}
+{#                                                    {{ spaceless }}#}
+{#                                                <select id="order_VisitT" name="order[VisitT]" class="form-control">#}
+{#                                                    <option value="">指定なし</option>#}
+{#                                                    {{ for choice in choices }}#}
+{#                                                    <option value="{{ choice.value }}" id="order_VisitT_{{ loop.index }}"{{ if choice.label is value }} selected="selected"{{ endif }}>#}
+{#                                                        {{ choice.label }}#}
+{#                                                    </option>#}
+{#                                                    {{ endfor }}#}
+{#                                                </select>#}
+{#                                                    {{ endspaceless }}#}
+{#                                                {{ endblock _admin_order_VisitT_widget }}#}
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3 form-group">
                                             <label class="col-3 col-form-label">{{ 'admin.common.payment_method'|trans }}</label>
                                             <div class="col">
                                                 {{ form_widget(form.Payment) }}
@@ -570,7 +590,7 @@ file that was distributed with this source code.
                                                         <label class="col-3 col-form-label">お問い合わせ</label>
                                                     <div class="col">
                                                         <textarea id="order_message" name="order[message]" rows="8" cols="8" class="form-control"> {{ Order.message }}</textarea>
-                                                       
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -890,7 +910,7 @@ file that was distributed with this source code.
                                                         {{ form_widget(orderItemForm.quantity) }}
                                                     {% endif %}
                                                     {{ form_errors(orderItemForm.quantity) }}
-                                          
+
                                                 </div>
                                             </td>
                                             <!-- 税率 -->

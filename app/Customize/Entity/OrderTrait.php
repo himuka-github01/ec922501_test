@@ -71,7 +71,7 @@ trait OrderTrait
      */
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="uke_tenpo", type="string", length=255, nullable=true)
      */
     private $uke_tenpo;
 
@@ -123,7 +123,7 @@ trait OrderTrait
      */
 
      /**
-      * @ORM\Column(type="string", length=255, nullable=true)
+      * @ORM\Column(name="h_pref", type="string", length=255, nullable=true)
       */
     private $h_pref;
 
@@ -168,35 +168,35 @@ trait OrderTrait
     private $receipt_no;
     //配送先追加項目　2024/09/11 田中
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_name1", type="string", length=20, nullable=true)
     */
     private $h_name1;
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_name2", type="string", length=20, nullable=true)
     */
     private $h_name2;
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_kana1", type="string", length=20, nullable=true)
     */
     private $h_kana1;
     /**
-    * @ORM\Column(type="string", length=20, nullable=true)
+    * @ORM\Column(name="h_kana2", type="string", length=20, nullable=true)
     */
     private $h_kana2;
     /**
-    * @ORM\Column(type="integer", length=7, nullable=true)
+    * @ORM\Column(name="h_postal_code", type="integer", length=7, nullable=true)
     */
     private $h_postal_code;
     /**
-    * @ORM\Column(type="string", length=25, nullable=true)
+    * @ORM\Column(name="h_addr1", type="string", length=25, nullable=true)
     */
     private $h_addr1;
     /**
-    * @ORM\Column(type="string", length=25, nullable=true)
+    * @ORM\Column(name="h_addr2", type="string", length=25, nullable=true)
     */
     private $h_addr2;
     /**
-    * @ORM\Column(type="string", length=14, nullable=true)
+    * @ORM\Column(name="h_phone_number", type="string", length=14, nullable=true)
     */
     private $h_phone_number;
     //ここまで
@@ -261,11 +261,11 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Uketori.
-     * 
+     *
      * @param \Customize\Entity\Recieve|null $uketori
-     * 
+     *
      * @return Order
      */
     public function getUketori()
@@ -277,7 +277,7 @@ trait OrderTrait
     //支払い状況追加　2024/09/02 田中
     /**
      * Set Shiharai
-     * 
+     *
      */
     public function setShiharai( $shiharai): self
     {
@@ -285,9 +285,9 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Shiharai.
-     * 
+     *
      */
     public function getShiharai()
     {
@@ -298,7 +298,7 @@ trait OrderTrait
     //来店時間追加　2024/09/09 田中
     /**
      * Summary of setVisit
-     * 
+     *
      * @param \Customize\Entity\Visit|null $visit_t
      * @return mixed
      */
@@ -308,11 +308,11 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Visit.
-     * 
+     *
      * @param \Customize\Entity\Visit $visit_t
-     * 
+     *
      * @return Order
      */
     public function getVisit_t()
@@ -321,10 +321,34 @@ trait OrderTrait
     }
     //来店時間ここまで
 
+    /**
+     * Summary of setVisit
+     *
+     * @param \Customize\Entity\Visit|null $visit_t
+     * @return mixed
+     */
+    public function setVisitT(\Customize\Entity\Visit $visit_t): self
+    {
+        $this->visit_t = $visit_t;
+        return $this;
+    }
+    /**
+     *
+     * Get Visit.
+     *
+     * @param \Customize\Entity\Visit $visit_t
+     *
+     * @return Order
+     */
+    public function getVisitT()
+    {
+        return $this->visit_t;
+    }
+
     //受付店鋪追加　2024/09/10 田中
     /**
      * Set Tenpos.
-     * 
+     *
      * @param \Customize\Entity\Tenpos|null $uke_tenpo
      * @return $this
      */
@@ -336,7 +360,7 @@ trait OrderTrait
 
     /**
     * Get Tenpos.
-    * 
+    *
     * @return \Customize\Entity\Tenpos|null
     */
     public function getTenpos()
@@ -344,6 +368,28 @@ trait OrderTrait
         return $this->uke_tenpo;
     }
     //受付店鋪ここまで
+
+    /**
+     * Set UkeTenpo
+     *
+     * @param \Customize\Entity\Tenpos|null $uke_tenpo
+     * @return $this
+     */
+    public function setUkeTenpo(\Customize\Entity\Tenpos $uke_tenpo = null)
+    {
+        $this->uke_tenpo = $uke_tenpo;
+        return $this;
+    }
+
+    /**
+     * Get UkeTenpo.
+     *
+     * @return \Customize\Entity\Tenpos|null
+     */
+    public function getUkeTenpo()
+    {
+        return $this->uke_tenpo;
+    }
 
     //配送先住所追加　2024/09/11 修正　2024/09/13 田中
     public function getH_name1()
@@ -394,7 +440,7 @@ trait OrderTrait
 
     /**
      * Set Hpref
-     * 
+     *
      * @param \Customize\Entity\Hpref|null $h_pref
      * @return mixed
      */
@@ -404,11 +450,11 @@ trait OrderTrait
         return $this;
     }
     /**
-     * 
+     *
      * Get Hpref.
-     * 
+     *
      * @param \Customize\Entity\Hpref $h_pref
-     * 
+     *
      * @return Order
      */
     public function getH_pref()
@@ -453,14 +499,14 @@ trait OrderTrait
      */
     public function setUkedate(?\DateTimeInterface $Ukedate)
     {
-        
+
         $this->Ukedate = $Ukedate;
         return $this;
     }
 
     /**
      * Get Ukedate.
-     * 
+     *
      */
     public function getUkedate()
     {
@@ -468,7 +514,7 @@ trait OrderTrait
     }
 
     //ここまで
-    
+
     //ヤマト配送日時Gtter・Setter 2024/09/20 田中　2024/09/25 @paramタグ修正
     /**
      * Set DeliveryTime.
@@ -497,7 +543,7 @@ trait OrderTrait
     /**
      * Set shipping_delivery_date.
      *
-     * @param Eccube/Entity/DeliveryTime|null 
+     * @param Eccube/Entity/DeliveryTime|null
      *
      * @return Order
      */
@@ -510,8 +556,8 @@ trait OrderTrait
 
     /**
      * Get shipping_delivery_date.
-     * 
-     * @return Eccube/Entity/Shipping|null 
+     *
+     * @return Eccube/Entity/Shipping|null
      */
     public function getShipping_delivery_date()
     {
@@ -745,6 +791,90 @@ trait OrderTrait
         }
         return null;
     }
+
+    public function getHName1()
+    {
+        return $this->h_name1;
+    }
+    public function setHName1(?string $h_name1): self
+    {
+        $this->h_name1 = $h_name1;
+        return $this;
+    }
+    public function getHName2()
+    {
+        return $this->h_name2;
+    }
+    public function setHName2(?string $h_name2): self
+    {
+        $this->h_name2 = $h_name2;
+        return $this;
+    }
+    public function getHKana1()
+    {
+        return $this->h_kana1;
+    }
+    public function setHKana1(?string $h_kana1): self
+    {
+        $this->h_kana1 = $h_kana1;
+        return $this;
+    }
+    public function getHKana2()
+    {
+        return $this->h_kana2;
+    }
+    public function setHKana2(?string $h_kana2): self
+    {
+        $this->h_kana2 = $h_kana2;
+        return $this;
+    }
+    public function getHPostalCode()
+    {
+        return $this->h_postal_code;
+    }
+    public function setHPostalCode(?int $h_postal_code): self
+    {
+        $this->h_postal_code = $h_postal_code;
+        return $this;
+    }
+    public function setHPref(\Customize\Entity\Hpref $h_pref): self
+    {
+        $this->h_pref = $h_pref;
+        return $this;
+    }
+    public function getHPref()
+    {
+        return $this->h_pref;
+    }
+
+    public function getHAddr1()
+    {
+        return $this->h_addr1;
+    }
+    public function setHAddr1(?string $h_addr1): self
+    {
+        $this->h_addr1 = $h_addr1;
+        return $this;
+    }
+    public function getHAddr2()
+    {
+        return $this->h_addr2;
+    }
+    public function setHAddr2(?string $h_addr2): self
+    {
+        $this->h_addr2 = $h_addr2;
+        return $this;
+    }
+    public function getHPhoneNumber()
+    {
+        return $this->h_phone_number;
+    }
+    public function setHPhoneNumber(?string $h_phone_number): self
+    {
+        $this->h_phone_number = $h_phone_number;
+        return $this;
+    }
+
     /**
      * 同一商品の注文総数を取得
      * @param \Eccube\Entity\OrderItem|null $orderItem
