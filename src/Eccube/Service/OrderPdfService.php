@@ -796,12 +796,18 @@ class OrderPdfService extends TcpdfFpdi
         $this->lfText($x , $y+$height*6.6, '受付店鋪', 10);
         $this->lfText($x2, $y+$height*6.6, $Order->getTenpos(), 10);
 
-        // お引渡し日 2024/10/11 参照テーブル修正
+        //お引渡し日の処理 田中　2024/11/28
         $ukedate = $Order->getUkedate();
-        if($ukedate !== null ){
+        if($ukedate !== null ) {
             $owatashiDate = $ukedate->format('Y年m月d日');
-        }else{
-            $owatashiDate = '日付未設定';
+        } else {
+            // ヤマト配送用の処理
+            $shippingDeliveryDate = $Shipping->getShippingDeliveryDate();
+            if ($shippingDeliveryDate !== null) {
+                $owatashiDate = $shippingDeliveryDate->format('Y年m月d日');
+            } else {
+                $owatashiDate = '未指定';
+            }
         }
 
         //$owatashiDate .= '（'.$Shipping->getShippingDeliveryTime().'頃）';
