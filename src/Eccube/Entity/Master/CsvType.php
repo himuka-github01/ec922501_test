@@ -57,5 +57,6 @@ if (!class_exists(CsvType::class, false)) {
          * @var integer
          */
         const CSV_TYPE_PRODUCT_FOR_IMPORT = 6;
+
     }
 }

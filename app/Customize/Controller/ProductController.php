@@ -241,6 +241,13 @@ class ProductController extends BaseProductController
         // 2)-4 商品毎受渡日別受注状況をワーク配列にセット
         $wOrders = [];
         foreach ($sumOrdersByTenpo as $sumOrder) {
+            if (!isset($sumOrder['shipping_delivery_date']) || !($sumOrder['shipping_delivery_date'] instanceof DateTime)) {
+                continue;
+            }//nullチェック
+            if (!isset($sumOrder['product_id']) || !isset($sumOrder['quantity'])) {
+                echo "Missing product_id or quantity\n";
+                continue;
+            }
             $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
             $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
         }
@@ -277,7 +284,17 @@ class ProductController extends BaseProductController
         log_info('[商品一覧]受注実績(全店):',$sumOrdersAllTenpo);
 
         // 3)-3 商品毎受渡日別受注状況をワーク配列にセット
+        $wOrders = [];
         foreach ($sumOrdersAllTenpo as $sumOrder) {
+            // shipping_delivery_dateがDateTimeオブジェクトであることを確認
+            if (!isset($sumOrder['shipping_delivery_date']) || !($sumOrder['shipping_delivery_date'] instanceof DateTime)) {
+                continue;
+            }
+            // product_idとquantityが存在することを確認
+            if (!isset($sumOrder['product_id']) || !isset($sumOrder['quantity'])) {
+                echo "Missing product_id or quantity\n";
+                continue;
+            }
             $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
             $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
         }

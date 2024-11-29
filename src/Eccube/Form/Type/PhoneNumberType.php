@@ -78,6 +78,7 @@ class PhoneNumberType extends AbstractType
 
         $resolver->setDefaults([
             'options' => ['constraints' => []],
+            'label' => false,
             'constraints' => $constraints,
             'attr' => [
                 'placeholder' => 'common.phone_number_sample',

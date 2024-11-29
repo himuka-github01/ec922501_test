@@ -42,7 +42,6 @@ file that was distributed with this source code.
 会社名：{{ Order.company_name }}
 {% endif %}
 郵便番号：〒{{ Order.postal_code }}
-住所：{{ Order.Pref.name }}{{ Order.addr01 }}{{ Order.addr02 }}
 電話番号：{{ Order.phone_number }}
 
 ************************************************
@@ -55,7 +54,6 @@ file that was distributed with this source code.
 会社名：{{ Shipping.company_name }}
 {% endif %}
 郵便番号：〒{{ Shipping.postal_code }}
-住所：{{ Shipping.Pref.name }}{{ Shipping.addr01 }}{{ Shipping.addr02 }}
 電話番号：{{ Shipping.phone_number }}
 
 お届け日：{{ Shipping.shipping_delivery_date is empty ? '指定なし' : Shipping.shipping_delivery_date|date_day }}

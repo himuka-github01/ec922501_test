@@ -11,8 +11,12 @@ file that was distributed with this source code.
 {% extends 'default_frame.twig' %}
 
 {% form_theme form 'Form/form_div_layout.twig' %}
+{% block javascript %}
+
+{% endblock javascript %}
 
 {% block main %}
+
 
 <style>
     dl.hiddenItem {
@@ -78,21 +82,37 @@ file that was distributed with this source code.
                     <h2>{{ 'お客様情報'|trans }}</h2>
                 </div>
                 <div class="ec-orderAccount__account">
-                    <p class="ec-halfInput hiddenItem">{{ ''|trans }}{{ Order.name01 }} {{ Order.name02 }}</span>{{ ' 様'|trans }}</p>
-                    <p class="ec-halfInput">お名前（カナ）：{{ Order.kana01 }}</span> {{ Order.kana02 }}{{ ' 様'|trans }}</p>
+                    <p class="ec-halfInput">お名前（漢字）：{{ Order.name01 }}&emsp;{{ Order.name02 }}{{ ' 様'|trans }}</p>
+                    <p class="ec-halfInput">お名前（カナ）：{{ Order.kana01 }}&emsp;{{ Order.kana02 }}{{ ' 様'|trans }}</p>
                     <p class="ec-input hiddenItem">{{ Order.companyName }}</span></p>
                 {% if eccube_config.hdn_delivery_address_use %}
                     <p class="ec-zipInput">郵　便　番　号：{{ Order.postal_code }}</p>
-                    <p class="ec-input">住　　　　　所：{{ Order.pref }}{{ Order.addr01 }}{{ Order.addr02 }}</p>
+                    <p class="ec-input">住　　　　　所：{{ Order.addr01 }}&emsp;{{ Order.addr02 }}</p>
                 {% else %}
                     <p class="ec-zipInput hiddenItem">{{ '〒'|trans }}{{ Order.postal_code }}</p>
-                    <p class="ec-input hiddenItem">{{ Order.pref }}{{ Order.addr01 }}{{ Order.addr02 }}</p>
+                    <p class="ec-input hiddenItem">{{ Order.pref }}&emsp;{{ Order.addr01 }}&emsp;{{ Order.addr02 }}</p>
                 {% endif %}
-                    <p class="ec-telInput">電　話　番　号：{{ Order.phone_number }}</span></p>
-                    <p class="ec-input hiddenItem">{{ Order.email }}</span></p>
-                    <p class="ec-input">受　　付　　者：{{ Order.uketsuke_name }}</span></p>
-                    <p class="ec-input hiddenItem">紹　　介　　者：{{ Order.shoukai_name }}</span></p>
-                    <p class="ec-input">社　　　　　員：{{ Order.shain_flg }}</span>
+
+                    {# 受取方法追加　2024/08/23 来店時間追加　2024/09/09 配送先住所追加　2024/09/12 #}
+                    <p class="ec-input">受　取　方　法：{{ Order.uketori|trans }}</p>
+                    <p class="ec-telInput">お 支 払 い 方 法：{{ Order.Payment }}</p>
+                    <p class="ec-telInput">電　話　番　号：{{ Order.phone_number }}</p>
+                    {% if Order.uketori == 'ヤマト配送' %}
+                    <p class="ec-input">お届け先　郵便番号 : {{'〒'|trans}}{{ Order.h_postal_code }}</p>
+                    <p class="ec-input">お届け先　住所 : {{ Order.h_pref }} &emsp;{{ Order.h_addr1 }} &emsp;{{ Order.h_addr2 }}</p>
+                    <p class="ec-halfInput">お届け先　お名前（漢字）：{{ Order.h_name1 }}&emsp;{{ Order.h_name2 }}{{'様'|trans}}</p>
+                    <p class="ec-input">お届け先　お名前（カナ）：{{ Order.h_kana1 }}&emsp;{{ Order.h_kana2 }}{{'様'|trans}}</p>
+                    <p class="ec-telInput">お届け先　お電話番号：{{ Order.h_phone_number }}</p>
+                    {% endif %}
+                    <p class="ec-input hiddenItem">{{ Order.email }}</p>
+                    {% if Order.uketori != 'ヤマト配送' %}
+                    <p class="ec-input">受　取　来　店　日：{{ Order.Ukedate|date("Y年m月d日") }}</p>
+                    <p class="ec-input">受　取　時　間：{{ Order.visit_t }}</p>
+                    {% endif %}
+                    <p class="ec-input">受　付　店　鋪：{{ Order.tenpos }}</p>
+                    <p class="ec-input">受　　付　　者：{{ Order.uketsuke_name }}</p>
+                    <p class="ec-input hiddenItem">紹　　介　　者：{{ Order.shoukai_name }}</p>
+                    <p class="ec-input">社　　　　　員：{{ Order.shain_flg }}
                     {% if Order.shain_flg == 1 %}
                         <span>社員</span>
                     {% else %}
@@ -120,7 +140,7 @@ file that was distributed with this source code.
                             </div>
                             <div class="ec-select ec-select__delivery">
                                 <label>{{ 'お引渡し日'|trans }}</label>
-                                {{ Order.Shippings[idx].shipping_delivery_date? Order.Shippings[idx].shipping_delivery_date|date_day_with_weekday : '指定なし'|trans }}
+                                {{ Order.Shippings[idx].shipping_delivery_date ? Order.Shippings[idx].shipping_delivery_date|date_day_with_weekday : '指定なし'|trans }}
                             </div>
                             <div class="ec-select ec-select__time">
                                 <label>{{ 'お引渡し時間'|trans }}</label>
@@ -265,7 +285,7 @@ file that was distributed with this source code.
                 {% endif %}
                 <div class="ec-totalBox__btn">
                     <button type="submit" class="ec-blockBtn--action">{{ '注文する'|trans }}</button>
-                    <a href="{{ url('shopping') }}" class="ec-blockBtn--cancel">{{ 'ご注文手続きに戻る'|trans }}</a>
+{#                    <a href="{{ url('shopping') }}" class="ec-blockBtn--cancel">{{ 'ご注文手続きに戻る'|trans }}</a>#}
                 </div>
             </div>
         </div>

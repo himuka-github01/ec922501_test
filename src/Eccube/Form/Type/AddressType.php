@@ -99,8 +99,9 @@ class AddressType extends AbstractType
     {
         $resolver->setDefaults([
             'options' => [],
-            'pref_options' => ['constraints' => [], 'attr' => ['class' => 'p-region-id']],
+            'pref_options' => ['constraints' => [], 'attr' => ['class' => 'p-region-id'],'label' => false,],
             'addr01_options' => [
+                'label' => false,
                 'constraints' => [
                     new Assert\Length(['max' => $this->config['eccube_address1_len']]),
                 ],
@@ -110,6 +111,7 @@ class AddressType extends AbstractType
                 ],
             ],
             'addr02_options' => [
+                'label' => false,
                 'constraints' => [
                     new Assert\Length(['max' => $this->config['eccube_address2_len']]),
                 ],

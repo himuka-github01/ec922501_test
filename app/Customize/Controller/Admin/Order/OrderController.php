@@ -26,6 +26,7 @@ use Eccube\Entity\Master\OrderStatus;
 use Eccube\Entity\OrderPdf;
 use Eccube\Entity\Payment;      // (HDN) Payment
 use Eccube\Entity\Shipping;
+use Cusatomize\Entity\OrderTrait; //追記　OrderTrait
 use Eccube\Event\EccubeEvents;
 use Eccube\Event\EventArgs;
 use Eccube\Form\Type\Admin\OrderPdfType;
@@ -42,18 +43,23 @@ use Eccube\Repository\ProductRepository;    // (HDN) ProductRepository
 use Eccube\Repository\ProductStockRepository;
 use Eccube\Service\CsvExportService;
 use Eccube\Service\MailService;
-
 use Eccube\Service\OrderPdfService;
 //use Customize\Service\OrderPdfService;  // services.yamlの記述が効かないためCustomize側を直接記述
 
 use Customize\Service\HdnOrderListService;  // (HDN) Listサービス
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Eccube\Service\OrderStateMachine;
 use Eccube\Service\PurchaseFlow\PurchaseFlow;
 use Eccube\Util\FormUtil;
 
+
 // 同名のクラスが存在するため、使用するものを明示
 use Knp\Component\Pager\PaginatorInterface;
+use PhpOffice\PhpSpreadsheet\Calculation\TextData\Format;
+use PhpOffice\PhpSpreadsheet\Calculation\TextData\Search;
+use PhpParser\Node\Stmt\Catch_;
+use Psr\Log\NullLogger;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -62,6 +68,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Tests\Fixtures\ToString;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -116,7 +123,7 @@ class OrderController extends BaseOrderController
         HdnTenpoRepository $hdnTenpoRepository,
         HdnOrderListService $hdnOrderListService,
         ProductRepository $productRepository
-    ) {
+    ) {                     
         $this->purchaseFlow = $orderPurchaseFlow;
         $this->csvExportService = $csvExportService;
         $this->customerRepository = $customerRepository;
@@ -719,7 +726,7 @@ class OrderController extends BaseOrderController
             'lines' => $lines,
         ];
     }
-
+    /********************************************sum_bumon_item_02*******************<sumBumonItem02BK>*********************************************************************/
     /**
      * 受注部門商品集計画面(02) Ver.2022.05.xx
      *
@@ -864,6 +871,7 @@ class OrderController extends BaseOrderController
         $qb = $this->orderRepository->createQueryBuilder('o')
             ->select('sj.id as saiji_id')
             ->addSelect('sj.name as saiji_name')
+            //->addSelect('o.ukedate')//受渡日集計の為、追加　2024/10/07
             ->addSelect('s.shipping_delivery_date')
             ->addSelect('bm.id as bumon_id')
             ->addSelect('bm.name as bumon_name')
@@ -886,10 +894,13 @@ class OrderController extends BaseOrderController
             ->leftJoin('oi.Bumon', 'bm')
             ->leftJoin('o.OrderStatus', 'os')
             ->where('o.Saiji = :Saiji')
+            //->orderBy('o.uedate', 'DESC')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
+            //->andWhere('o.ukedate is not null')
             ->groupBy('saiji_id')
             ->addGroupBy('s.shipping_delivery_date')
+            //->addGroupBy('ud')
             ->addGroupBy('bumon_id')
             ->addGroupBy('oi.product_code')
             ->addGroupBy('tenpo_id')
@@ -897,9 +908,11 @@ class OrderController extends BaseOrderController
             ->having('oi.product_code is not null')
             ->orderBy('saiji_id')
             ->addOrderBy('s.shipping_delivery_date')
+            //->addOrderBy('ud')
             ->addOrderBy('product_name')
             ->addOrderBy('bumon_id')
             ->addOrderBy('tenpo_id');
+
 
         // (HDN) 催事指定は必須
         //$qb->where('o.Saiji = :Saiji')->setParameter('Saiji', $objSaiji);
@@ -911,13 +924,34 @@ class OrderController extends BaseOrderController
             ->andWhere('tp.id = :tenpo_id')
             ->setParameter('tenpo_id', $objTenpo->getId());
         }
-
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
             ->andWhere('bm.id = :bumon_id')
             ->setParameter('bumon_id', $objBumon->getId());
         }
+        //受渡日条件セット
+         //searchFormから検索条件を渡す
+        if ( $searchForm->get('ukedate_start') ) {
+            $ukedate_start = $searchForm->get('ukedate_start')->getData();
+        }
+        if ( $searchForm->get('ukedate_end') ) {
+            $ukedate_end = $searchForm->get('ukedate_end')->getData();
+        }
+        //受渡し日の条件セット 2024/10/08
+        //開始
+        if($ukedate_start){
+            $qb
+            ->andWhere('o.ukedate >= :ukedate_start')
+            ->setParameter('ukedate_start', $ukedate_start);
+        }
+        //終了
+        if($ukedate_end){
+            $qb
+            ->andWhere('o.ukedate <= :ukedate_end')
+            ->setParameter('ukedate_end', $ukedate_end);
+        }
+        //ここまで
 
         // (HDN) 実績取得
         $dtls = $qb->getQuery()->execute();
@@ -1068,6 +1102,9 @@ class OrderController extends BaseOrderController
             'lines' => $lines,
         ];
     }
+    /********************************************<sum_bumon_item_02>*******************<sumBumonItem02BK>*********************************************************************/
+
+    /********************************************<sum_bumon_item_02>*******************<sumBumonItem02>*********************************************************************/
 
     /**
      * 受注部門商品集計画面(02) Ver.2022.05.xx
@@ -1227,7 +1264,8 @@ class OrderController extends BaseOrderController
         $qb = $this->orderRepository->createQueryBuilder('o')
             ->select('sj.id as saiji_id')
             ->addSelect('sj.name as saiji_name')
-            //->addSelect('s.shipping_delivery_date')
+            ->addSelect('s.shipping_delivery_date')
+            //->addSelect('o.ukedate')     
             ->addSelect('bm.id as bumon_id')
             ->addSelect('bm.name as bumon_name')
             ->addSelect('oi.product_code')
@@ -1243,7 +1281,7 @@ class OrderController extends BaseOrderController
             ->addSelect('sum(oi.quantity*oi.wari_kikan_gaku) as wari_kikan_kingaku')
             ->addSelect('sum(oi.quantity*oi.wari_matome_gaku) as wari_matome_kingaku')
             ->leftJoin('o.OrderItems', 'oi')
-            //->leftJoin('oi.Shipping', 's')
+            ->leftJoin('oi.Shipping', 's')
             ->leftJoin('o.Saiji', 'sj')
             ->leftJoin('o.Tenpo', 'tp')
             ->leftJoin('oi.Bumon', 'bm')
@@ -1251,15 +1289,18 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
+            //->andWhere('o.order is not null')
             ->groupBy('saiji_id')
-            //->addGroupBy('s.shipping_delivery_date')
+            ->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
             ->addGroupBy('oi.product_code')
             ->addGroupBy('tenpo_id')
             ->addGroupBy('os.id')
+            //->addGroupBy('ukedate')
             ->having('oi.product_code is not null')
             ->orderBy('saiji_id')
-            //->addOrderBy('s.shipping_delivery_date')
+            ->addOrderBy('s.shipping_delivery_date')
+            //->addOrderBy('uekdate')
             ->addOrderBy('product_name')
             ->addOrderBy('bumon_id')
             ->addOrderBy('tenpo_id');
@@ -1281,7 +1322,27 @@ class OrderController extends BaseOrderController
             ->andWhere('bm.id = :bumon_id')
             ->setParameter('bumon_id', $objBumon->getId());
         }
-
+        //受渡日条件セット
+         //searchFormから検索条件を渡す
+         $ukedate_start = null;
+         $ukedate_end = null;
+        if ( $searchForm->get('ukedate_start') ) {
+            $ukedate_start = $searchForm->get('ukedate_start')->getData();
+        }
+        if ( $searchForm->get('ukedate_end') ) {
+            $ukedate_end = $searchForm->get('ukedate_end')->getData();
+        }    
+        //受渡し日指定があれば条件セット
+        if($ukedate_start){
+            $qb
+            ->andWhere('o.ukedate >= :ukedate_start')
+            ->setParameter('ukedate_start', $ukedate_start);
+        }
+        if($ukedate_end){
+            $qb
+            ->andWhere('o.ukedate <= :ukedate_end')
+            ->setParameter('ukedate_end', $ukedate_end);
+        }
         $lines = [];
         // ④催事が複数日かを判定
         if ( $objSaiji->getDeliveryStartDt() != $objSaiji->getDeliveryEndDt() ) {
@@ -1344,6 +1405,9 @@ class OrderController extends BaseOrderController
             'lines' => $lines,
         ];
     }
+    /********************************************<sum_bumon_item_02>*******************<sumBumonItem02>*********************************************************************/
+
+
 
     /**
      * 未引渡商品一覧画面.
@@ -1819,6 +1883,16 @@ class OrderController extends BaseOrderController
         }
         log_info('[受注部門商品集計(02]posOfTenpo',$posOfTenpo);
 
+        // 受渡日の条件を取得(ukedate)
+        $ukedate_start = null;
+        $ukedate_end = null;
+        if ($searchForm->has('ukedate_start')) {
+            $ukedate_start = $searchForm->get('ukedate_start')->getData();
+        }
+        if ($searchForm->has('ukedate_end')) {
+            $ukedate_end = $searchForm->get('ukedate_end')->getData();
+        }
+
         // ③催事/日付/部門/商品/店舗の実績を取得
         // QueryBuilderを取得
         $qb = $this->orderRepository->createQueryBuilder('o')
@@ -1877,6 +1951,17 @@ class OrderController extends BaseOrderController
             $qb
             ->andWhere('bm.id = :bumon_id')
             ->setParameter('bumon_id', $objBumon->getId());
+        }
+        // 受渡日の条件を追加
+        if ($ukedate_start) {
+            $qb
+                ->andWhere('o.ukedate >= :ukedate_start')
+                ->setParameter('ukedate_start', $ukedate_start);
+        }
+        if ($ukedate_end) {
+            $qb
+                ->andWhere('o.ukedate <= :ukedate_end')
+                ->setParameter('ukedate_end', $ukedate_end);
         }
 
         // (HDN) 実績取得
@@ -3803,4 +3888,326 @@ class OrderController extends BaseOrderController
         */
     }
 
+   /* public function exportYamato(Request $request)
+    {   
+        //検索フォーム定義
+        $searchData[] = $request->get('search_form',[]);
+        
+        //クエリービルダを使用して’ヤマト配送’のみをフィルタリング   OrderEntityが文字列としてpayment_methodを保存している
+        $qb = $this->orderRepository->createQueryBuilder('o')
+            ->andWhere('o.payment_method = :paymentMethod')
+            ->setParameter('paymentMethod', 'ヤマト配送')
+            ->leftJoin('o.Pref', 'pref');
+
+        log_info('検索フォーム', [$searchData]);
+        
+        //検索条件をセット　2024/10/16 田中
+        //検索フォームデータを取得
+        $searchData = $request->get('search_form');
+            if ($searchData) {
+                if (isset($searchData['name01'])) {
+                    $qb->andWhere('o.name01 = :name01')
+                    ->setParameter('name01', $searchData['name01']);
+                }
+                log_info('依頼者（姓）',$searchData['name01']);
+
+                if (isset($searchData['name02'])) {
+                    $qb->andWhere('o.name02 = :name02')
+                    ->setParameter('name02', $searchData['name02']);
+                }
+                log_info('依頼者（名）',$searchData['name02']);
+
+                if (isset($searchData['h_name1'])) {
+                    $qb->andWhere('o.h_name1 = :h_name1')
+                    ->setParameter('h_name1', $searchData['h_name1']);
+                }
+                log_info('配送先氏名（姓）',$searchData['h_name1']);
+
+                if (isset($searchData['h_name2'])) {
+                    $qb->andWhere('o.h_name2 = :h_name2')
+                    ->setParameter('h_name2', $searchData['h_name2']);
+                }
+                log_info('配送先氏名（名）',$searchData['h_name2']);
+
+                if (isset($searchData['Pref'])) {
+                    $qb
+                    ->andWhere('o.Pref = :Pref')
+                    ->setParameter('配達依頼者県', $searchData['Pref']);
+                }
+                log_info('name01',$searchData['pref_id']);
+                
+                if (isset($searchData['addr01'])) {
+                    $qb->andWhere('o.addr01 = :addr01')
+                    ->setParameter('addr01', $searchData['addr01']);
+                }
+                log_info('配達依頼者住所１',$searchData['addr01']);
+
+                if (isset($searchData['h_pred'])) {
+                    $qb->andWhere('o.h_pred = :h_pred')
+                    ->setParameter('h_pred', $searchData['h_pred']);
+                }
+                log_info('配送先県情報',$searchData['h_pred']);
+
+                if (isset($searchData['h_addr1'])) {
+                    $qb->andWhere('o.h_addr1 = :h_addr1')
+                    ->setParameter('h_addr1', $searchData['h_addr1']);
+                }
+                log_info('配送先住所１',$searchData['h_addr1']);
+
+                if (isset($searchData['h_addr2'])) {
+                    $qb->andWhere('o.h_addr1 = :h_addr1')
+                    ->setParameter('h_addr2', $searchData['h_addr2']);
+                }
+                log_info('配送先住所2',$searchData['h_addr2']);
+
+                if (isset($searchData['phone_number'])) {
+                    $qb->andWhere('o.phone_number = :phone_number')
+                    ->setParameter('phone_number', $searchData['phone_number']);
+                }
+                log_info('依頼人電話番号',$searchData['phone_number']);
+
+                if (isset($searchData['h_phone_number'])) {
+                    $qb->andWhere('o.h_phone_number = :h_phone_number')
+                    ->setParameter('h_phone_number', $searchData['h_phone_number']);
+                }
+                log_info('受取人電話番号',$searchData['h_phone_number']);
+
+                if (isset($searchData['postal_code'])) {
+                    $qb->andWhere('o.postal_code = :postal_code')
+                    ->setParameter('postal_code', $searchData['postal_code']);
+                }
+                log_info('依頼人郵便番号',$searchData['postal_code']);
+                
+                if (isset($searchData['h_postal_code'])) {
+                    $qb->andWhere('o.h_postal_code = :h_postal_code')
+                    ->setParameter('h_postal_code', $searchData['h_postal_code']);
+                }
+                log_info('受取人郵便番号',$searchData['h_postal_code']);
+            }
+        //var_dump('ヤマト配送CSV出力検索条件', [$searchData]);
+
+        //クエリビルダを使用してname01.name02とh_name1.h_name2,pref.addr01,h_pref.h_addr1の値取り出し(ヤマトCSV対応の為)
+        $qb->select( 'o.id', 'o.name01'||'o.name02', 'o.h_name1'||'o.h_name2', 'pref.name as pref_name'||'o.addr01', 'o.h_pref'||'o.h_addr1', 
+                    'o.phone_number', 'o.h_phone_number', 'o.postal_code', 'o.h_postal_code');
+                            
+        //結果を取得
+        $results = $qb->getQuery()->getResult();
+       //var_dump($results);
+        log_info('qb結果', [$results]);
+
+        //CSV→Excel変換用
+        mb_convert_variables('SJIS', 'UTF-8',$results);
+
+        //値を結合
+        foreach ($results as &$result) {
+            $result['name'] = $result['name01'] . ' ' . $result['name02'];
+            $result['y_name'] = $result['h_name1'] . ' ' . $result['h_name2'];
+            $result['y_addr'] = $result['pref_name'] . ' ' . $result['addr01'];
+            $result['y_addr1'] = $result['h_pref'] . ' ' . $result['h_addr1'];
+            
+        }
+        log_info('値結合', [$result]);
+
+        //フィルタリングされた注文IDを取得して配列を作成
+        $orderIds = array_column($results, 'id');
+        log_info('注文ID', [$orderIds]);
+        
+
+        //新しいrequestオブジェクトを作成し、フィルタリングされた注文IDをセット
+        $yamatoRequest = new Request();
+        $yamatoRequest->request->set('ids',$orderIds);
+        // $yamatoRequest = Request::create('', 'GET', ['ids' => $orderIds]);
+
+        log_info('ヤマトリクエスト', [$request]);
+        
+
+        $filename = 'yamato_'.(new \DateTime())->format('YmdHis').'.csv';
+        log_info('ファイル名', [$filename]);
+        $response = $this->exportCsv($yamatoRequest, CsvType::CSV_TYPE_YAMATO, $filename);
+        log_info('受注CSV出力ファイル', [$response]);
+
+        return $response;
+        }*/
+
+    //ヤマト配送用CSV 2024/11/18
+    /**
+     * @param Request $request
+     * @param $csvTypeId 
+     * @param string $fileName
+     * @Route("/%eccube_admin_route%/order/export/yamato", name="admin_order_export_yamato")
+     *
+     * @return StreamedResponse
+     */
+    public function exportYamato(Request $request)
+    {
+        // タイムアウトを無効にする.
+        set_time_limit(0);
+
+        // sql loggerを無効にする.
+        $em = $this->entityManager;
+        $em->getConfiguration()->setSQLLogger(null);
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($request) {
+            // CSV種別を元に初期化.
+            $this->csvExportService->initCsvType(CsvType::CSV_TYPE_YAMATO);
+
+            // ヘッダ行の出力.
+            $this->csvExportService->exportHeader();
+            // 受注データ検索用のクエリビルダを取得.
+            //$qb = $this->orderRepository->createQueryBuilder('o');
+            $qb = $this->csvExportService
+                ->getOrderQueryBuilder($request)
+                ->andWhere('o.uketori = :uketori')
+                ->setParameter('uketori', 'ヤマト配送');
+    
+                // データ行の出力.
+                $this->csvExportService->setExportQueryBuilder($qb);
+                $this->csvExportService->exportData(function ($entity, $csvService) use ($request) {
+                    
+                $Csvs = $csvService->getCsvs();
+                log_info('csvs', $Csvs);
+
+                $Order = $entity;
+
+                $OrderItems = $Order->getOrderItems();
+
+                foreach ($OrderItems as $OrderItem) {
+                    $ExportCsvRow = new ExportCsvRow();
+
+                    // CSV出力項目と合致するデータを取得.
+                    foreach ($Csvs as $Csv) {
+                        //log_info( (string)$Csv);
+                        // 受注データを検索. 
+                        //$wData = $csvService->getData($Csv, $Order);
+                        //log_info((string)$wData);
+                        $ExportCsvRow->setData($csvService->getData($Csv, $Order));
+                        if ($ExportCsvRow->isDataNull()) {
+                            // 受注データにない場合は, 受注明細を検索.
+                            $ExportCsvRow->setData($csvService->getData($Csv, $OrderItem));
+                            log_info($csvService->getData($Csv, $OrderItem));
+                        }
+                        if ($ExportCsvRow->isDataNull() && $Shipping = $OrderItem->getShipping()) {
+                            // 受注明細データにない場合は, 出荷を検索.
+                            $ExportCsvRow->setData($csvService->getData($Csv, $Shipping));
+                            log_info($csvService->getData($Csv, $Shipping));
+                        }
+                
+                        $event = new EventArgs(
+                            [
+                                'csvService' => $csvService,
+                                'Csv' => $Csv,
+                                'OrderItem' => $OrderItem,
+                                'ExportCsvRow' => $ExportCsvRow,
+                            ],
+                            $request
+                        );
+                        $this->eventDispatcher->dispatch(EccubeEvents::ADMIN_ORDER_CSV_EXPORT_ORDER, $event);
+                        log_info($request);
+                        $ExportCsvRow->pushData();
+
+                        //var_dump('ExportCsvRow',$ExportCsvRow);
+
+                        }
+                    }   
+                    //$row[] = number_format(memory_get_usage(true));
+                    //データ行を配列に加工
+                    $rowData = (array)$ExportCsvRow->getRow();
+                    log_info('rowData', $rowData);
+
+                    //ここをgetでの値取得に修正
+                    $fullname01 = $Order->getName01() . $Order->getName02();
+                    $fullname02 = $Order->getkana01() . $Order->getkana02();
+                    $kana01 = $Order->getKana01() . $Order->getKana02();
+                    $kana02 = $Order->getH_kana1() . $Order->getH_kana2();
+                    $addr01 = $Order->getPref() . $Order->getAddr01();
+                    $addr02 = $Order->getH_pref() . $Order->getH_addr1();
+                    $hpn = $Order->getH_phone_number();
+                    $hpostal = $Order->getH_postal_code();
+                    $addr03 = $Order->getH_addr2();
+                    //$addr04 = $Order->getAddr02();
+
+                    //それぞれの行にセット
+                    $rowData[39] = '0962861691';//請求先コード
+                    $rowData[8] = $hpn;//お届け先電話番号
+                    $rowData[10] = $hpostal;//お届け先郵便番号
+                    $rowData[11] = $addr02;//お届け先住所
+                    $rowData[12] = $addr03;//お届け先マンション名
+                    $rowData[15] = $fullname02;//お届け先名
+                    $rowData[16] = $kana02;//お届け先名(ｶﾅ)
+                    $rowData[22] = $addr01;//ご依頼主住所
+                    $rowData[24] = $fullname01;//ご依頼主名
+                    $rowData[25] = $kana01;//ご依頼主名(ｶﾅ)
+
+                    //B列（０：発払い）、C列（１：クール便）、E列（2024/12/28）のデフォルト値
+                    $rowData[1] = 0;
+                    $rowData[2] = 1;
+                    $rowData[17] = '様';
+
+                    //※今後ここを変える必要あり　ロッキーの2024年おせち発送日　2024/10/22 田中
+                    $rowData[4] = '2024/12/28';
+                    // log_info($rowData[1]);
+                    // log_info($rowData[2]);
+
+                    //配達日時変換　2024/10/22 田中 Fix 2024/10/23
+                    if(!empty($rowData[5])){
+                    $shippingDeliveryDate = (new \DateTime($rowData[5]))->format('Y/m/d');
+                    $rowData[5] = $shippingDeliveryDate;
+                    }
+                    //log_info('配達日', $rowData[5]);
+                    log_info('配送時間: ' . $rowData[6]);
+                    //配達時間の変換・セット　2024/10/23 田中
+                    //switch文で処理
+                    switch ($rowData[6]) {
+                        case '08～12時':
+                        case '午前中':
+                            $rowData[6] = '0812'; 
+                            break;
+                        case '14〜16時':
+                            $rowData[6] = '1416';
+                            break;
+                        case '16〜18時':
+                            $rowData[6] = '1618';
+                            break;
+                        case '18〜20時':
+                            $rowData[6] = '1820';
+                            break;
+                        case '19〜21時':
+                            $rowData[6] = '1921';
+                            break;
+                        default:
+                            $rowData[6] = '指定なし';
+                            break;
+                    } 
+                    
+
+                    // var_dump('時間帯',$deliveryTime);
+                    
+                    log_info('rowData2', $rowData);
+
+                    //$wColの文字形式変換s
+                    //mb_convert_encoding($rowData[6],'SJIS', 'UTF-8');
+
+                    //ここでrowDataを初期化
+                    $wCol = new ArrayCollection($rowData);
+                    /*
+                    $rowData = new ArrayCollection();
+                        foreach ($rowData as $key => $value) {
+                            $rowData->set($key, $value);
+                        }
+                        log_info($rowData->toArray());
+                    */
+                    //CSV出力
+                    $csvService->fputcsv($wCol);
+                    //$csvService->fputcsv($rowData);
+                    //$csvService->fputcsv($rowData[6]);
+                    //$csvService->fputcsv($ExportCsvRow->getRow());//ヤマト配送用に修正　2024/10/18 田中
+            });
+        });
+        $fileName = 'yamatoB2_'.(new \DateTime())->format('YmdHis').'.csv';
+        $response->headers->set('Content-Type', 'application/octet-stream');
+        $response->headers->set('Content-Disposition', 'attachment; filename='.$fileName);
+        $response->send();
+        return $response;
+    }
 }

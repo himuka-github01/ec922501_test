@@ -112,7 +112,7 @@ class OrderHelper extends BaseOrderHelper
         //   (5) 受付店舗取得（2022.05.06）
         $uketsukeTenpo = $tenpoRepository->find($wUketsukeTenpoId);
         //   (6) 受付店舗をOrderにセット（2022.05.06）
-        $Order->setUketsukeTenpo($uketsukeTenpo);
+        //$Order->setUketsukeTenpo($uketsukeTenpo);
 
         // (HDN) 支払方法が指定されていればセット
         /*

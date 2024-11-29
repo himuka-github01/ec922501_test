@@ -85,7 +85,6 @@ file that was distributed with this source code.
                                 会社名：{{ Order.company_name }}<br/>
                             {% endif %}
                             郵便番号：〒{{ Order.postal_code }}<br/>
-                            住所：{{ Order.Pref.name }}{{ Order.addr01 }}{{ Order.addr02 }}<br/>
                             電話番号：{{ Order.phone_number }}<br/>
                             メールアドレス：{{ Order.email }}<br/>
                             <br/>
@@ -102,7 +101,6 @@ file that was distributed with this source code.
                                     会社名：{{ Shipping.company_name }}<br/>
                                 {% endif %}
                                 郵便番号：〒{{ Shipping.postal_code }}<br/>
-                                住所：{{ Shipping.Pref.name }}{{ Shipping.addr01 }}{{ Shipping.addr02 }}<br/>
                                 電話番号：{{ Shipping.phone_number }}<br/>
                                 <br/>
                                 配送方法：{{ Shipping.shipping_delivery_name }}<br/>

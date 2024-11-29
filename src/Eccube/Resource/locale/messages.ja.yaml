@@ -522,6 +522,7 @@ admin.common.device_type: 端末種別
 admin.common.authority: 権限
 admin.common.payment_method: 支払方法
 admin.common.charge: 手数料
+
 #------------------------------------------------------------------------------------
 # ホーム
 #------------------------------------------------------------------------------------
@@ -783,6 +784,8 @@ admin.order.order_sum_tenpo_bumon: 売上集計
 admin.order.shipping_registration: 出荷登録
 admin.order.shipping_csv_upload: 出荷CSV登録
 admin.order.mail: メール通知
+# 名称追加　2024/09/05 田中
+admin.order.order_sum_bumon_item_02: 受渡日集計
 
 # flashメッセージ
 admin.order.shipping_save_message: 出荷に関わる情報が変更されました。送料の変更が必要な場合は、受注管理より手動で変更してください。
@@ -795,11 +798,23 @@ admin.order.list_shukka: 受渡台帳
 admin.order.list_uriage: 売上集計
 admin.order.tenpo_label: 店舗
 admin.order.bumon_label: 部門
+#追加　2024/09/04 田中
+admin.order.uketoi_label: 受取方法
+admin.order.uke_tenpo: 受付店鋪
+#追加　2024/09/06 田中
+front.shopping.tentou_time: 受渡時間
+front.shopping.tentou_ukestuke: 受付店鋪
 
 admin.order.multi_search_label: 注文番号・お名前・電話番号
 admin.order.order_date_label: 受注日
 admin.order.reception_date_label: 受付日
 admin.order.delivery_date_label: 受渡日
+
+#2024/09/02 受取日のフォーム作成用で追加　田中
+admin.order.ukedate_date_start: 受渡日（開始）
+admin.order.ukedate_date_end: 受渡日（終了）
+dmin.order.ukedate_date: 受渡日
+
 admin.order.delivery_status_label: 状態
 admin.order.note_label: メモ
 admin.order.order_info: 注文情報
@@ -900,6 +915,8 @@ admin.order.change_status: 対応状況の変更
 admin.order.csv_shipping_date_description: 出荷日を「YYYY-MM-DD」の形式で設定
 admin.order.order_csv: 受注CSV
 admin.order.shipping_csv: 出荷CSV
+# add 2024/11/11 ヤマトCSV用
+admin.order.shipping_yamato: ヤマト配送CSV
 admin.order.shipping_status: 出荷状況
 admin.order.delivery: お届け先
 admin.order.not_payment: 未入金

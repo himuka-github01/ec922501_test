@@ -134,8 +134,10 @@ file that was distributed with this source code.
                 $('#order_Shipping_address_addr01').val($('#order_address_addr01').val());
                 $('#order_Shipping_address_addr02').val($('#order_address_addr02').val());
                 $('#order_Shipping_email').val($('#order_email').val());
+                // $('#order_Order_ukedate').val($('#order_ukedate').val());
                 $('#order_Shipping_phone_number').val($('#order_phone_number').val());
                 $('#order_Shipping_company_name').val($('#order_company_name').val());
+
             });
 
             // PDF出力(単一)
@@ -350,6 +352,35 @@ file that was distributed with this source code.
                                                 </div>
                                             </div>
                                         {% endif %}
+                                        {% if Order.uketori != 'ヤマト配送' %}
+                                        <div class="row mb-3 form-group">
+                                            <label class="col-3 col-form-label">{{ 'admin.common.ukedate'|trans }}</label>
+                                            <div class="col">
+                                                {{ form_widget(form.Ukedate) }}
+                                                {{ form_errors(form.Ukedate) }}
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3 form-group">
+                                            <label class="col-3 col-form-label">{{ 'admin.common.visit'|trans }}</label>
+                                            <div class="col">
+{#                                                {{ form_widget(form.VisitT) }}#}
+{#                                                {{ form_errors(form.VisitT) }}#}
+                                                <span class="customer-edit customer-visit_t">{{ Order.visit_t }}</span>
+{#                                                {{ block _admin_order_VisitT_widget }}#}
+{#                                                    {{ spaceless }}#}
+{#                                                <select id="order_VisitT" name="order[VisitT]" class="form-control">#}
+{#                                                    <option value="">指定なし</option>#}
+{#                                                    {{ for choice in choices }}#}
+{#                                                    <option value="{{ choice.value }}" id="order_VisitT_{{ loop.index }}"{{ if choice.label is value }} selected="selected"{{ endif }}>#}
+{#                                                        {{ choice.label }}#}
+{#                                                    </option>#}
+{#                                                    {{ endfor }}#}
+{#                                                </select>#}
+{#                                                    {{ endspaceless }}#}
+{#                                                {{ endblock _admin_order_VisitT_widget }}#}
+                                            </div>
+                                        </div>
+                                        {% endif %}
                                         <div class="row mb-3 form-group">
                                             <label class="col-3 col-form-label">{{ 'admin.common.payment_method'|trans }}</label>
                                             <div class="col">
@@ -428,6 +459,7 @@ file that was distributed with this source code.
                                         </div>
                                     </div>
                                 {% endif %}
+
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="row hiddenItem">
@@ -438,7 +470,7 @@ file that was distributed with this source code.
                                                 {{ form_errors(form.Customer) }}
                                             </div>
                                         </div>
-                                        <div class="row form-group hiddenItem">
+                                        <div class="row form-group">
                                             <label class="col-3 col-form-label">{{ 'admin.common.name'|trans }}<span class="badge badge-primary ml-1">{{ 'admin.common.required'|trans }}</span></label>
                                             <div class="col">
                                                 <div class="row">
@@ -514,35 +546,61 @@ file that was distributed with this source code.
                                             </div>
                                         </div>
                                     </div>
-
+                                    {# <div class="row form-group">
+                                    <label class="col-3 col-form-label">{{ 'admin.common.h_adress'|trans }}<span class="badge badge-primary ml-1">{{ 'admin.common.required'|trans }}</span></label>
+                                            <div class="col">
+                                                <div class="row mb-3">
+                                                    <div class="col form-inline">
+                                                        {{ 'admin.common.postal_symbol'|trans }}
+                                                        {{ form_widget(form.h_postal_code) }}
+                                                        {{ form_errors(form.h_postal_code) }}
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        {{ form_widget(form.h_pref) }}
+                                                        {{ form_errors(form.h_pref) }}
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        {{ form_widget(form.h_addr1) }}
+                                                        {{ form_errors(form.h_addr1) }}
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        {{ form_widget(form.h_addr2) }}
+                                                        {{ form_errors(form.h_addr2) }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> #}
                                     <div class="col-6">
-                                        <div class="row form-group hiddenItem">
-                                            <label class="col-3 col-form-label">{{ 'admin.common.mail_address'|trans }}<span class="badge badge-primary ml-1">{{ 'admin.common.required'|trans }}</span></label>
-                                            <div class="col">
-                                                {{ form_widget(form.email) }}
-                                                {{ form_errors(form.email) }}
-                                            </div>
-                                        </div>
-                                        <div class="row form-group hiddenItem">
-                                            <label class="col-3 col-form-label">{{ 'admin.common.company_name'|trans }}</label>
-                                            <div class="col">
-                                                {{ form_widget(form.company_name) }}
-                                                {{ form_errors(form.company_name) }}
-                                            </div>
-                                        </div>
-                                        <div class="row form-group">
-                                            <label class="col-3 col-form-label">{{ 'admin.order.message'|trans }}</label>
-                                            <div class="col">
-                                                {{ form_widget(form.message, { attr : {'rows': 8 }}) }}
-                                                {{ form_errors(form.message) }}
+                                                <div class="form-group hiddenItem">
+                                                    <label class="col-form-label">{{ 'admin.common.mail_address'|trans }}<span class="badge badge-primary ml-1">{{ 'admin.common.required'|trans }}</span></label>
+                                                    {{ form_widget(form.email) }}
+                                                    {{ form_errors(form.email) }}
+                                                </div>
+                                                <div class="form-group hiddenItem">
+                                                    <label class="col-form-label">{{ 'admin.common.company_name'|trans }}</label>
+                                                    {{ form_widget(form.company_name) }}
+                                                    {{ form_errors(form.company_name) }}
+                                                </div>
+                                                <div class="row form-group">
+                                                        <label class="col-3 col-form-label">お問い合わせ</label>
+                                                    <div class="col">
+                                                        <textarea id="order_message" name="order[message]" rows="8" cols="8" class="form-control"> {{ Order.message }}</textarea>
+
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
-                        </div>
-                    </div><!-- .card.rounded -->
+                    <!-- .card.rounded -->
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header">
                             <div class="row">
@@ -686,14 +744,14 @@ file that was distributed with this source code.
                                                 </div>
                                             </div>
                                             <div class="row mb-3 form-group">
-                                                <label class="col-3 col-form-label"><i class="fa fa-calendar-check-o fa-fw mr-1" aria-hidden="true"></i>{{ 'admin.order.for_delivery_date'|trans }}</label>
+                                                <label class="col-3 col-form-label"><i class="fa fa-calendar-check-o fa-fw mr-1" aria-hidden="true"></i>{{ 'ヤマト配送日'|trans }}</label>
                                                 <div class="col">
                                                     {{ form_widget(form.Shipping.shipping_delivery_date) }}
                                                     {{ form_errors(form.Shipping.shipping_delivery_date) }}
                                                 </div>
                                             </div>
                                             <div class="row mb-3 form-group">
-                                                <label class="col-3 col-form-label"><i class="fa fa-clock-o fa-fw mr-1" aria-hidden="true"></i>{{ 'admin.order.for_delivery_time'|trans }}</label>
+                                                <label class="col-3 col-form-label"><i class="fa fa-clock-o fa-fw mr-1" aria-hidden="true"></i>{{ 'ヤマト配送時間'|trans }}</label>
                                                 <div class="col">
                                                     {{ form_widget(form.Shipping.DeliveryTime) }}
                                                     {{ form_errors(form.Shipping.DeliveryTime) }}
@@ -854,6 +912,7 @@ file that was distributed with this source code.
                                                         {{ form_widget(orderItemForm.quantity) }}
                                                     {% endif %}
                                                     {{ form_errors(orderItemForm.quantity) }}
+
                                                 </div>
                                             </td>
                                             <!-- 税率 -->

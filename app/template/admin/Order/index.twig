@@ -233,7 +233,7 @@ file that was distributed with this source code.
 {% block main %}
     <!--検索条件設定テーブルここから-->
     <div class="c-outsideBlock">
-        <form name="search_form" id="search_form" method="POST" action="{{ url('admin_order') }}">
+        <form ="search_form" id="search_form" method="POST" action="{{ url('admin_order') }}">
             <div class="c-outsideBlock__contents">
                 <div class="row">
                     <div class="col-12">
@@ -306,11 +306,12 @@ file that was distributed with this source code.
                             </div>
                         </div>
                         <div class="col-6 order-search">
-                            <label class="col-form-label">{{ 'admin.order.delivery_date_label'|trans }}</label>
+                            <label class="col-form-label">{{ 'ヤマト配送日'|trans }}</label>
                             <div class="form-row align-items-center">
                                 <div class="col">
                                     <div class="input-group">
                                         {{ form_widget(searchForm.shipping_delivery_date_start) }}
+
                                         {{ form_errors(searchForm.shipping_delivery_date_start) }}
                                     </div>
                                 </div>
@@ -346,11 +347,11 @@ file that was distributed with this source code.
                     </div>
                     <div class="col">
                         <div class="form-row">
-                            <div class="col-12">
+                            <!-- <div class="col-12">
                                 <p class="col-form-label">{{ 'admin.common.payment_method'|trans }}</p>
                                 {{ form_widget(searchForm.payment, { 'label_attr': { 'class': 'checkbox-inline'}}) }}
                                 {{ form_errors(searchForm.payment) }}
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -364,11 +365,11 @@ file that was distributed with this source code.
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col">
+                    <!-- <div class="col">
                         <label class="col-form-label">{{ 'admin.order.orderer_company_name'|trans }}</label>
                         {{ form_widget(searchForm.company_name) }}
                         {{ form_errors(searchForm.company_name) }}
-                    </div>
+                    </div> -->
                     <div class="col">
                         <label class="col-form-label">{{ 'admin.order.payment_date'|trans }}</label>
                         <div class="form-row align-items-center">
@@ -385,11 +386,11 @@ file that was distributed with this source code.
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col">
+                    <!-- <div class="col">
                         <label class="col-form-label">{{ 'admin.common.mail_address'|trans }}</label>
                         {{ form_widget(searchForm.email) }}
                         {{ form_errors(searchForm.email) }}
-                    </div>
+                    </div> -->
                     <div class="col">
                         <label class="col-form-label">{{ 'admin.common.update_date'|trans }}</label>
                         <div class="form-row align-items-center">
@@ -455,7 +456,6 @@ file that was distributed with this source code.
                         {{ form_errors(searchForm.buy_product_name) }}
                     </div>
                 </div>
-
                 <div class="row mb-2">
                     <div class="col">
                         <div class="form-row">
@@ -614,11 +614,10 @@ file that was distributed with this source code.
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.delivery_date_label'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.tenpo_label'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.delivery_status_label'|trans }}</th>
-                                        {% if eccube_config.hdn_receipt_no_use %}
-                                            <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.receipt_no_label'|trans }}</th>
-                                        {% endif %}
+                                        <!-- 管理画面へ受取方法追加 2024/09/04 田中 -->
+                                        <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.uketoi_label'| trans }}</th>
+                                        <th class="border-top-0 pt-2 pb-2 text-center">{{ '受付店鋪'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.note_label'|trans }}</th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center pr-3"></th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -633,7 +632,7 @@ file that was distributed with this source code.
                                                     />
                                                 </td>
                                                 <td class="align-middle text-left">
-                                                    <a class="action-edit" href="{{ url('admin_order_edit', { id : Order.id }) }}">{{ Order.order_no }}<br>{{ Order.kana01 ~ Order.kana02 }}<br>{{ Order.order_date|date_min }}</a>
+                                                    <a class="action-edit" href="{{ url('admin_order_edit', { id : Order.id }) }}">{{ Order.order_no }}<br>{{ Order.name01}} {{Order.name02 }}<br>{{ Order.order_date|date_min }}</a>
                                                 </td>
                                                 <td class="align-middle text-center">
                                                     {{ Order.Saiji == null ? '' : Order.Saiji.name }}
@@ -649,8 +648,15 @@ file that was distributed with this source code.
                                                     {{ Order.order_date|date("y/m/d") }}
                                                 </td>
                                                 <td class="align-middle text-center">
+                                                {% if Order.uketori == "店頭受取" %}
+                                                    {{ Order.ukedate|date("y/m/d") }}<br>
+                                                    {{ Order.visit_t }}
+                                                {% elseif Order.uketori == "ヤマト配送"  %}
                                                     {{ Shipping.shipping_delivery_date|date("y/m/d") }}<br>
                                                     {{ Shipping.shipping_delivery_time }}
+                                                {% else %}
+                                                    {{'ー'}}
+                                                {% endif %}
                                                 </td>
                                                 <td class="align-middle text-center">
                                                     {{ Order.Tenpo == null ? '' : Order.Tenpo.tenpoName }}
@@ -665,7 +671,6 @@ file that was distributed with this source code.
                                                             {% else %}
                                                                 {{ 'admin.order.unshipped'|trans }}
                                                             {% endif %}
-                                                        </a>
                                                     {% else %}
                                                         {% if Shipping.shipping_date %}
                                                             完了<br> {{ Shipping.shipping_date|date("y/m/d") }} 
@@ -673,17 +678,21 @@ file that was distributed with this source code.
                                                             {{ 'admin.order.unshipped'|trans }}
                                                         {% endif %}
                                                     {% endif %}
+                                                 
                                                     {% if Shipping.mail_send_date %}
                                                         {% set send_mail_date = Shipping.mail_send_date|date_min %}
-                                                        <i class="fa fa-envelope fa-lg text-secondary" aria-hidden="true" data-tooltip="true" data-placement="top" data-original-title="{{ 'admin.order.shipping_mail__completed'|trans({'%date%': send_mail_date}) }}"></i>
+                                                         <i class="fa fa-envelope fa-lg text-secondary" aria-hidden="true" data-tooltip="true" data-placement="top" data-original-title="{{ 'admin.order.shipping_mail__completed'|trans({'%date%': send_mail_date}) }}"></i>
                                                     {% endif %}
-                                                </td>
-                                                {% if eccube_config.hdn_receipt_no_use %}
+                                                    <!-- 管理画面に受取方法追加　2024/09/04 田中 -->
                                                     <td class="align-middle text-center">
-                                                        {{ Order.receipt_no }}
+                                                        {{ Order.uketori }}
                                                     </td>
-                                                {% endif %}
-                                                <td class="align-middle text-center">
+                                                    <!--管理画面に受付店舗追加　2024/10/10 田中 -->
+                                                    <td class="align-middle text-center">
+                                                        {{ Order.Tenpos }}
+                                                    </td>
+                                                </td>
+                                                <td class="align-middle text-center" style="word-break: break-all; width: 30ch;">
                                                     {{ Order.message }}<!--メモ保留--><br>
                                                     受付：{{ Order.uketsuke_name }}　/　紹介：{{ Order.shoukai_name }}
                                                 </td>

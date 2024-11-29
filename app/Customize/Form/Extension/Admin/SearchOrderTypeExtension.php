@@ -177,6 +177,33 @@ class SearchOrderTypeExtension extends AbstractTypeExtension
                 'data-toggle' => 'datepicker',
             ],
         ])
+
+        ->add('order_date_start', DateType::class, [
+            'label'=> 'admin.order.ukedate_start',
+            'required'=> false,
+            'input' => 'datetime',
+            'widget' => 'single_text',
+            'format' => 'yyyy-MM-dd',
+            'placeholder' => ['year' => '----', 'month' => '--', 'day' => '--'],
+            'attr' => [
+                'class' => 'datepicker-input',
+                'data-target' => '#'.$this->getBlockPrefix().'_admin.order.ukedate_start',
+                'data-toggle' => 'datepicker',
+            ],
+        ])
+        ->add('order_date_end', DateType::class, [
+            'label'=> 'admin.order.ukedate_end',
+            'required'=> false,
+            'input' => 'datetime',
+            'widget' => 'single_text',
+            'format' => 'yyyy-MM-dd',
+            'placeholder' => ['year' => '----', 'month' => '--', 'day' => '--'],
+            'attr' => [
+                'class' => 'datepicker-input',
+                'data-target' => '#'.$this->getBlockPrefix().'_admin.order.ukedate_end',
+                'data-toggle' => 'datepicker',
+            ],
+        ])
         ;
         /* form受取側で上手く取り出せないため断念
         ->add('status', EntityType::class, [

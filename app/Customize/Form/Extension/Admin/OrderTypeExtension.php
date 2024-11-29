@@ -14,6 +14,7 @@
 //namespace Eccube\Form\Type\Admin;
 namespace Customize\Form\Extension\Admin;
 
+use Customize\Repository\VisitRepository;
 use Eccube\Form\Type\Admin\OrderType; // 元のFormType
 
 use Symfony\Component\Form\AbstractTypeExtension;   // これが必要
@@ -31,8 +32,11 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType; //2024/11/15 田中
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class OrderTypeExtension extends AbstractTypeExtension
 {
@@ -41,15 +45,20 @@ class OrderTypeExtension extends AbstractTypeExtension
      */
     protected $eccubeConfig;
 
+    protected $visitRepository;
+
     /**
      * OrderType constructor.
      *
      * @param EccubeConfig $eccubeConfig
      */
     public function __construct(
-        EccubeConfig $eccubeConfig
+        EccubeConfig $eccubeConfig,
+        VisitRepository $visitRepository
     ) {
         $this->eccubeConfig = $eccubeConfig;
+        // $Ukedate = $form['ukedate'];
+        $this->visitRepository = $visitRepository;
     }
 
     /**
@@ -57,6 +66,15 @@ class OrderTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+
+        // $order =
+
+        $Visit = $this->visitRepository->findAll();
+//        $list = [];
+//        foreach($Visit as $item) {
+//            $list[$item->getId()] = $item->getVisitT();
+//        }
+
         $builder
             ->remove('postal_code')
             ->add('postal_code', PostalType::class, [
@@ -96,8 +114,139 @@ class OrderTypeExtension extends AbstractTypeExtension
                     ]),
                 ],
             ])
-            ;
+            ->add('Ukedate', DateType::class, [
+                'widget' => 'single_text',
+                // 'format' => 'yyyy-MM-dd',
+                'required' => false,
+                'by_reference' => true,
+//                'mapped' => false,
+                // エンティティから取得した日付データを表示
+                //'data' => $order->getUkedate() ?? new \DateTime(),
+            ])
+            ->add('VisitT', ChoiceType::class, [
+                'choices' => $Visit,
+                'choice_label' => 'visit_t',
+                'required' => false,
+                'expanded' => false,
+                'multiple' => false,
+                'placeholder' => 'common.select__unspecified',
+                'mapped' => false,
+            ])
 
+             //受け取り方法追加　2024/08/23 田中
+            /*->add('uketori', TextType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Length([
+                    'max' => $this->eccubeConfig['eccube_stext_len'],
+                ]),
+            ],
+        ])*/
+       /* //支払い状況追加　2024/09/02 田中
+        ->add('shiharai_s', TextType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Length([
+                    'max' => $this->eccubeConfig['eccube_stext_len'],
+                ]),
+            ],
+        ])*/
+        //来店時間追加　2024/09/06 田中
+        /*->add('visit_t', TextType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Length([
+                    'max' => $this->eccubeConfig['eccube_stext_len'],
+                ]),
+            ],
+        ])*/
+         //受付店鋪追加　2024/09/10 田中
+         /*->add('uke_tenpo', TextType::class, [
+            'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ]),
+                ],
+            ])*/
+        //配送先住所追加　2024/09/11 修正　2024/09/13 田中
+        /*->add('h_name1', TextType::class, [
+            'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ]),
+                ],
+            ])
+        ->add('h_name2', TextType::class, [
+            'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ]),
+                ],
+            ])
+        ->add('h_kana1', TextType::class, [
+            'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ]),
+                ],
+            ])
+        ->add('h_kana2', TextType::class, [
+            'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ]),
+                ],
+            ])*/
+        /*->add('h_postal_code', TextType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Length([
+                    'max' => $this->eccubeConfig['eccube_stext_len'],
+                ]),
+            ],
+        ])
+        ->add('h_addr1', TextType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Length([
+                    'max' => $this->eccubeConfig['eccube_stext_len'],
+                ]),
+            ],
+        ])
+        ->add('h_addr2', TextType::class, [
+            'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ]),
+                ],
+            ])
+            ->add('h_postal_code', PostalType::class, [
+                'label' => 'dmin.common.h_postal',
+                'required' => false,
+            ])
+        /*->add('h_phone_number', PhoneNumberType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Length([
+                    'max' => $this->eccubeConfig['eccube_stext_len'],
+                ]),
+            ],
+        ])*/
+        //受付店鋪追加　2024/09/10 田中
+        /*->add('h_pref', TextType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Length([
+                    'max' => $this->eccubeConfig['eccube_stext_len'],
+                ]),
+            ],
+        ])*/;
     }
 
     /**
@@ -106,5 +255,10 @@ class OrderTypeExtension extends AbstractTypeExtension
     public function getExtendedType()
     {
         return OrderType::class;
+    }
+
+    public static function getExtendedTypes(): iterable
+    {
+        yield OrderType::class;
     }
 }

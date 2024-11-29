@@ -53,6 +53,7 @@ class KanaType extends AbstractType
     {
         $resolver->setDefaults([
             'lastname_options' => [
+                'label' => false,
                 'attr' => [
                     'placeholder' => 'common.last_name_kana',
                 ],
@@ -67,6 +68,7 @@ class KanaType extends AbstractType
                 ],
             ],
             'firstname_options' => [
+                'label' => false,
                 'attr' => [
                     'placeholder' => 'common.first_name_kana',
                 ],

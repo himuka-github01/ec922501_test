@@ -11,6 +11,15 @@ namespace Customize\Form\Extension;
 use Eccube\Common\EccubeConfig;
 use Eccube\Entity\Delivery;
 use Eccube\Entity\DeliveryTime;
+use Customize\Entity\Recieve;//受け取り方法追加　2024/08/23 田中
+use Customize\Entity\Visit;
+use Customize\Repository\RecieveRepository;//受け取り方法追加　2024/08/23 田中
+//use Customize\Repository\ShiharaiRepository;//支払い状況追加　2024/09/02 田中 支払い方法が「支払い済み」だけになった　2024/10/11
+use Customize\Repository\HdnTenpoRepository;//受取店鋪追加　2024/09/03 田中
+use Customize\Repository\VisitRepository;//来店時間追加　2024/09/09 田中
+use Customize\Repository\TenposRepository;//受取店鋪追加　2024/09/10 田中
+use Customize\Repository\HprefRepository;//県情報取得追加　2024/09/13 田中
+use Doctrine\ORM\Mapping\Entity;
 use Eccube\Form\Type\Front\NonMemberType;
 use Eccube\Form\Type\AddressType;
 use Eccube\Form\Type\KanaType;
@@ -46,33 +55,66 @@ class NonMemberTypeExtension extends AbstractTypeExtension
     protected $deliveryRepository;
 
     /**
+     * @var RecieveRepository
+     */
+    protected $recieveRepository;
+
+    /**
+     * @var HdnTenpoRepository
+     */
+    protected $hdnTenpoRepository;
+
+    //来店時間のプルダウンリスト作成　2024/09/09
+    /**
+     * @var VisitRepository
+     */
+    protected $visitRepository;
+
+    //受付店鋪のプルダウンリスト作成　2024/09/10 田中
+    /**
+     * @var  TenposRepository
+     */
+    protected $tenposRepository;
+    //県情報プルダウン作成　2024/09/13
+    /**
+     * @var HprefRepository
+     */
+    protected $hprefRepository;
+
+    /**
      * @var EccubeConfig
      */
+
     public function __construct(
+        RecieveRepository $recieveRepository,
         CategoryRepository $categoryRepository,
         DeliveryRepository $deliveryRepository,
+        //店鋪一覧取得　2024/09/06 田中
+        HdnTenpoRepository $hdnTenpoRepository,
+        //来店時間プルダウン　2024/09/09 田中
+        VisitRepository $visitRepository,
+        //受付店鋪プルダウン　2024/09/10 田中
+        TenposRepository $tenposRepository,
+        //県情報プルダウン　2024/09/13 田中
+        HprefRepository $hprefRepository,
         EccubeConfig $eccubeConfig
+        
     ) {
+        $this->recieveRepository = $recieveRepository;
         $this->categoryRepository = $categoryRepository;
         $this->deliveryRepository = $deliveryRepository;
+        $this->hdnTenpoRepository = $hdnTenpoRepository;
+        $this->visitRepository = $visitRepository;
+        $this->tenposRepository = $tenposRepository;
+        $this->hprefRepository = $hprefRepository;
         $this->eccubeConfig = $eccubeConfig;
     }
-
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /*
-        $options = $builder->get('company_name')->getOptions();
-
-        $options['required'] = true;
-        $options['constraints'] = [ new NotBlank() ];
-        $options['attr']['placeholder'] = '会社名';
-
-        $builder->add('company_name', TextType::class, $options);
-        */
-
+        
         // (HDN) 受渡日配列を作成
         /*
         $Shipping = $event->getData();
@@ -146,15 +188,36 @@ class NonMemberTypeExtension extends AbstractTypeExtension
                 return $DeliveryTime->isVisible();
             });
 
-            /*
-            foreach ($DeliveryTimes as $deliveryTime) {
-                if ($deliveryTime->getId() == $Shipping->getTimeId()) {
-                    $ShippingDeliveryTime = $deliveryTime;
-                    break;
-                }
-            }
-            */
+        //受渡日の作成　2024/09/19 田中　修正2024/09/21 元のDeliveryを流用して別配列に
+        $Ukedates = [];
+        $Ukedate = new \DatePeriod(
+            $startDt,
+            new \DateInterval('P1D'),
+            $endDt->modify('+1 days')
+        );
+        $dateFormatter = \IntlDateFormatter::create(
+              'ja_JP',
+            \IntlDateFormatter::FULL,
+            \IntlDateFormatter::FULL,
+            'Asia/Tokyo',
+            \IntlDateFormatter::GREGORIAN,
+            'E'
+        );
+        //オブジェクトから配列へ変換　2024/09/21 田中
+        //2024/09/24 UkeDateArrayをUkeDateへ変更
+        foreach ($Ukedate as $day) {
+            $Ukedates[$day->format('Y/m/d')] = $day->format('Y/m/d').'('.$dateFormatter->format($day).')';
+         }
+         
+         //datetimeへの変換　2024/09/24 田中
+         //$DateTimez =[];
+         //ここでDateTimeオブジェクトを生成しているが、失敗しているためfalseが返ってくる　2024/09/25 田中
+         /*foreach($UkeDateArray as $formattedDate){
+            //
+            $DateTimez[] = \DateTime::createFromFormat('Y-m-d', substr($formattedDate, 0, 10));
+            }*/
         }
+
         // (HDN) 支払方法配列を生成
         $Payments = [];
         $PaymentOptions = $Delivery->getPaymentOptions();
@@ -166,10 +229,28 @@ class NonMemberTypeExtension extends AbstractTypeExtension
             }
         }
 
+        //受け取り方法設定　2024/08/23 田中
+        $Recieve = $this->recieveRepository->findAll();
+        log_info('[受取方法]：', array($Recieve));
+
+        //支払い状況追加　2024/09/02 田中 支払い方法が「支払い済み」だけになったので不要　2024/10/11
+        //$Shiharai = $this->shiharaiRepository->findAll();
+        //log_info('[支払い状況]：', array($Shiharai));
+
+        //来店時間追加　2024/09/09 田中
+        $Visit = $this->visitRepository->findAll();
+        log_info('[来店時間]', array($Visit));
+
+        //店鋪一覧取得　2024/09/10 田中
+        $Tenpos = $this->tenposRepository->findall();
+
+        //県情報プルダウン　2024/09/13 田中
+        $Hpref = $this->hprefRepository->findAll();
+
 
         $builder
         ->add('name', NameType::class, [
-            'required' => false,
+            'required' => true,
         ])
         ->add('kana', KanaType::class, [
             'required' => true,
@@ -225,7 +306,7 @@ class NonMemberTypeExtension extends AbstractTypeExtension
         // (HDN) 2022.05.09 追加
         ->add('shipping_delivery_date', ChoiceType::class, [
             'choices' => array_flip($deliveryDurations),
-            'required' => true,
+            'required' => false,
             'placeholder' => 'common.select__unspecified',
             'mapped' => false,
             //'data' => $Shipping->getShippingDeliveryDate() ? $Shipping->getShippingDeliveryDate()->format('Y/m/d') : null,
@@ -237,7 +318,7 @@ class NonMemberTypeExtension extends AbstractTypeExtension
             'choice_label' => 'deliveryTime',
             'choices' => $DeliveryTimes,
             //'required' => true,
-            'required' => $this->eccubeConfig['hdn_delivery_time_required'],
+            'required' => false,
             'placeholder' => 'common.select__unspecified',
             'mapped' => false,
             //'data' => $ShippingDeliveryTime,
@@ -250,17 +331,112 @@ class NonMemberTypeExtension extends AbstractTypeExtension
             'multiple' => false,
             'placeholder' => false,
             'choices' => $Payments,
-            //'data' => $data,
+            'required' => false,
+            //'data' => '1',
+        ])
+        //受け取り方法追加　2024/08/23 田中
+        ->add('Recieve', EntityType::class, [
+            'required' => true,
+            'class' => 'Customize\Entity\Recieve',
+            'choice_label'=> 'uketori',
+            'expanded' => true,
+            'multiple' => false,
+            'placeholder' => false,
+            'choices' => $Recieve,
+            //'data' => $this->RecieveRepository->findBy(['id' => [1]]),
+        ])
+        //支払い状況追加　2024/09/02 田中
+        // ->add('Shiharai', ChoiceType::class, [
+        //     'required'=> false,
+        //     //'class' => 'Customize\Entity\Shiharai',
+        //     //'choice_label'=> '支払い状況',
+        //     'expanded' => true,
+        //     'multiple' => false,
+        //     'placeholder' => '支払い済み',
+        //     'choices' =>  
+        //     [
+        //         trans('支払い済み') => 1,
+        //     ],
+        //     'data' => '1',
+        // ])
+        ->add('Shiharai', ChoiceType::class, [
+            'required' => false,
+            'expanded' => true,
+            'multiple' => false,
+            'placeholder' => '支払い済み',
+            'data' => '1'
+        ])
+        //来店時間追加　2024/09/06 田中
+        ->add('Visit', ChoiceType::class, [
+            'choices' => $Visit,
+            'choice_label' => 'visit_t',
+            'label' => 'front.shopping.delivery_time',
+            'required' => false,
+            'expanded' => false,
+            'multiple' => false,
+            'placeholder' => 'common.select__unspecified',
+            'mapped' => false,
+        ])
+         //受付店鋪追加　2024/09/10 田中
+         ->add('Tenpos', ChoiceType::class, [
+            'choices' => $Tenpos,
+            'choice_label' => 'uke_tenpo',
+            'label' => 'front.shopping.tentou_ukestuke',
+            'required' => true,
+            'expanded' => false,
+            'multiple' => false,
+            'placeholder' => 'common.select__unspecified',
+            'mapped' => false,
+        ])
+        //配送先住所追加　2024/09/11 修正　2024/09/13 田中
+        ->add('h_name1', TextType::class, [
+            'required' => false,
+        ])
+        ->add('h_name2', TextType::class, [
+            'required' => false,
+        ])
+        ->add('h_kana1', TextType::class, [
+            'required' => false,
+        ])
+        ->add('h_kana2', TextType::class, [
+            'required' => false,
+        ])
+        ->add('h_postal_code', PostalType::class, [
+            'required' => false,
+        ])
+        ->add('h_addr1', TextType::class, [
+            'required' => false,
+        ])
+        ->add('h_addr2', TextType::class, [
+            'required' => false,
+        ])
+        ->add('h_phone_number', PhoneNumberType::class, [
+            'required' => false,
+        ])
+        //受付店鋪追加　2024/09/10 田中
+        ->add('Hpref', ChoiceType::class, [
+            'choices' => $Hpref,
+            'choice_label' => 'h_pref',
+            //'label' => '',
+            'required' => false,
+            'expanded' => false,
+            'multiple' => false,
+            'placeholder' => '都道府県を選択',
+            'mapped' => false,
+        ])
+        //店頭受取来店時間　2024/09/19 田中　＊元の曜日配列を流用
+        ->add('Ukedate', ChoiceType::class, [
+            'choices' => Array_flip($Ukedates), 
+            'placeholder' => '日付を選択してください。',
+            'mapped' => false,
+            'required' => false,
         ]);
-
-
-
     }
-
+    
     /**
      * {@inheritdoc}
      */
-    public function getExtendedType()
+     public function getExtendedType()
     {
         return NonMemberType::class;
     }

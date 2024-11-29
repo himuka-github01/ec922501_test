@@ -57,9 +57,22 @@ admin.common.search_try_set_saiji: イベントを指定して「検索」をお
 # エンティティに関連するラベル
 admin.common.wari_kikan_flg: 早割
 admin.common.shain_flg: 社員
+admin.common.shiharai: 支払い状況
 admin.common.shoukai.name: 紹介者
 admin.common.uketsuke_name: 受付者
 admin.common.receipt_no: レシート番号
+admin.common.uketori: 受取方法
+#2024/09/06 追加　田中
+admin.common.visit: 来店時間
+#Edit画面ラベル追加 2024/09/17
+admin.common.recieve: 受取方法
+admin.common.h_adress: お届け先住所
+dmin.common.h_postal: お届け先郵便番号
+admin.common.h_name: お届け先：お名前（漢字）
+admin.common.h_kana: お届け先：お名前（カナ）
+admin.common.h_address: お届け先：住所
+admin.common.h_phone_number: お届け先：電話番号
+admin.common.ukedate: お受取り来店日
 # エラーメッセージ
 admin.common.csv_invalid_value: '%line%行目の%name%の値が不正です'
 
@@ -121,7 +134,12 @@ admin.order.list_uriage: 売上集計
 admin.order.list_minou: 未引渡一覧
 admin.order.tenpo_label: 受渡店舗
 admin.order.bumon_label: 部門
-admin.order.receipt_no_label: レシート
+admin.order.receipt_no_label: レシー
+admin.order.uketori: 受取方法
+admin.order.uke_tenpo: 受付店鋪
+admin.order.visit: 来店時間
+admin.order.ukedate_start: 受渡日（開始）
+admin.order.ukedate_end: 受渡日（終了）
 
 admin.order.multi_search_label: 注文番号・お名前・電話番号・メモ・受付者・紹介者
 

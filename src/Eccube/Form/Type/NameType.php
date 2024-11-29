@@ -96,7 +96,9 @@ class NameType extends AbstractType
     {
         $resolver->setDefaults([
             'options' => [],
+            
             'lastname_options' => [
+                'label' => false,
                 'attr' => [
                     'placeholder' => 'common.last_name',
                 ],
@@ -111,6 +113,7 @@ class NameType extends AbstractType
                 ],
             ],
             'firstname_options' => [
+                'label' => false,
                 'attr' => [
                     'placeholder' => 'common.first_name',
                 ],

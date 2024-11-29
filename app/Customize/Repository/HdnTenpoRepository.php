@@ -49,6 +49,17 @@ class HdnTenpoRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+    //追加検索方法　店鋪名取得 田中　2024/09/10
+    public function findByTenpoName($value)
+    {
+        return $this->createQueryBuilder('tn')
+        //->leftJoin('tn.','') //必要であれば関連するEntityを追加
+        ->Where('tn.tenpoName= :tenpoName')
+        ->setParameter('tenpoName', $value)
+        ->getQuery()
+        ->getResult()
+        ;
+    }
 
     // /**
     //  * @return HdnTenpo[] Returns an array of HdnTenpo objects

@@ -40,14 +40,14 @@ if (!class_exists('\Eccube\Entity\Customer')) {
         private $id;
 
         /**
-         * @var string
+         * @var string|null
          *
          * @ORM\Column(name="name01", type="string", length=255)
          */
         private $name01;
 
         /**
-         * @var string
+         * @var string|null
          *
          * @ORM\Column(name="name02", type="string", length=255)
          */

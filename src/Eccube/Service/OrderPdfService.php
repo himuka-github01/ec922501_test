@@ -17,6 +17,7 @@ use Eccube\Common\EccubeConfig;
 use Eccube\Entity\BaseInfo;
 use Eccube\Entity\OrderItem;
 use Eccube\Entity\Shipping;
+use Eccube\Entity\Order; //2024/10/11
 use Eccube\Repository\BaseInfoRepository;
 use Eccube\Repository\OrderPdfRepository;
 use Eccube\Repository\OrderRepository;
@@ -139,7 +140,7 @@ class OrderPdfService extends TcpdfFpdi
         $this->labelCell[] = '数量';
         $this->labelCell[] = '単価';
         $this->labelCell[] = '金額(税込)';
-        $this->widthCell = [110.3, 12, 21.7, 24.5];
+        $this->widthCell = [150, 1, 24, 24.5];
 
         // Fontの設定しておかないと文字化けを起こす
         $this->SetFont(self::FONT_SJIS);
@@ -439,7 +440,7 @@ class OrderPdfService extends TcpdfFpdi
 
         $this->lfText(25, 125, $orderDate, 10);
         //注文番号
-        $this->lfText(25, 135, $Order->getOrderNo(), 10);
+        $this->lfText(25, 125, $Order->getOrderNo(), 10);
 
         // 総合計金額
         if (!$Order->isMultiple()) {
@@ -751,42 +752,79 @@ class OrderPdfService extends TcpdfFpdi
         $this->lfText($x , $y+$height*0, '注文番号', 11);
         $this->lfText($x2, $y+$height*0, $Order->getOrderNo(), 11);
 
-        // 購入者氏名
+        //購入者氏名（カナ）　2024/09/10
         //$text = $Shipping->getName01().'　'.$Shipping->getName02().'　様';
-        $text = $Order->getKana01().'　'.$Order->getKana02().'　様';
-        $this->lfText($x , $y+$height*1, 'お名前', 11);
-        $this->lfText($x2, $y+$height*1, $text, 11);
+        $text = $Order->getKana01().'　'.$Order->getKana02().'';
+        $this->lfText($x , $y+$height*0.8, '', 8);
+        $this->lfText($x2, $y+$height*0.8, $text, 8);
+
+        // 購入者氏名（漢字）
+        $text = $Shipping->getName01().'　'.$Shipping->getName02().'　様';
+        //$text = $Order->getKana01().'　'.$Order->getKana02().'　様';
+        $this->lfText($x , $y+$height*1.4, 'お名前（漢字）', 10);
+        $this->lfText($x2, $y+$height*1.4, $text, 10);
 
         // ご注文日
         $orderDate = $Order->getCreateDate()->format('Y年m月d日 H:i');
         if ($Order->getOrderDate()) {
             $orderDate = $Order->getOrderDate()->format('Y年m月d日 H:i');
         }
-        $this->lfText($x , $y+$height*2, 'ご注文日', 11);
-        $this->lfText($x2, $y+$height*2, $orderDate, 11);
+        $this->lfText($x , $y+$height*2.2, 'ご注文日', 10);
+        $this->lfText($x2, $y+$height*2.2, $orderDate, 10);
 
         // 受付担当
-        $this->lfText($x , $y+$height*3, '受付担当', 11);
-        $this->lfText($x2, $y+$height*3, $Order->getUketsukeName(), 11);
+        $this->lfText($x , $y+$height*3, '受付担当', 10);
+        $this->lfText($x2, $y+$height*3, $Order->getUketsukeName(), 10);
 
         // お支払方法
-        $this->lfText($x , $y+$height*4, 'お支払方法', 11);
-        $this->lfText($x2, $y+$height*4, $Order->getPaymentMethod(), 11);
+        $this->lfText($x , $y+$height*3.8, 'お支払方法', 10);
+        $this->lfText($x2, $y+$height*3.8, $Order->getPaymentMethod(), 10);
 
-        // お引渡し日
-        $owatashiDate  = $Shipping->getShippingDeliveryDate()->format('Y年m月d日');
+        //お支払い状況　2024/09/05 田中
+        $this->lfText($x , $y+$height*4.5, 'お支払い状況', 10);
+        $this->lfText($x2, $y+$height*4.5, '支払い済み', 10);
+
+        //受取方法　2024/09/05 田中
+        $this->lfText($x , $y+$height*5.2, '受取方法', 10);
+        $this->lfText($x2, $y+$height*5.2, $Order->getUketori(), 10);
+        
+        //来店時間　2024/09/10 田中
+        $this->lfText($x , $y+$height*5.9, '来店時間', 10);
+        $this->lfText($x2, $y+$height*5.9, $Order->getVisit_t(), 10);
+
+        //受付店鋪　2024/09/10 田中
+        $this->lfText($x , $y+$height*6.6, '受付店鋪', 10);
+        $this->lfText($x2, $y+$height*6.6, $Order->getTenpos(), 10);
+
+        //お引渡し日の処理 田中　2024/11/28
+        $ukedate = $Order->getUkedate();
+        if($ukedate !== null ) {
+            $owatashiDate = $ukedate->format('Y年m月d日');
+        } else {
+            // ヤマト配送用の処理
+            $shippingDeliveryDate = $Shipping->getShippingDeliveryDate();
+            if ($shippingDeliveryDate !== null) {
+                $owatashiDate = $shippingDeliveryDate->format('Y年m月d日');
+            } else {
+                $owatashiDate = '未指定';
+            }
+        }
+
         //$owatashiDate .= '（'.$Shipping->getShippingDeliveryTime().'頃）';
         $owatashiDate .= '（'.$Shipping->getShippingDeliveryTime().'）';
-        $this->lfText($x , $y+$height*9.3, 'お引渡し日', 11, 'B');
-        $this->lfText($x2, $y+$height*9.3, $owatashiDate, 11, 'BU');
+        $this->lfText($x , $y+$height*7.5, 'お引渡し日', 10, 'B');
+        $this->lfText($x2, $y+$height*7.5, $owatashiDate, 10, 'BU');
 
         // お引渡し店舗
+        if($Order->getUketori() == 'ヤマト配送'){
+            $owatashiTenpo = "";
+        }else{
         $owatashiTenpo  = $Order->getTenpo()->getTenpoName();
         $phoneNumber    = ' ('.$Order->getTenpo()->getPhoneNumber().')';
-        $this->lfText($x , $y+$height*10.3, 'お引渡し店舗', 11, 'B');
-        $this->lfText($x2, $y+$height*10.3, $owatashiTenpo, 11, 'BU');
-        $this->lfText($xTel, $y+$height*10.3, $phoneNumber, 11,);
-
+        $this->lfText($x , $y+$height*8.4, 'お引渡し店舗', 10, 'B');
+        $this->lfText($x2, $y+$height*8.4, $owatashiTenpo, 10, 'BU');
+        $this->lfText($xTel, $y+$height*8.4, $phoneNumber, 10,);
+        }
         // =========================================
         // 金額＆バーコード
         // =========================================
@@ -841,14 +879,14 @@ class OrderPdfService extends TcpdfFpdi
             $this->MultiCell(58, 4, $text, 1, 'L', 0, 1, $xReceipt);
 
             //------------------------
-            // (HDN) お支払い金額
+            // (HDN) お支払い金額　座標変更　2024/09/05 田中
             //------------------------
             $this->SetFont(self::FONT_SJIS, 'B', 15);
-            //$this->setBasePosition($xBar, $y+$height*9);
+            $this->setBasePosition($xBar*2.0, $y+$height*9);
             //$this->Cell(5, 7, '', 0, 0, '', 0, '');
             //$this->Cell(67, 8, $paymentTotalText, 0, 2, 'R', 0, '');
             //$this->Cell(0, 45, '', 0, 2, '', 0, '');
-            $this->lfText($xGaku, $y+$height*10.0, 'お支払金額　'.$paymentTotalText, 15, 'U');
+            $this->lfText($xGaku+6, $y+$height*9.5, 'お支払金額　'.$paymentTotalText, 15, 'U');
 
         }
 
@@ -863,10 +901,10 @@ class OrderPdfService extends TcpdfFpdi
      * @param array $formData
      */
     protected function renderMessageDataY01(array $formData, $x, $y, $height)
-    {
-        $this->lfText($x, $y+$height*0, $formData['message1'], 10); //メッセージ1
-        $this->lfText($x, $y+$height*1, $formData['message2'], 10); //メッセージ2
-        $this->lfText($x, $y+$height*2, $formData['message3'], 10); //メッセージ3
+    {   //メッセージ座標　2024/09/05
+        $this->lfText($x, $y+$height*4.2, $formData['message1'], 10); //メッセージ1
+        $this->lfText($x, $y+$height*4.9, $formData['message2'], 10); //メッセージ2
+        $this->lfText($x, $y+$height*5.6, $formData['message3'], 10); //メッセージ3
     }
 
     /**
@@ -935,7 +973,7 @@ class OrderPdfService extends TcpdfFpdi
         $this->labelCell[4] = 'お支払額(税抜)';
         //$this->widthCell = [100, 12, 30, 30];
         //$this->widthCell = [75, 25, 12, 30, 30];
-        $this->widthCell = [74, 27, 11, 30, 30];
+        $this->widthCell = [76, 30, 12, 30, 30];
 
         // =========================================
         // 受注詳細情報
@@ -951,7 +989,7 @@ class OrderPdfService extends TcpdfFpdi
         $iter->uasort(function($a, $b) {
             $name_a = $a->getProductName();
             $name_b = $b->getProductName();
-            return $name_a == $name_b ? 0 : $name_a > $name_b ? 1 : - 1;
+            return $name_a == ($name_b ? 0 : $name_a > $name_b) ? 1 : - 1;
         });
         /* @var OrderItem $OrderItem */
         //foreach ($Shipping->getOrderItems() as $OrderItem) {

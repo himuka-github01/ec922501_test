@@ -51,6 +51,11 @@ class HdnTenpo
      */
     private $phone_number;
 
+     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $uke_tenpo;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -115,15 +120,28 @@ class HdnTenpo
 
         return $this;
     }
-
-    public function getPhoneNumber(): ?string
+    //Entity 修正　2024/10/11 田中
+    public function getPhoneNumber()
     {
         return $this->phone_number;
     }
 
-    public function setPhoneNumber(string $phone_number = null): self
+    public function setPhoneNumber($phone_number): self
     {
         $this->phone_number = $phone_number;
+
+        return $this;
+    }
+
+    //受付店鋪の追加　2024/09/17 田中
+    public function getUkeTenpo(): ?string
+    {
+        return $this->uke_tenpo;
+    }
+
+    public function setUkeTenpo(string $uke_tenpo = null): self
+    {
+        $this->uke_tenpo = $uke_tenpo;
 
         return $this;
     }

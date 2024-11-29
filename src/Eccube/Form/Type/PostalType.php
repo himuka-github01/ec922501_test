@@ -62,7 +62,7 @@ class PostalType extends AbstractType
             if (isset($options['required']) && true === $options['required']) {
                 $constraints[] = new Assert\NotBlank();
             }
-
+            
             $constraints[] = new Assert\Length([
                 'max' => $eccubeConfig['eccube_postal_code'],
             ]);

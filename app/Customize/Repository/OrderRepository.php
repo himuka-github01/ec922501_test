@@ -380,8 +380,9 @@ class OrderRepository extends BaseOrderRepository
             //$hdnTenpoRepository = $this->entityManager->getRepository(HdnTenpo::class);
             $hdnTenpoRepository = $entityManager->getRepository(HdnTenpo::class);
             $tenpo = $hdnTenpoRepository->find($tenpo_id);
-
+            
             // 2)-2 催事/店舗を条件に商品/受渡日毎の実績を取得(SQL生成)
+            //sum_bumon_item_02.twig　受注管理（新）日付ソート作成　2024/09/18 田中　
             //$orderRepository = $this->entityManager->getRepository(Order::class);
             $qb = $this->createQueryBuilder('o')
                 ->select('sj.id as saiji_id')
@@ -404,6 +405,7 @@ class OrderRepository extends BaseOrderRepository
                 ->addGroupBy('s.shipping_delivery_date')
                 ->orderBy('product_id')
                 ->addOrderBy('s.shipping_delivery_date');
+                
             $qb->andwhere($qb->expr()->in('p.id', $ids));
             $qb->setParameter('Saiji', $saiji)
                 ->setParameter('Tenpo', $tenpo);
@@ -418,7 +420,7 @@ class OrderRepository extends BaseOrderRepository
                 $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
                 $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
             }
-            
+            //2024/09/18 
             // 3) 商品毎(全店)の受渡日別受注数を取得 $sumOrdersAllTenpo
             // 3)-1 催事を条件に商品/受渡日毎の実績を取得(SQL生成)
             $qb = $this->createQueryBuilder('o')
@@ -427,6 +429,7 @@ class OrderRepository extends BaseOrderRepository
                 ->addSelect('p.id as product_id')
                 ->addSelect('s.shipping_delivery_date')
                 ->addSelect('sum(oi.quantity) as quantity')
+                //->addSelect('u.shippipng.ukedate')//2024/09/18 追加
                 ->leftJoin('o.OrderItems', 'oi')
                 ->leftJoin('oi.Product', 'p')
                 ->leftJoin('oi.Shipping', 's')
@@ -441,8 +444,8 @@ class OrderRepository extends BaseOrderRepository
                 //->addGroupBy('tenpo_id')
                 ->addGroupBy('product_id')
                 ->addGroupBy('s.shipping_delivery_date')
-                ->orderBy('product_id')
-                ->addOrderBy('s.shipping_delivery_date');
+                ->orderBy('product_id');
+                //->addOrderBy('u.shippipng.ukedate');//2024/09/18 追加
             $qb->setParameter('Saiji', $saiji);
                 //->setParameter('Tenpo', $tenpo);
 
@@ -452,7 +455,8 @@ class OrderRepository extends BaseOrderRepository
 
             // 3)-3 商品毎受渡日別受注状況をワーク配列にセット
             foreach ($sumOrdersAllTenpo as $sumOrder) {
-                $wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
+                //$wDate = $sumOrder['shipping_delivery_date']->format('Y-m-d');
+                $wDate = $sumOrder['shipping_delivery_date'] ? $sumOrder['shipping_delivery_date']->format('Y/m/d') : '1900/01/01';
                 $wOrders[$sumOrder['product_id']][$wDate] = $sumOrder['quantity'];
             }
         }

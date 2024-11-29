@@ -155,8 +155,10 @@ file that was distributed with this source code.
 {% endblock javascript %}
 
 {% block main %}
+   
     <div class="ec-sliderRole">
         <div class="ec-layoutRole tenpo-block">
+             <p> <font color="red" size="5">　※ヤマト配送時は一番下の「ヤマト配送（９９９）」を選択して下さい。</font></p>
             {% for Tenpo in Tenpos %}
                 <li id="ex-category-{{ Tenpo.id }}" class="sortable-item tenpo-group-item" data-id="{{ Tenpo.id }}" data-sort-no="{{ Tenpo.sortNo }}">
                     {% if Tenpo.id == tenpo_id %}
