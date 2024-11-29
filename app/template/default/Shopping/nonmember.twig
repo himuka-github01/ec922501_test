@@ -1,0 +1,482 @@
+{#
+This file is part of EC-CUBE
+
+Copyright(c) EC-CUBE CO.,LTD. All Rights Reserved.
+
+http://www.ec-cube.co.jp/
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+#}
+{% extends 'default_frame.twig' %}
+
+{% set body_class = 'cart_page' %}
+
+{% form_theme form 'Form/form_div_layout.twig' %}
+
+{% block javascript %}
+{# <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script> #}
+{# 受取方法の分岐追加 240724 田中 #}
+<script>
+    function buttonClick() {
+    //要素の取得
+    const btnHide = document.getElementById("nonmember_Recieve_1");
+    const btnHide1 = document.getElementById("nonmember_Recieve_2");
+    const address = document.getElementById("address");
+    const shiharai = document.getElementById("shiharai");
+    const deliverytime = document.getElementById("deliverytime");
+    const delivery = document.getElementById("delivery");
+    const visit = document.getElementById("visit");
+    const address2 = document.getElementById("address2");
+    const uketori = document.getElementById("uketori");
+    
+    //フォームセレクターの定義
+    const formSelectors = {
+        address: {
+            'postal_code': 'input[name="nonmember[postal_code]"]',
+            'pref': 'select[name="nonmember[address][pref]"]',
+            'addr01': 'input[name="nonmember[address][addr01]"]',
+            'addr02': 'input[name="nonmember[address][addr02]"]'
+        },
+        delivery: {
+            'delivery_date': 'select[name="nonmember[shipping_delivery_date]"]',
+            'delivery_time': 'select[name="nonmember[DeliveryTime]"]'
+        },
+        uketori: {
+            'ukedate': 'select[name="nonmember[Ukedate]"]',
+            'visit_time': 'select[name="nonmember[Visit]"]'
+        },
+        delivery_address: {
+            'h_name1': 'input[name="nonmember[h_name1]"]',
+            'h_name2': 'input[name="nonmember[h_name2]"]',
+            'h_kana1': 'input[name="nonmember[h_kana1]"]',
+            'h_kana2': 'input[name="nonmember[h_kana2]"]',
+            'h_postal_code': 'input[name="nonmember[h_postal_code]"]',
+            'h_pref': 'select[name="nonmember[Hpref]"]',
+            'h_addr1': 'input[name="nonmember[h_addr1]"]',
+            'h_addr2': 'input[name="nonmember[h_addr2]"]',
+            'h_phone': 'input[name="nonmember[h_phone_number]"]'
+        }
+    };
+
+    //フォームのクリア処理
+    function clearFormFields(categories) {
+        categories.forEach(category => {
+            if (formSelectors[category]) {
+                Object.values(formSelectors[category]).forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        if (element.tagName.toLowerCase() === 'select') {
+                            element.selectedIndex = '';
+                        } else {
+                            element.value = '';
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    //ラジオボタンの変更時の処理
+    const radiobtn = document.querySelectorAll('input[type="radio"][name="nonmember[Recieve]"]');
+    radiobtn.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (btnHide && btnHide.checked) {
+                // 店頭受取の場合
+                clearFormFields(['address', 'delivery', 'delivery_address']);
+                address.style.display = "none";
+                shiharai.style.display = "none";
+                deliverytime.style.display = "none";
+                delivery.style.display = "none";
+                visit.style.display = "";
+                address2.style.display = "none";
+                uketori.style.display = "";
+            } else if (btnHide1 && btnHide1.checked) {
+                // ヤマト配送の場合
+                clearFormFields(['uketori']);
+                address.style.display = "";
+                shiharai.style.display = "";
+                deliverytime.style.display = "";
+                delivery.style.display = "";
+                visit.style.display = "none";
+                address2.style.display = "";
+                uketori.style.display = "none";
+            } else {
+                address.style.display = "";
+                shiharai.style.display = "";
+                deliverytime.style.display = "";
+                delivery.style.display = "";
+                visit.style.display = "";
+                address2.style.display = "";
+                uketori.style.display = "";
+            }
+        });
+    });
+}
+    
+
+</script>
+{% endblock javascript %}
+
+{% block main %}
+<style>
+    dl.hiddenItem {
+        display: none;
+    }
+    .hiddenItem {
+        display: none;
+    }
+
+</style>
+
+<div class="ec-customerRole">
+    <div class="ec-pageHeader">
+        <h1>{{ 'お客様情報の入力'|trans }}</h1>
+    </div>
+    <div class="ec-cartRole">
+        <div class="ec-cartRole__progress">
+            <ul class="ec-progress">
+                {% set step = 1 %}
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">{{ 'カートの商品'|trans }}
+                    </div>
+                </li>
+                {% if is_granted('ROLE_USER') == false %}
+                    <li class="ec-progress__item is-complete">
+                        <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                        </div>
+                        <div class="ec-progress__label">{{ 'お客様情報'|trans }}
+                        </div>
+                    </li>
+                {% endif %}
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">{{ 'ご注文手続き'|trans }}
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">{{ 'ご注文内容確認'|trans }}
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">{{ '完了'|trans }}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% if app.session.flashbag.has('error') %}
+            <div class="alert alert-danger">
+            {% for message in app.session.flashbag.get('error') %}
+                <p>{{ 'お支払い方法が選択されていません。'|trans }}</p>
+            {% endfor %}
+            </div>
+            {% endif %}
+    <div class="ec-off1Grid">
+        <div class="ec-off1Grid__cell">
+            <form method="post" action="{{ url('shopping_nonmember') }}" class="h-adr">
+            <span class="p-country-name" style="display:none;">Japan</span>
+            {{ form_widget(form._token) }}
+            <div class="ec-borderedDefs">
+                <dl>
+                    <dt>
+                        {{ form_label(form.name, 'お名前（漢字）', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-halfInput{{ has_errors(form.name.name01, form.name.name02) ? ' error'}}">
+                            {{ form_widget(form.name.name01, { 'attr': { 'placeholder': '姓' }}) }}
+                            {{ form_widget(form.name.name02, { 'attr': { 'placeholder': '名' }}) }}
+                            {{ form_errors(form.name.name01) }}
+                            {{ form_errors(form.name.name02) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        {{ form_label(form.kana, 'お名前(カナ)', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-halfInput{{ has_errors(form.kana.kana01, form.kana.kana02) ? ' error'}}">
+                            {{ form_widget(form.kana.kana01, { 'attr': { 'placeholder': 'セイ' }}) }}
+                            {{ form_widget(form.kana.kana02, { 'attr': { 'placeholder': 'メイ' }}) }}
+                            {{ form_errors(form.kana.kana01) }}
+                            {{ form_errors(form.kana.kana02) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        {{ form_label(form.shain_flg, '社員の方はチェックしてください。', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-checkbox">
+                            {{ form_widget(form.shain_flg, { 'label': '社員'|trans }) }}
+                            <font color="red">※注文者が社員（パート・バイト含む）ならチェックを入れる</font>
+                        </div>
+                    </dd>
+                </dl>
+                {# 受取方法の追加 2024/08/23 田中 #}
+                 <dl>
+                    <dt>
+                        {{ form_label(form.Recieve, '受取方法', { 'label_attr': { 'class': 'ec-label' }}) }}</br>
+                        <font color="red">最初に必ず選択してください。</font>
+                    </dt>
+                    <dd>
+                        <div class="ec-radio" name="店頭受取" onclick="buttonClick()" >
+                            {% for key, child in form.Recieve %}
+                                <div style="display: block;" >
+                                {{ form_widget(child, { 'attr': {'checked': child.vars.value == '店頭受取'} }) }}
+                                </div>
+                            {% endfor %}
+                            {{ form_errors(form.Recieve) }}
+                        </div>
+                    </dd>
+                </dl>
+                <!--
+                <dl>
+                    <dt>
+                        {{ form_label(form.company_name, '会社名', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-halfInput{{ has_errors(form.company_name) ? ' error' }}">
+                            {{ form_widget(form.company_name) }}
+                            {{ form_errors(form.company_name) }}
+                        </div>
+                    </dd>
+                </dl>
+                -->
+                {% if eccube_config.hdn_delivery_address_use %}
+                <dl id = "address" >
+                    <dt>
+                        {{ form_label(form.address, 'ご注文者様住所', { 'label_attr': { 'class': 'ec-label' }}) }} <font color="red">※入力必須</font><br>
+                        <font color="red">※配送の場合のみ記入してください。</font>
+                    </dt>
+                    <dd>
+                        <form class="h-adr">
+                        <div class="ec-zipInput{{ has_errors(form.postal_code) ? ' error' }}"><span>{{ '〒'|trans }}</span>
+                        <span class="p-country-name" style="display:none;">Japan</span>
+                            {{ form_widget(form.postal_code) }}
+                            <div class="ec-zipInputHelp">
+                                <div class="ec-zipInputHelp__icon">
+                                    <div class="ec-icon"><img
+                                                src="{{ asset('assets/icon/question-white.svg') }}" alt="">
+                                    </div>
+                                </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>{{ '郵便番号検索'|trans }}</span></a>
+                            </div>
+                            {{ form_errors(form.postal_code) }}
+                        </div>
+                        <div class="ec-select{{ has_errors(form.address.pref) ? ' error' }}">
+                            {{ form_widget(form.address.pref) }}
+                            {{ form_errors(form.address.pref) }}
+                        </div>
+                        <div class="ec-input{{ has_errors(form.address.addr01) ? ' error' }}">
+                            {{ form_widget(form.address.addr01, { 'attr': { 'placeholder': '市区町村名・番地(例：大阪市北区1-1-1)' }}) }}
+                            {{ form_errors(form.address.addr01) }}
+                        </div>
+                        <div class="ec-input{{ has_errors(form.address.addr02) ? ' error' }}">
+                            {{ form_widget(form.address.addr02,  { 'attr': { 'placeholder': 'アパート・マンション名(例：〇〇マンション〇〇号室)' }}) }}
+                            {{ form_errors(form.address.addr02) }}
+                        </div>
+                    </dd>
+                 </dl>
+                 {# 配送先住所追加 2024/09/11 田中 #}
+                 <dl id="address2">
+                    <dt>
+                        {{ form_label(form.address, 'お届け先住所', { 'label_attr': { 'class': 'ec-label' }}) }}</span><span> <font color="red">※入力必須</font></span><br>
+                        <font color="red">※配送の場合のみ記入してください。</font><br>
+                    </dt>
+                   <dd>
+                        {{ '＜お名前(漢字)＞' }}
+                        <div class="ec-halfInput">
+                            {{ form_widget(form.h_name1,{ 'attr': { 'placeholder': '姓' }}) }}
+                            {{ form_widget(form.h_name2,{ 'attr': { 'placeholder': '名' }}) }}
+                        </div>
+                        {{ '＜お名前(カナ)＞' }}
+                        <div class="ec-halfInput">
+                            {{ form_widget(form.h_kana1,{ 'attr': { 'placeholder': 'セイ' }}) }}
+                            {{ form_widget(form.h_kana2,{ 'attr': { 'placeholder': 'メイ' }}) }}
+                        </div>
+                        {# 配送先記述変更 2024/09/13 田中 #}
+                        {{ '＜お届け先住所＞' }}<font color ="red"font size="3">※配送先住所は手入力をして下さい。</font><br>
+                        <div class="ec-zipInput"><span>{{ '〒'|trans }}</span>
+                            {{ form_widget(form.h_postal_code, {'attr': { 'placeholder': '例：5300000' }}) }}
+                            <div class="ec-zipInputHelp">
+                                <div class="ec-zipInputHelp__icon">
+                                    <div class="ec-icon"><img src="{{ asset('assets/icon/question-white.svg') }}" alt=""></div>
+                                </div>
+                                <a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>{{ '郵便番号検索'|trans }}</span></a>
+                            </div>
+                        </div>
+                        <div class="ec-select">
+                            {{ form_widget(form.Hpref) }}
+                        <div class="ec-input">
+                            {{ form_widget(form.h_addr1,{ 'attr': { 'placeholder': '市区町村名・番地(例：大阪市北区1-1-1)' }}) }}
+                        <div class="ec-input">
+                            {{ form_widget(form.h_addr2, { 'attr': { 'placeholder': 'アパート・マンション名(例：〇〇マンション〇〇号室)'}}) }}
+                        </div>
+                        {{ '＜お届け先電話番号＞' }}<br>
+                        <div class="ec-telInput">
+                            {{ form_widget(form.h_phone_number) }}
+                        </div>
+                    </dd>
+                 </dl>
+                 {# 支払い状況の追加 2024/09/02 田中 #}
+                 <dl id= "shiharai" >
+                    <dt>
+                        {{ form_label(form.Shiharai, '支払い状況', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-radio"name="shiharai">
+                           {{ form_widget(form.Shiharai, { 'data': '1'}) }} 
+                        </div>
+                    </dd>
+                </dl>
+                {% endif %}
+                <!--
+                <input type="hidden" name="nonmember[name][name01]" value="{{ form_widget(form.name.name01) }}">
+                <input type="hidden" name="nonmember[name][name02]" value="{{ form_widget(form.name.name02) }}">
+                -->
+                {# {% if eccube_config.hdn_delivery_address_use != true %}
+                    <input type="hidden" name="nonmember[postal_code]" value="">
+                    <input type="hidden" name="nonmember[address][pref]" value="45">
+                    <input type="hidden" name="nonmember[address][addr01]" value="">
+                {% endif %} #}
+                <input type="hidden" name="nonmember[email][first]" value="dummy@dummy.com">
+                <input type="hidden" name="nonmember[email][second]" value="dummy@dummy.com">
+                <dl>
+                    <dt>
+                        {{ form_label(form.phone_number, '電話番号', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-telInput{{ has_errors(form.phone_number) ? ' error' }}">
+                            {{ form_widget(form.phone_number) }}
+                            {{ form_errors(form.phone_number) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl id ="delivery">
+                    <dt>
+                        {{ form_label(form.shipping_delivery_date, 'お届け日', { 'label_attr': { 'class': 'ec-label' }}) }} <font color="red" font size="2"> 必須</font><br>
+                        <font color="red" font size="2">※配送の場合は必ずお届け予定・お届け希望時間帯を選択してください。</font><br> 
+                    </dt>
+                    <dd>
+                        <div class="ec-select ec-select__delivery">
+                            {{ form_widget(form.shipping_delivery_date, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.shipping_delivery_date) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl id = "deliverytime">
+                    <dt>
+                        {{ form_label(form.DeliveryTime, 'お届けご希望時間帯', { 'label_attr': { 'class': 'ec-label' }}) }} <font color="red" font size="2"> 必須</font><br>
+                    </dt>
+                    <dd>
+                        <div class="ec-select ec-select__time">
+                            {{ form_widget(form.DeliveryTime, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.DeliveryTime) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl id = "paymentstatus">
+                    <dt>
+                        {{ form_label(form.Payment, 'お支払い方法' , { 'label_attr': { 'class': 'ec-label' }}) }} <font color="red" font size="2"> 必須</font><br>
+                    <dd>
+                        <div class="ec-radio"name="paymentstatus">
+                            {% for key, child in form.Payment %}
+                                <div style="display: block;">
+                                    {{ form_widget(child, { 'data': '1'}) }}
+                                </div>
+                            {% endfor %}
+                            {{ form_errors(form.Payment) }}
+                        </div>
+                    </dd>
+                </dl>
+                {# 来店受取日追加 2024/09/19 田中 #}
+                <dl id ="uketori">
+                    <dt>
+                        {{ form_label(form.shipping_delivery_date, '来店受取日', { 'label_attr': { 'class': 'ec-label' }}) }} <font color="red" font size="2"> 必須</font><br>
+                    </dt>
+                    <dd>
+                        <div class="ec-select ec-select__time">
+                            {{ form_widget(form.Ukedate,  {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </dd>
+                </dl>
+               <dl id="visit">
+                <dt>
+                    {# 来店時間追加 2024/09/09 田中 Formで設定した文字列と同じにしなければならない。（例：Form側->Visitであればtwig側も先頭大文字で記述）#}
+                    {{ form_label(form.Visit, '来店時間') }} <font color="red" size="2">必須</font><br>
+                </dt>
+                    <dd>
+                        <div class="ec-select ec-select__time">
+                            {{ form_widget(form.Visit) }}
+                            {{ form_errors(form.Visit) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                <dt>
+                    {# 受付店鋪追加 2024/09/10 田中 #}
+                    {{ form_label(form.Tenpos, '受付店鋪') }}
+                </dt>
+                    <dd>
+                        <div class="ec-select">
+                            {{ form_widget(form.Tenpos) }}
+                            {{ form_errors(form.Tenpos) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        {{ form_label(form.uketsuke_name, '受付担当', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-halfInput{{ has_errors(form.uketsuke_name) ? ' error' }}">
+                            {{ form_widget(form.uketsuke_name) }}
+                            {{ form_errors(form.uketsuke_name) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl class="hiddenItem">
+                    <dt>
+                        {{ form_label(form.shoukai_name, '紹介者', { 'label_attr': { 'class': 'ec-label' }}) }}
+                    </dt>
+                    <dd>
+                        <div class="ec-halfInput{{ has_errors(form.shoukai_name) ? ' error' }}">
+                            {{ form_widget(form.shoukai_name) }}
+                            {{ form_errors(form.shoukai_name) }}
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        {{ form_label(form.message, '備考（3,000文字以内）', { 'label_attr': { 'class': 'ec-label' }}) }}<br>
+                    </dt>
+                    <dd>
+                        <div class="ec-input{{ has_errors(form.message) ? ' error' }}">
+                            {{ form_widget(form.message, {'attr': {'class': 'form-control', 'placeholder': '(3000文字まで)'|trans, 'rows': '6'}}) }}
+                            {{ form_errors(form.message) }}
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+            <div class="ec-RegisterRole__actions">
+                <div class="ec-off4Grid">
+                    <div class="ec-off4Grid__cell">
+                        <button type="submit" class="ec-blockBtn--action">{{ '次へ'|trans }}</button>
+                        <a class="ec-blockBtn--cancel" href="{{ url('cart') }}">{{ '戻る'|trans }}</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

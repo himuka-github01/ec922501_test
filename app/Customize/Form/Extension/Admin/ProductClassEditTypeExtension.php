@@ -1,0 +1,61 @@
+<?php
+
+namespace Customize\Form\Extension\Admin;
+
+use Eccube\Common\EccubeConfig;
+use Eccube\Form\Type\Admin\ProductClassEditType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\AbstractTypeExtension;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
+//use Symfony\Component\DependencyInjection\ContainerInterface;
+
+class ProductClassEditTypeExtension extends AbstractTypeExtension
+{
+    /**
+     * @var EccubeConfig
+     */
+    public function __construct(
+        EccubeConfig $eccubeConfig
+    ) {
+        $this->eccubeConfig = $eccubeConfig;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder
+        ->add('one_day_limit', NumberType::class, [
+            'required' => false,
+            'constraints' => [
+                new Assert\Regex([
+                    'pattern' => "/^\d+$/u",
+                    'message' => 'form_error.numeric_only',
+                ]),
+            ],
+        ])
+        /*
+        ->add('one_day_limit', TextType::class, [
+            'constraints' => [
+                new Assert\NotBlank(),
+            ],
+        ])
+        */
+        ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getExtendedType()
+    {
+        return ProductClassEditType::class;
+    }
+}
