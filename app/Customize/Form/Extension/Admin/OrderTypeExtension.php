@@ -14,6 +14,8 @@
 //namespace Eccube\Form\Type\Admin;
 namespace Customize\Form\Extension\Admin;
 
+use Customize\Entity\HdnTenpo;
+use Customize\Repository\HdnTenpoRepository;
 use Customize\Repository\VisitRepository;
 use Customize\Repository\HprefRepository;
 use Eccube\Form\Type\Admin\OrderType; // 元のFormType
@@ -50,6 +52,9 @@ class OrderTypeExtension extends AbstractTypeExtension
     protected $visitRepository;
 
     protected $hprefRepository;
+
+    protected $hdnTenpoRepository;
+
     /**
      * OrderType constructor.
      *
@@ -58,11 +63,13 @@ class OrderTypeExtension extends AbstractTypeExtension
     public function __construct(
         EccubeConfig $eccubeConfig,
         VisitRepository $visitRepository,
+        HdnTenpoRepository $hdnTenpoRepository,
         HPrefRepository $hprefRepository
     ) {
         $this->eccubeConfig = $eccubeConfig;
         // $Ukedate = $form['ukedate'];
         $this->visitRepository = $visitRepository;
+        $this->hdnTenpoRepository = $hdnTenpoRepository;
         $this->hprefRepository = $hprefRepository;
     }
 
@@ -81,6 +88,8 @@ class OrderTypeExtension extends AbstractTypeExtension
 //        }
 
         $Hpref = $this->hprefRepository->findAll();
+
+        $tenpo = $this->hdnTenpoRepository->findAll();
 
         $builder
             ->remove('postal_code')
@@ -202,6 +211,15 @@ class OrderTypeExtension extends AbstractTypeExtension
             ])
             ->add('h_phone_number', PhoneNumberType::class, [
                 'required' => false,
+            ])
+            ->add('tenpo_code', ChoiceType::class, [
+            'choices' => $tenpo,
+                'choice_label' => 'tenpo_code',
+                'required' => false,
+                'expanded' => false,
+                'multiple' => false,
+                'placeholder' => '店舗を選択',
+
             ])
              //受け取り方法追加　2024/08/23 田中
             /*->add('uketori', TextType::class, [
