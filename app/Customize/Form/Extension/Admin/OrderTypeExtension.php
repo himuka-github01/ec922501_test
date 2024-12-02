@@ -182,15 +182,24 @@ class OrderTypeExtension extends AbstractTypeExtension
                 'multiple' => false,
                 'placeholder' => '都道府県を選択',
             ])
-//            ->add('h_aaddress', AddressType::class, [
-//                'required' => false,
-//                'h_addr1_options' => [
-//                    'required' => false,
-//                ],
-//                'h_addr2_options' => [
-//                    'required' => false,
-//                ],
-//            ])
+            ->add('h_addr1', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ])
+                ],
+
+            ])
+            ->add('h_addr2', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ])
+                ],
+
+            ])
             ->add('h_phone_number', PhoneNumberType::class, [
                 'required' => false,
             ])
