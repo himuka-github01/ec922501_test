@@ -48,6 +48,7 @@ class OrderTypeExtension extends AbstractTypeExtension
 
     protected $visitRepository;
 
+    protected $hprefRepository;
     /**
      * OrderType constructor.
      *
@@ -55,11 +56,13 @@ class OrderTypeExtension extends AbstractTypeExtension
      */
     public function __construct(
         EccubeConfig $eccubeConfig,
-        VisitRepository $visitRepository
+        VisitRepository $visitRepository,
+        HPrefRepository $hprefRepository
     ) {
         $this->eccubeConfig = $eccubeConfig;
         // $Ukedate = $form['ukedate'];
         $this->visitRepository = $visitRepository;
+        $this->hprefRepository = $hprefRepository;
     }
 
     /**
