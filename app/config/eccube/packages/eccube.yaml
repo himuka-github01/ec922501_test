@@ -134,6 +134,12 @@ parameters:
     #-------------------------
     # ユーザ定義定数
     #-------------------------
+	# 2024/09/02 田中　通常CSV・ヤマトCSV用　
+    hdn_yamato_csv: 'ヤマト配送用CSV'
+    admin.order.shipping_yamato: ヤマト配送CSV
+    #2024/09/06 田中　店頭受取時
+    hdn_tentou_time: 受取時間
+	
     # 2023.07.xx for Rocky
     hdn_saiji_by_tenpo_use: false   # 店舗毎催事の使用有無
     hdn_wari_use: false # 各種割引の使用有無

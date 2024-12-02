@@ -783,6 +783,7 @@ admin.order.order_sum_bumon_item: 受注集計
 admin.order.order_sum_tenpo_bumon: 売上集計
 admin.order.shipping_registration: 出荷登録
 admin.order.shipping_csv_upload: 出荷CSV登録
+admin.order.shipping_yamato: ヤマトB2用
 admin.order.mail: メール通知
 # 名称追加　2024/09/05 田中
 admin.order.order_sum_bumon_item_02: 受渡日集計

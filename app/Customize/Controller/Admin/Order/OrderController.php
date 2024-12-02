@@ -4058,8 +4058,8 @@ class OrderController extends BaseOrderController
             //$qb = $this->orderRepository->createQueryBuilder('o');
             $qb = $this->csvExportService
                 ->getOrderQueryBuilder($request)
-                ->andWhere('o.payment_method = :paymentMethod')
-                ->setParameter('paymentMethod', 'ヤマト配送');
+                ->andWhere('o.uketori = :uketori')
+                ->setParameter('uketori', 'ヤマト配送');
     
                 // データ行の出力.
                 $this->csvExportService->setExportQueryBuilder($qb);

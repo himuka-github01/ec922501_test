@@ -592,6 +592,10 @@ file that was distributed with this source code.
                                                 <a class="dropdown-item" href="{{ url('admin_setting_shop_csv', { id : constant('\\Eccube\\Entity\\Master\\CsvType::CSV_TYPE_SHIPPING') }) }}" id="shippingCsvSetting">
                                                     {{ 'admin.order.shipping_csv'|trans }}
                                                 </a>
+												 {# ヤマト配送CSV ダウンロード　2024/10/02 田中 #}
+                                                <a class="dropdown-item" href="{{ url('admin_order_export_yamato') }}" id="yamatoCsvDownload">
+                                                    {{ 'admin.order.shipping_yamato'|trans }}
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
