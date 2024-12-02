@@ -15,6 +15,7 @@
 namespace Customize\Form\Extension\Admin;
 
 use Customize\Repository\VisitRepository;
+use Customize\Repository\HprefRepository;
 use Eccube\Form\Type\Admin\OrderType; // 元のFormType
 
 use Eccube\Form\Type\PhoneNumberType;
