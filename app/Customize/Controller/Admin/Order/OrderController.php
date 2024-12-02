@@ -26,7 +26,6 @@ use Eccube\Entity\Master\OrderStatus;
 use Eccube\Entity\OrderPdf;
 use Eccube\Entity\Payment;      // (HDN) Payment
 use Eccube\Entity\Shipping;
-use Cusatomize\Entity\OrderTrait; //追記　OrderTrait
 use Eccube\Event\EccubeEvents;
 use Eccube\Event\EventArgs;
 use Eccube\Form\Type\Admin\OrderPdfType;
@@ -43,23 +42,18 @@ use Eccube\Repository\ProductRepository;    // (HDN) ProductRepository
 use Eccube\Repository\ProductStockRepository;
 use Eccube\Service\CsvExportService;
 use Eccube\Service\MailService;
+
 use Eccube\Service\OrderPdfService;
 //use Customize\Service\OrderPdfService;  // services.yamlの記述が効かないためCustomize側を直接記述
 
 use Customize\Service\HdnOrderListService;  // (HDN) Listサービス
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+
 use Eccube\Service\OrderStateMachine;
 use Eccube\Service\PurchaseFlow\PurchaseFlow;
 use Eccube\Util\FormUtil;
 
-
 // 同名のクラスが存在するため、使用するものを明示
 use Knp\Component\Pager\PaginatorInterface;
-use PhpOffice\PhpSpreadsheet\Calculation\TextData\Format;
-use PhpOffice\PhpSpreadsheet\Calculation\TextData\Search;
-use PhpParser\Node\Stmt\Catch_;
-use Psr\Log\NullLogger;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -68,7 +62,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Tests\Fixtures\ToString;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -123,7 +116,7 @@ class OrderController extends BaseOrderController
         HdnTenpoRepository $hdnTenpoRepository,
         HdnOrderListService $hdnOrderListService,
         ProductRepository $productRepository
-    ) {                     
+    ) {
         $this->purchaseFlow = $orderPurchaseFlow;
         $this->csvExportService = $csvExportService;
         $this->customerRepository = $customerRepository;
@@ -292,10 +285,14 @@ class OrderController extends BaseOrderController
         if ( $searchForm->get('bumon_id') ) {
             $objBumon = $searchForm->get('bumon_id')->getData();
         }
+        /* //配送先住所情報　2024/09/18 田中
+         if ( $searchForm->get('h_postal_code') ) {
+             $objHpostalcode = $searchForm->get('h_postal_code')->getData();
+         }*/
 
         // QueryBuilderを取得
         $qb = $this->orderRepository->getQueryBuilderBySearchDataForAdmin($searchData);
-        
+
         $qb ->addSelect('sj')
             ->leftJoin('o.Saiji', 'sj');
 
@@ -304,24 +301,24 @@ class OrderController extends BaseOrderController
 
         $qb ->addSelect('bm')
             ->leftJoin('oi.Bumon', 'bm');
-                
+
         // (HDN) 催事指定があれば条件セット
         if ( $objSaiji ) {
             $qb
-            ->andWhere('sj.id = :saiji_id')
-            ->setParameter('saiji_id', $objSaiji->getId());
+                ->andWhere('sj.id = :saiji_id')
+                ->setParameter('saiji_id', $objSaiji->getId());
         }
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
 
         log_info('受注一覧：queryBuilder',(array)$qb);
@@ -509,7 +506,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfDate' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -521,7 +518,7 @@ class OrderController extends BaseOrderController
          */
 
         // EntityManager取得
-        $em = $this->getDoctrine()->getEntityManager(); 
+        $em = $this->getDoctrine()->getEntityManager();
 
         // ①受渡日のリストを取得
         $qb = $this->orderRepository->createQueryBuilder('o')
@@ -552,6 +549,7 @@ class OrderController extends BaseOrderController
         log_info('受注集計：posOfDate',$posOfDate);
 
         // ③催事/店舗/部門/商品/受渡日の実績を取得
+        //sum_bumon_item_02.twig　受注期間ソート作成　2024/09/18 田中
         // QueryBuilderを取得
         $qb = $this->orderRepository->createQueryBuilder('o')
             ->select('sj.id as saiji_id')
@@ -562,6 +560,7 @@ class OrderController extends BaseOrderController
             ->addSelect('bm.name as bumon_name')
             ->addSelect('oi.product_code')
             ->addSelect('s.shipping_delivery_date')
+            //->addSelect('u.shippipng.ukedate_date')//2024/09/18 追加
             ->addSelect('os.id as order_status_id')
             ->addSelect('max(oi.product_name) as product_name')
             ->addSelect('sum(oi.quantity) as quantity')
@@ -584,6 +583,7 @@ class OrderController extends BaseOrderController
             ->addGroupBy('tenpo_id')
             ->addGroupBy('bumon_id')
             ->addGroupBy('oi.product_code')
+            //->addGroupBy('u.shippipng.ukedate_date')//2024/09/18 追加
             ->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('os.id')
             ->having('oi.product_code is not null')
@@ -592,6 +592,7 @@ class OrderController extends BaseOrderController
             ->addOrderBy('bumon_id')
             ->addOrderBy('oi.product_code')
             ->addOrderBy('s.shipping_delivery_date');
+        //->addOrderBy('u.shippipng.ukedate_date');//2024/09/18 追加
 
         // (HDN) 催事指定は必須
         //$qb->where('o.Saiji = :Saiji')->setParameter('Saiji', $objSaiji);
@@ -600,15 +601,15 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
 
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
 
         // (HDN) 実績取得
@@ -625,9 +626,9 @@ class OrderController extends BaseOrderController
         // (HDN) 実績を展開
         while ( $dtl = current($dtls) ) {
             if ( $pre['saiji_id'] != $dtl['saiji_id'] ||
-                 $pre['tenpo_id'] != $dtl['tenpo_id'] || 
-                 $pre['bumon_id'] != $dtl['bumon_id'] || 
-                 $pre['product_code'] != $dtl['product_code'] ) {
+                $pre['tenpo_id'] != $dtl['tenpo_id'] ||
+                $pre['bumon_id'] != $dtl['bumon_id'] ||
+                $pre['product_code'] != $dtl['product_code'] ) {
                 // 商品行の初期化
                 $bumonLine['saiji_id'] = $itemLine['saiji_id'] = $dtl['saiji_id'];
                 $bumonLine['saiji_name'] = $itemLine['saiji_name'] = $dtl['saiji_name'];
@@ -636,7 +637,7 @@ class OrderController extends BaseOrderController
                 $bumonLine['bumon_id'] = $itemLine['bumon_id'] = $dtl['bumon_id'];
                 $bumonLine['bumon_name'] = $itemLine['bumon_name'] = $dtl['bumon_name'];
                 $itemLine['product_code'] = $dtl['product_code'];
-                $itemLine['product_name'] = $dtl['product_name'] ;   
+                $itemLine['product_name'] = $dtl['product_name'] ;
                 for ( $i=0; $i<count($posOfDate); $i++ ) {
                     $itemLine['quantity'][$i]      = 0;
                     $itemLine['shukka_quantity'][$i]      = 0;
@@ -695,9 +696,9 @@ class OrderController extends BaseOrderController
             $pre = $dtl;
             $post = next($dtls);
             if ( !$post ||
-                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                 $post['tenpo_id'] != $dtl['tenpo_id'] || 
-                 $post['bumon_id'] != $dtl['bumon_id'] ) {
+                $post['saiji_id'] != $dtl['saiji_id'] ||
+                $post['tenpo_id'] != $dtl['tenpo_id'] ||
+                $post['bumon_id'] != $dtl['bumon_id'] ) {
                 $lines[] = $itemLine;
                 $itemLine = [];
                 $lines[] = $bumonLine;
@@ -726,7 +727,7 @@ class OrderController extends BaseOrderController
             'lines' => $lines,
         ];
     }
-    /********************************************sum_bumon_item_02*******************<sumBumonItem02BK>*********************************************************************/
+
     /**
      * 受注部門商品集計画面(02) Ver.2022.05.xx
      *
@@ -835,7 +836,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfTenpo' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -849,7 +850,7 @@ class OrderController extends BaseOrderController
          */
 
         // EntityManager取得
-        $em = $this->getDoctrine()->getEntityManager(); 
+        $em = $this->getDoctrine()->getEntityManager();
 
         // ①催事対象店舗のリストを取得
         $Tenpos = $this->hdnTenpoRepository->findBySaiji($objSaiji->getId());
@@ -871,7 +872,6 @@ class OrderController extends BaseOrderController
         $qb = $this->orderRepository->createQueryBuilder('o')
             ->select('sj.id as saiji_id')
             ->addSelect('sj.name as saiji_name')
-            //->addSelect('o.ukedate')//受渡日集計の為、追加　2024/10/07
             ->addSelect('s.shipping_delivery_date')
             ->addSelect('bm.id as bumon_id')
             ->addSelect('bm.name as bumon_name')
@@ -894,13 +894,10 @@ class OrderController extends BaseOrderController
             ->leftJoin('oi.Bumon', 'bm')
             ->leftJoin('o.OrderStatus', 'os')
             ->where('o.Saiji = :Saiji')
-            //->orderBy('o.uedate', 'DESC')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
-            //->andWhere('o.ukedate is not null')
             ->groupBy('saiji_id')
             ->addGroupBy('s.shipping_delivery_date')
-            //->addGroupBy('ud')
             ->addGroupBy('bumon_id')
             ->addGroupBy('oi.product_code')
             ->addGroupBy('tenpo_id')
@@ -908,11 +905,9 @@ class OrderController extends BaseOrderController
             ->having('oi.product_code is not null')
             ->orderBy('saiji_id')
             ->addOrderBy('s.shipping_delivery_date')
-            //->addOrderBy('ud')
             ->addOrderBy('product_name')
             ->addOrderBy('bumon_id')
             ->addOrderBy('tenpo_id');
-
 
         // (HDN) 催事指定は必須
         //$qb->where('o.Saiji = :Saiji')->setParameter('Saiji', $objSaiji);
@@ -921,16 +916,16 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
+
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
-       
 
         // (HDN) 実績取得
         $dtls = $qb->getQuery()->execute();
@@ -981,9 +976,9 @@ class OrderController extends BaseOrderController
             }
             // 商品行の初期化
             if ( $pre['saiji_id'] != $dtl['saiji_id'] ||
-                 $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] || 
-                 $pre['bumon_id'] != $dtl['bumon_id'] || 
-                 $pre['product_code'] != $dtl['product_code'] ) {
+                $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ||
+                $pre['bumon_id'] != $dtl['bumon_id'] ||
+                $pre['product_code'] != $dtl['product_code'] ) {
                 // 商品行の初期化
                 $itemLine['sbt'] = 'quantity';
                 $itemLine['kbn'] = 'item';
@@ -993,7 +988,7 @@ class OrderController extends BaseOrderController
                 $itemLine['bumon_id'] = $dtl['bumon_id'];
                 $itemLine['bumon_name'] = $dtl['bumon_name'];
                 $itemLine['product_code'] = $dtl['product_code'];
-                $itemLine['product_name'] = $dtl['product_name'] ;   
+                $itemLine['product_name'] = $dtl['product_name'] ;
                 for ( $i=0; $i<count($namesOfTenpo); $i++ ) {
                     $itemLine['quantity'][$i]      = 0;
                     $itemLine['shukka_quantity'][$i]      = 0;
@@ -1040,8 +1035,8 @@ class OrderController extends BaseOrderController
             $post = next($dtls);
             // 行の出力
             if ( !$post ||
-                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                 $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
+                $post['saiji_id'] != $dtl['saiji_id'] ||
+                $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
                 // 受渡日BREAK時は明細行と受渡日集計行を出力
                 $lines[] = $itemLine;
                 $itemLine = [];
@@ -1081,9 +1076,6 @@ class OrderController extends BaseOrderController
             'lines' => $lines,
         ];
     }
-    /********************************************<sum_bumon_item_02>*******************<sumBumonItem02BK>*********************************************************************/
-
-    /********************************************<sum_bumon_item_02>*******************<sumBumonItem02>*********************************************************************/
 
     /**
      * 受注部門商品集計画面(02) Ver.2022.05.xx
@@ -1193,7 +1185,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfTenpo' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -1214,7 +1206,7 @@ class OrderController extends BaseOrderController
          */
 
         // EntityManager取得
-        $em = $this->getDoctrine()->getEntityManager(); 
+        $em = $this->getDoctrine()->getEntityManager();
 
         // ①催事対象店舗のリストを取得
         $Tenpos = $this->hdnTenpoRepository->findBySaiji($objSaiji->getId());
@@ -1243,8 +1235,7 @@ class OrderController extends BaseOrderController
         $qb = $this->orderRepository->createQueryBuilder('o')
             ->select('sj.id as saiji_id')
             ->addSelect('sj.name as saiji_name')
-            ->addSelect('s.shipping_delivery_date')
-            //->addSelect('o.ukedate')     
+            //->addSelect('s.shipping_delivery_date')
             ->addSelect('bm.id as bumon_id')
             ->addSelect('bm.name as bumon_name')
             ->addSelect('oi.product_code')
@@ -1268,18 +1259,15 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
-            //->andWhere('o.order is not null')
             ->groupBy('saiji_id')
-            ->addGroupBy('s.shipping_delivery_date')
+            //->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
             ->addGroupBy('oi.product_code')
             ->addGroupBy('tenpo_id')
             ->addGroupBy('os.id')
-            //->addGroupBy('ukedate')
             ->having('oi.product_code is not null')
             ->orderBy('saiji_id')
-            ->addOrderBy('s.shipping_delivery_date')
-            //->addOrderBy('uekdate')
+            //->addOrderBy('s.shipping_delivery_date')
             ->addOrderBy('product_name')
             ->addOrderBy('bumon_id')
             ->addOrderBy('tenpo_id');
@@ -1291,17 +1279,17 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
 
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
-        
+
         $lines = [];
         // ④催事が複数日かを判定
         if ( $objSaiji->getDeliveryStartDt() != $objSaiji->getDeliveryEndDt() ) {
@@ -1364,9 +1352,6 @@ class OrderController extends BaseOrderController
             'lines' => $lines,
         ];
     }
-    /********************************************<sum_bumon_item_02>*******************<sumBumonItem02>*********************************************************************/
-
-
 
     /**
      * 未引渡商品一覧画面.
@@ -1471,7 +1456,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfDate' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -1483,7 +1468,7 @@ class OrderController extends BaseOrderController
          */
 
         // EntityManager取得
-        $em = $this->getDoctrine()->getEntityManager(); 
+        $em = $this->getDoctrine()->getEntityManager();
 
         // ①受渡日のリストを取得
         $qb = $this->orderRepository->createQueryBuilder('o')
@@ -1562,15 +1547,15 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
 
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
 
         // (HDN) 実績取得
@@ -1587,9 +1572,9 @@ class OrderController extends BaseOrderController
         // (HDN) 実績を展開
         while ( $dtl = current($dtls) ) {
             if ( $pre['saiji_id'] != $dtl['saiji_id'] ||
-                 $pre['tenpo_id'] != $dtl['tenpo_id'] || 
-                 $pre['bumon_id'] != $dtl['bumon_id'] || 
-                 $pre['product_code'] != $dtl['product_code'] ) {
+                $pre['tenpo_id'] != $dtl['tenpo_id'] ||
+                $pre['bumon_id'] != $dtl['bumon_id'] ||
+                $pre['product_code'] != $dtl['product_code'] ) {
                 // 商品行と部門行の初期化
                 $bumonLine['saiji_id'] = $itemLine['saiji_id'] = $dtl['saiji_id'];
                 $bumonLine['saiji_name'] = $itemLine['saiji_name'] = $dtl['saiji_name'];
@@ -1601,7 +1586,7 @@ class OrderController extends BaseOrderController
                 $itemLine['kbn'] = 'item';
                 $itemLine['product_code'] = $dtl['product_code'];
                 $itemLine['product_name'] = $dtl['product_name'] ;
-                // 商品行の日別集計を初期化   
+                // 商品行の日別集計を初期化
                 for ( $i=0; $i<count($posOfDate); $i++ ) {
                     $itemLine['quantity'][$i]      = 0;
                     $itemLine['shukka_quantity'][$i] = 0;
@@ -1620,7 +1605,7 @@ class OrderController extends BaseOrderController
                 $bumonLine['kbn'] = 'bumon';
                 $bumonLine['product_code'] = '';
                 $bumonLine['product_name'] = '';
-                // 部門行の日別集計を初期化   
+                // 部門行の日別集計を初期化
                 for ( $i=0; $i<count($posOfDate); $i++ ) {
                     $bumonLine['quantity'][$i]      = 0;
                     $bumonLine['shukka_quantity'][$i] = 0;
@@ -1671,9 +1656,9 @@ class OrderController extends BaseOrderController
             $pre = $dtl;
             $post = next($dtls);
             if ( !$post ||
-                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                 $post['tenpo_id'] != $dtl['tenpo_id'] || 
-                 $post['bumon_id'] != $dtl['bumon_id'] ) {
+                $post['saiji_id'] != $dtl['saiji_id'] ||
+                $post['tenpo_id'] != $dtl['tenpo_id'] ||
+                $post['bumon_id'] != $dtl['bumon_id'] ) {
                 $lines[] = $itemLine;
                 $itemLine = [];
                 $lines[] = $bumonLine;
@@ -1811,7 +1796,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfTenpo' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -1825,7 +1810,7 @@ class OrderController extends BaseOrderController
          */
 
         // EntityManager取得
-        $em = $this->getDoctrine()->getEntityManager(); 
+        $em = $this->getDoctrine()->getEntityManager();
 
         // ①催事対象店舗のリストを取得
         $Tenpos = $this->hdnTenpoRepository->findBySaiji($objSaiji->getId());
@@ -1841,8 +1826,6 @@ class OrderController extends BaseOrderController
             $pos++;
         }
         log_info('[受注部門商品集計(02]posOfTenpo',$posOfTenpo);
-
-       
 
         // ③催事/日付/部門/商品/店舗の実績を取得
         // QueryBuilderを取得
@@ -1893,17 +1876,16 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
 
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
-
 
         // (HDN) 実績取得
         $dtls = $qb->getQuery()->execute();
@@ -1954,9 +1936,9 @@ class OrderController extends BaseOrderController
             }
             // 商品行の初期化
             if ( $pre['saiji_id'] != $dtl['saiji_id'] ||
-                 $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] || 
-                 $pre['bumon_id'] != $dtl['bumon_id'] || 
-                 $pre['product_code'] != $dtl['product_code'] ) {
+                $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ||
+                $pre['bumon_id'] != $dtl['bumon_id'] ||
+                $pre['product_code'] != $dtl['product_code'] ) {
                 // 商品行の初期化
                 $itemLine['sbt'] = 'quantity';
                 $itemLine['kbn'] = 'item';
@@ -1966,7 +1948,7 @@ class OrderController extends BaseOrderController
                 $itemLine['bumon_id'] = $dtl['bumon_id'];
                 $itemLine['bumon_name'] = $dtl['bumon_name'];
                 $itemLine['product_code'] = $dtl['product_code'];
-                $itemLine['product_name'] = $dtl['product_name'] ;   
+                $itemLine['product_name'] = $dtl['product_name'] ;
                 for ( $i=0; $i<count($namesOfTenpo); $i++ ) {
                     $itemLine['quantity'][$i]      = 0;
                     $itemLine['shukka_quantity'][$i]      = 0;
@@ -2013,8 +1995,8 @@ class OrderController extends BaseOrderController
             $post = next($dtls);
             // 行の出力
             if ( !$post ||
-                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                 $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
+                $post['saiji_id'] != $dtl['saiji_id'] ||
+                $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
                 // 受渡日BREAK時は明細行と受渡日集計行を出力
                 $lines[] = $itemLine;
                 $itemLine = [];
@@ -2157,7 +2139,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfTenpo' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -2177,7 +2159,7 @@ class OrderController extends BaseOrderController
          */
 
         // EntityManager取得
-        $em = $this->getDoctrine()->getEntityManager(); 
+        $em = $this->getDoctrine()->getEntityManager();
 
         // ①催事対象店舗のリストを取得
         $Tenpos = $this->hdnTenpoRepository->findBySaiji($objSaiji->getId());
@@ -2243,15 +2225,15 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
 
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
 
         $lines = [];
@@ -2307,7 +2289,7 @@ class OrderController extends BaseOrderController
                     'has_errors' => true,
                     'posOfTenpo' => $posOfTenpo,
                     'lines' => $lines,
-                    ];
+                ];
             }
             // 暫定的に
             return [
@@ -2391,9 +2373,9 @@ class OrderController extends BaseOrderController
             }
             // 商品行の初期化
             if ( $pre['saiji_id'] != $dtl['saiji_id'] ||
-                 $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] || 
-                 $pre['bumon_id'] != $dtl['bumon_id'] || 
-                 $pre['product_code'] != $dtl['product_code'] ) {
+                $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ||
+                $pre['bumon_id'] != $dtl['bumon_id'] ||
+                $pre['product_code'] != $dtl['product_code'] ) {
                 // 商品行の初期化
                 $itemLine['sbt'] = 'quantity';
                 $itemLine['kbn'] = 'item';
@@ -2403,7 +2385,7 @@ class OrderController extends BaseOrderController
                 $itemLine['bumon_id'] = $dtl['bumon_id'];
                 $itemLine['bumon_name'] = $dtl['bumon_name'];
                 $itemLine['product_code'] = $dtl['product_code'];
-                $itemLine['product_name'] = $dtl['product_name'] ;   
+                $itemLine['product_name'] = $dtl['product_name'] ;
                 for ( $i=0; $i<count($namesOfTenpo); $i++ ) {
                     $itemLine['quantity'][$i]      = 0;
                     $itemLine['shukka_quantity'][$i]      = 0;
@@ -2454,8 +2436,8 @@ class OrderController extends BaseOrderController
             }
             // 行の出力
             if ( !$post ||
-                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                 $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
+                $post['saiji_id'] != $dtl['saiji_id'] ||
+                $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
                 // 受渡日BREAK時は明細行と受渡日集計行を出力
                 $lines[] = $itemLine;
                 $itemLine = [];
@@ -2542,7 +2524,7 @@ class OrderController extends BaseOrderController
                     $itemLine['bumon_id'] = $product['bumon_id'];
                     $itemLine['bumon_name'] = $product['bumon_name'];
                     $itemLine['product_code'] = $product['code'];
-                    $itemLine['product_name'] = $product['name'] ;   
+                    $itemLine['product_name'] = $product['name'] ;
                     for ( $i=0; $i<count($namesOfTenpo); $i++ ) {
                         $itemLine['quantity'][$i]      = 0;
                         $itemLine['shukka_quantity'][$i]      = 0;
@@ -2563,8 +2545,8 @@ class OrderController extends BaseOrderController
             // 商品行の初期化
             /*
             if ( $pre['saiji_id'] != $dtl['saiji_id'] ||
-                 $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] || 
-                 $pre['bumon_id'] != $dtl['bumon_id'] || 
+                 $pre['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ||
+                 $pre['bumon_id'] != $dtl['bumon_id'] ||
                  $pre['product_code'] != $dtl['product_code'] ) {
                 // 商品行の初期化
                 $itemLine['sbt'] = 'quantity';
@@ -2575,7 +2557,7 @@ class OrderController extends BaseOrderController
                 $itemLine['bumon_id'] = $dtl['bumon_id'];
                 $itemLine['bumon_name'] = $dtl['bumon_name'];
                 $itemLine['product_code'] = $dtl['product_code'];
-                $itemLine['product_name'] = $dtl['product_name'] ;   
+                $itemLine['product_name'] = $dtl['product_name'] ;
                 for ( $i=0; $i<count($namesOfTenpo); $i++ ) {
                     $itemLine['quantity'][$i]      = 0;
                     $itemLine['shukka_quantity'][$i]      = 0;
@@ -2630,8 +2612,8 @@ class OrderController extends BaseOrderController
             }
             // 行の出力
             if ( !$post ||
-                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                 $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
+                $post['saiji_id'] != $dtl['saiji_id'] ||
+                $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
                 // 受渡日BREAK時は明細行と受渡日集計行を出力
                 foreach($itemLinePool as $itemLine) {
                     $lines[] = $itemLine;
@@ -2639,12 +2621,109 @@ class OrderController extends BaseOrderController
                 $itemLinePool = [];
                 $lines[] = $sumLine;
                 $sumLine = [];
-            /*
-            } else if ( $post['product_code'] != $dtl['product_code'] ) {
-                // 商品BREAK時は明細行を出力
-                $lines[] = $itemLine;
-                $itemLine = [];
-            */
+                /*
+                } else if ( $post['product_code'] != $dtl['product_code'] ) {
+                    // 商品BREAK時は明細行を出力
+                    $lines[] = $itemLine;
+                    $itemLine = [];
+                */
+                /* //テスト用
+                 if ($dtl['kingaku'] != 0) {
+                     // 店舗位置
+                     if (isset($posOfTenpo[$dtl['tenpo_name']])) {
+                         $wTenpoPos = $posOfTenpo[$dtl['tenpo_name']];
+                     } else {
+                         // エラーハンドリング
+                         error_log("店舗名が見つかりません: " . $dtl['tenpo_name']);
+                         continue;
+                     }
+
+                     // 商品行位置
+                     if (isset($lineNoOfProduct[$dtl['product_code']])) {
+                         $wItemLineNo = $lineNoOfProduct[$dtl['product_code']];
+                     } else {
+                         // エラーハンドリング
+                         error_log("商品コードが見つかりません: " . $dtl['product_code']);
+                         continue;
+                     }
+
+                     // 商品行へのセット
+                     if (!isset($itemLinePool[$wItemLineNo])) {
+                         $itemLinePool[$wItemLineNo] = [
+                             'quantity' => [],
+                             'shukka_quantity' => [],
+                             'kingaku' => [],
+                             'base_kingaku' => [],
+                             'sum_quantity' => 0,
+                             'sum_shukka_quantity' => 0,
+                             'sum_kingaku' => 0,
+                             'sum_base_kingaku' => 0,
+                         ];
+                     }
+
+                     if (!isset($itemLinePool[$wItemLineNo]['quantity'][$wTenpoPos])) {
+                         $itemLinePool[$wItemLineNo]['quantity'][$wTenpoPos] = 0;
+                     }
+                     $itemLinePool[$wItemLineNo]['quantity'][$wTenpoPos] += $dtl['quantity'];
+
+                     if ($dtl['order_status_id'] == 5) {
+                         if (!isset($itemLinePool[$wItemLineNo]['shukka_quantity'][$wTenpoPos])) {
+                             $itemLinePool[$wItemLineNo]['shukka_quantity'][$wTenpoPos] = 0;
+                         }
+                         $itemLinePool[$wItemLineNo]['shukka_quantity'][$wTenpoPos] += $dtl['quantity'];
+                     }
+
+                     if (!isset($itemLinePool[$wItemLineNo]['kingaku'][$wTenpoPos])) {
+                         $itemLinePool[$wItemLineNo]['kingaku'][$wTenpoPos] = 0;
+                     }
+                     $itemLinePool[$wItemLineNo]['kingaku'][$wTenpoPos] += $dtl['kingaku'];
+
+                     if (!isset($itemLinePool[$wItemLineNo]['base_kingaku'][$wTenpoPos])) {
+                         $itemLinePool[$wItemLineNo]['base_kingaku'][$wTenpoPos] = 0;
+                     }
+                     $itemLinePool[$wItemLineNo]['base_kingaku'][$wTenpoPos] += $dtl['base_kingaku'];
+
+                     // 商品行の加算
+                     $itemLinePool[$wItemLineNo]['sum_quantity'] += $dtl['quantity'];
+                     if ($dtl['order_status_id'] == 5) {
+                         $itemLinePool[$wItemLineNo]['sum_shukka_quantity'] += $dtl['quantity'];
+                     }
+                     $itemLinePool[$wItemLineNo]['sum_kingaku'] += $dtl['kingaku'];
+                     $itemLinePool[$wItemLineNo]['sum_base_kingaku'] += $dtl['base_kingaku'];
+
+                     // 受渡日行への加算
+                     if (!isset($sumLine['quantity'][$wTenpoPos])) {
+                         $sumLine['quantity'][$wTenpoPos] = 0;
+                     }
+                     $sumLine['quantity'][$wTenpoPos] += $dtl['quantity'];
+
+                     if ($dtl['order_status_id'] == 5) {
+                         if (!isset($sumLine['shukka_quantity'][$wTenpoPos])) {
+                             $sumLine['shukka_quantity'][$wTenpoPos] = 0;
+                         }
+                         $sumLine['shukka_quantity'][$wTenpoPos] += $dtl['quantity'];
+                     }
+
+                     if (!isset($sumLine['kingaku'][$wTenpoPos])) {
+                         $sumLine['kingaku'][$wTenpoPos] = 0;
+                     }
+                     $sumLine['kingaku'][$wTenpoPos] += $dtl['kingaku'];
+
+                     if (!isset($sumLine['base_kingaku'][$wTenpoPos])) {
+                         $sumLine['base_kingaku'][$wTenpoPos] = 0;
+                     }
+                     $sumLine['base_kingaku'][$wTenpoPos] += $dtl['base_kingaku'];
+
+                     $sumLine['sum_quantity'] += $dtl['quantity'];
+                     if ($dtl['order_status_id'] == 5) {
+                         $sumLine['sum_shukka_quantity'] += $dtl['quantity'];
+                     }
+                     $sumLine['sum_kingaku'] += $dtl['kingaku'];
+                     $sumLine['sum_base_kingaku'] += $dtl['base_kingaku'];
+                 } else {
+                     // エラーハンドリング
+                     error_log("通常価格が0です: " . $dtl['kingaku']);
+                 }*/
             }
         }
         log_debug('[部門商品集計共通(02]lines',$lines);
@@ -2754,7 +2833,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfDate' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -2766,7 +2845,7 @@ class OrderController extends BaseOrderController
          */
 
         // EntityManager取得
-        $em = $this->getDoctrine()->getEntityManager(); 
+        $em = $this->getDoctrine()->getEntityManager();
 
         //-------------------------
         // ①受渡日のリストを取得
@@ -2805,43 +2884,43 @@ class OrderController extends BaseOrderController
         // 　　催事、店舗、日付、税率
         //-------------------------
         $qb = $this->orderRepository->createQueryBuilder('o')
-        ->select('sj.id as saiji_id')
-        ->addSelect('tp.id as tenpo_id')
-        ->addSelect('s.shipping_delivery_date')
-        ->addSelect('o.payment_method')
-        ->addSelect('o.id as order_id')
-        ->addSelect('oi.tax_rate')
-        ->addSelect('sum(oi.quantity*oi.price) as kingaku')
-        ->leftJoin('o.OrderItems', 'oi')
-        ->leftJoin('oi.Shipping', 's')
-        ->leftJoin('o.Saiji', 'sj')
-        ->leftJoin('o.Tenpo', 'tp')
-        ->leftJoin('oi.Bumon', 'bm')
-        ->where('o.Saiji = :Saiji')->setParameter('Saiji', $objSaiji)
-        ->andWhere('o.OrderStatus not in (3,8)')
-        ->andWhere('oi.product_code is not null')
-        ->groupBy('saiji_id')
-        ->addGroupBy('tenpo_id')
-        ->addGroupBy('s.shipping_delivery_date')
-        ->addGroupBy('o.payment_method')
-        ->addGroupBy('order_id')
-        ->addGroupBy('oi.tax_rate')
-        ->orderBy('saiji_id')
-        ->addOrderBy('tenpo_id')
-        ->addOrderBy('oi.tax_rate')
-        ->addOrderBy('s.shipping_delivery_date')
+            ->select('sj.id as saiji_id')
+            ->addSelect('tp.id as tenpo_id')
+            ->addSelect('s.shipping_delivery_date')
+            ->addSelect('o.payment_method')
+            ->addSelect('o.id as order_id')
+            ->addSelect('oi.tax_rate')
+            ->addSelect('sum(oi.quantity*oi.price) as kingaku')
+            ->leftJoin('o.OrderItems', 'oi')
+            ->leftJoin('oi.Shipping', 's')
+            ->leftJoin('o.Saiji', 'sj')
+            ->leftJoin('o.Tenpo', 'tp')
+            ->leftJoin('oi.Bumon', 'bm')
+            ->where('o.Saiji = :Saiji')->setParameter('Saiji', $objSaiji)
+            ->andWhere('o.OrderStatus not in (3,8)')
+            ->andWhere('oi.product_code is not null')
+            ->groupBy('saiji_id')
+            ->addGroupBy('tenpo_id')
+            ->addGroupBy('s.shipping_delivery_date')
+            ->addGroupBy('o.payment_method')
+            ->addGroupBy('order_id')
+            ->addGroupBy('oi.tax_rate')
+            ->orderBy('saiji_id')
+            ->addOrderBy('tenpo_id')
+            ->addOrderBy('oi.tax_rate')
+            ->addOrderBy('s.shipping_delivery_date')
         ;
 
         // (HDN) 催事指定は必須
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')->setParameter('tenpo_id', $objTenpo->getId());
         }
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')->setParameter('bumon_id', $objBumon->getId());
         }
 
         $denpyoByTax = $qb->getQuery()->getResult();
@@ -2967,15 +3046,15 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
 
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
 
         // (HDN) 実績取得
@@ -2993,8 +3072,8 @@ class OrderController extends BaseOrderController
         // (HDN) 実績を展開
         while ( $dtl = current($dtls) ) {
             if ( $pre['saiji_id'] != $dtl['saiji_id'] ||
-                 $pre['tenpo_id'] != $dtl['tenpo_id'] || 
-                 $pre['bumon_id'] != $dtl['bumon_id'] ) {
+                $pre['tenpo_id'] != $dtl['tenpo_id'] ||
+                $pre['bumon_id'] != $dtl['bumon_id'] ) {
                 // 店舗行/部門行の初期化
                 $tenpoLine['saiji_id'] = $bumonLine['saiji_id'] = $dtl['saiji_id'];
                 $tenpoLine['saiji_name'] = $bumonLine['saiji_name'] = $dtl['saiji_name'];
@@ -3104,8 +3183,8 @@ class OrderController extends BaseOrderController
             $pre = $dtl;
             $post = next($dtls);
             if ( !$post ||
-                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                 $post['tenpo_id'] != $dtl['tenpo_id'] ) {
+                $post['saiji_id'] != $dtl['saiji_id'] ||
+                $post['tenpo_id'] != $dtl['tenpo_id'] ) {
                 $lines[] = $bumonLine;
                 $bumonLine = [];
                 // 店舗行に税別集計を組み込み
@@ -3240,7 +3319,7 @@ class OrderController extends BaseOrderController
                 'has_errors' => false,
                 'posOfPayment' => null,
                 'lines' => [],
-                ];
+            ];
         }
 
         /*
@@ -3322,15 +3401,15 @@ class OrderController extends BaseOrderController
         // (HDN) 店舗指定があれば条件セット
         if ( $objTenpo ) {
             $qb
-            ->andWhere('tp.id = :tenpo_id')
-            ->setParameter('tenpo_id', $objTenpo->getId());
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
         }
 
         // (HDN) 部門指定があれば条件セット
         if ( $objBumon ) {
             $qb
-            ->andWhere('bm.id = :bumon_id')
-            ->setParameter('bumon_id', $objBumon->getId());
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
         }
 
         // (HDN) 実績取得
@@ -3345,7 +3424,7 @@ class OrderController extends BaseOrderController
         //  (3) 店舗/部門：$sumTenpoBumonLine
         //  (4) 店舗：$sumTenpoLine
         //  ※受渡日が単日の場合は(3)(4)不要
-        //  -> $line[]に出力 
+        //  -> $line[]に出力
         //-------------------------
         // (HDN) 使用する行（実際の初期化はBREAK時に行う）
         $lines = [];                // Viewに渡す出力行
@@ -3829,146 +3908,4 @@ class OrderController extends BaseOrderController
         */
     }
 
-   /* public function exportYamato(Request $request)
-    {   
-        //検索フォーム定義
-        $searchData[] = $request->get('search_form',[]);
-        
-        //クエリービルダを使用して’ヤマト配送’のみをフィルタリング   OrderEntityが文字列としてpayment_methodを保存している
-        $qb = $this->orderRepository->createQueryBuilder('o')
-            ->andWhere('o.payment_method = :paymentMethod')
-            ->setParameter('paymentMethod', 'ヤマト配送')
-            ->leftJoin('o.Pref', 'pref');
-
-        log_info('検索フォーム', [$searchData]);
-        
-        //検索条件をセット　2024/10/16 田中
-        //検索フォームデータを取得
-        $searchData = $request->get('search_form');
-            if ($searchData) {
-                if (isset($searchData['name01'])) {
-                    $qb->andWhere('o.name01 = :name01')
-                    ->setParameter('name01', $searchData['name01']);
-                }
-                log_info('依頼者（姓）',$searchData['name01']);
-
-                if (isset($searchData['name02'])) {
-                    $qb->andWhere('o.name02 = :name02')
-                    ->setParameter('name02', $searchData['name02']);
-                }
-                log_info('依頼者（名）',$searchData['name02']);
-
-                if (isset($searchData['h_name1'])) {
-                    $qb->andWhere('o.h_name1 = :h_name1')
-                    ->setParameter('h_name1', $searchData['h_name1']);
-                }
-                log_info('配送先氏名（姓）',$searchData['h_name1']);
-
-                if (isset($searchData['h_name2'])) {
-                    $qb->andWhere('o.h_name2 = :h_name2')
-                    ->setParameter('h_name2', $searchData['h_name2']);
-                }
-                log_info('配送先氏名（名）',$searchData['h_name2']);
-
-                if (isset($searchData['Pref'])) {
-                    $qb
-                    ->andWhere('o.Pref = :Pref')
-                    ->setParameter('配達依頼者県', $searchData['Pref']);
-                }
-                log_info('name01',$searchData['pref_id']);
-                
-                if (isset($searchData['addr01'])) {
-                    $qb->andWhere('o.addr01 = :addr01')
-                    ->setParameter('addr01', $searchData['addr01']);
-                }
-                log_info('配達依頼者住所１',$searchData['addr01']);
-
-                if (isset($searchData['h_pred'])) {
-                    $qb->andWhere('o.h_pred = :h_pred')
-                    ->setParameter('h_pred', $searchData['h_pred']);
-                }
-                log_info('配送先県情報',$searchData['h_pred']);
-
-                if (isset($searchData['h_addr1'])) {
-                    $qb->andWhere('o.h_addr1 = :h_addr1')
-                    ->setParameter('h_addr1', $searchData['h_addr1']);
-                }
-                log_info('配送先住所１',$searchData['h_addr1']);
-
-                if (isset($searchData['h_addr2'])) {
-                    $qb->andWhere('o.h_addr1 = :h_addr1')
-                    ->setParameter('h_addr2', $searchData['h_addr2']);
-                }
-                log_info('配送先住所2',$searchData['h_addr2']);
-
-                if (isset($searchData['phone_number'])) {
-                    $qb->andWhere('o.phone_number = :phone_number')
-                    ->setParameter('phone_number', $searchData['phone_number']);
-                }
-                log_info('依頼人電話番号',$searchData['phone_number']);
-
-                if (isset($searchData['h_phone_number'])) {
-                    $qb->andWhere('o.h_phone_number = :h_phone_number')
-                    ->setParameter('h_phone_number', $searchData['h_phone_number']);
-                }
-                log_info('受取人電話番号',$searchData['h_phone_number']);
-
-                if (isset($searchData['postal_code'])) {
-                    $qb->andWhere('o.postal_code = :postal_code')
-                    ->setParameter('postal_code', $searchData['postal_code']);
-                }
-                log_info('依頼人郵便番号',$searchData['postal_code']);
-                
-                if (isset($searchData['h_postal_code'])) {
-                    $qb->andWhere('o.h_postal_code = :h_postal_code')
-                    ->setParameter('h_postal_code', $searchData['h_postal_code']);
-                }
-                log_info('受取人郵便番号',$searchData['h_postal_code']);
-            }
-        //var_dump('ヤマト配送CSV出力検索条件', [$searchData]);
-
-        //クエリビルダを使用してname01.name02とh_name1.h_name2,pref.addr01,h_pref.h_addr1の値取り出し(ヤマトCSV対応の為)
-        $qb->select( 'o.id', 'o.name01'||'o.name02', 'o.h_name1'||'o.h_name2', 'pref.name as pref_name'||'o.addr01', 'o.h_pref'||'o.h_addr1', 
-                    'o.phone_number', 'o.h_phone_number', 'o.postal_code', 'o.h_postal_code');
-                            
-        //結果を取得
-        $results = $qb->getQuery()->getResult();
-       //var_dump($results);
-        log_info('qb結果', [$results]);
-
-        //CSV→Excel変換用
-        mb_convert_variables('SJIS', 'UTF-8',$results);
-
-        //値を結合
-        foreach ($results as &$result) {
-            $result['name'] = $result['name01'] . ' ' . $result['name02'];
-            $result['y_name'] = $result['h_name1'] . ' ' . $result['h_name2'];
-            $result['y_addr'] = $result['pref_name'] . ' ' . $result['addr01'];
-            $result['y_addr1'] = $result['h_pref'] . ' ' . $result['h_addr1'];
-            
-        }
-        log_info('値結合', [$result]);
-
-        //フィルタリングされた注文IDを取得して配列を作成
-        $orderIds = array_column($results, 'id');
-        log_info('注文ID', [$orderIds]);
-        
-
-        //新しいrequestオブジェクトを作成し、フィルタリングされた注文IDをセット
-        $yamatoRequest = new Request();
-        $yamatoRequest->request->set('ids',$orderIds);
-        // $yamatoRequest = Request::create('', 'GET', ['ids' => $orderIds]);
-
-        log_info('ヤマトリクエスト', [$request]);
-        
-
-        $filename = 'yamato_'.(new \DateTime())->format('YmdHis').'.csv';
-        log_info('ファイル名', [$filename]);
-        $response = $this->exportCsv($yamatoRequest, CsvType::CSV_TYPE_YAMATO, $filename);
-        log_info('受注CSV出力ファイル', [$response]);
-
-        return $response;
-        }*/
-
-    
 }
