@@ -930,28 +930,7 @@ class OrderController extends BaseOrderController
             ->andWhere('bm.id = :bumon_id')
             ->setParameter('bumon_id', $objBumon->getId());
         }
-        //受渡日条件セット
-         //searchFormから検索条件を渡す
-        if ( $searchForm->get('ukedate_start') ) {
-            $ukedate_start = $searchForm->get('ukedate_start')->getData();
-        }
-        if ( $searchForm->get('ukedate_end') ) {
-            $ukedate_end = $searchForm->get('ukedate_end')->getData();
-        }
-        //受渡し日の条件セット 2024/10/08
-        //開始
-        if($ukedate_start){
-            $qb
-            ->andWhere('o.ukedate >= :ukedate_start')
-            ->setParameter('ukedate_start', $ukedate_start);
-        }
-        //終了
-        if($ukedate_end){
-            $qb
-            ->andWhere('o.ukedate <= :ukedate_end')
-            ->setParameter('ukedate_end', $ukedate_end);
-        }
-        //ここまで
+       
 
         // (HDN) 実績取得
         $dtls = $qb->getQuery()->execute();
@@ -1322,27 +1301,7 @@ class OrderController extends BaseOrderController
             ->andWhere('bm.id = :bumon_id')
             ->setParameter('bumon_id', $objBumon->getId());
         }
-        //受渡日条件セット
-         //searchFormから検索条件を渡す
-         $ukedate_start = null;
-         $ukedate_end = null;
-        if ( $searchForm->get('ukedate_start') ) {
-            $ukedate_start = $searchForm->get('ukedate_start')->getData();
-        }
-        if ( $searchForm->get('ukedate_end') ) {
-            $ukedate_end = $searchForm->get('ukedate_end')->getData();
-        }    
-        //受渡し日指定があれば条件セット
-        if($ukedate_start){
-            $qb
-            ->andWhere('o.ukedate >= :ukedate_start')
-            ->setParameter('ukedate_start', $ukedate_start);
-        }
-        if($ukedate_end){
-            $qb
-            ->andWhere('o.ukedate <= :ukedate_end')
-            ->setParameter('ukedate_end', $ukedate_end);
-        }
+        
         $lines = [];
         // ④催事が複数日かを判定
         if ( $objSaiji->getDeliveryStartDt() != $objSaiji->getDeliveryEndDt() ) {
@@ -1883,15 +1842,7 @@ class OrderController extends BaseOrderController
         }
         log_info('[受注部門商品集計(02]posOfTenpo',$posOfTenpo);
 
-        // 受渡日の条件を取得(ukedate)
-        $ukedate_start = null;
-        $ukedate_end = null;
-        if ($searchForm->has('ukedate_start')) {
-            $ukedate_start = $searchForm->get('ukedate_start')->getData();
-        }
-        if ($searchForm->has('ukedate_end')) {
-            $ukedate_end = $searchForm->get('ukedate_end')->getData();
-        }
+       
 
         // ③催事/日付/部門/商品/店舗の実績を取得
         // QueryBuilderを取得
@@ -1952,17 +1903,7 @@ class OrderController extends BaseOrderController
             ->andWhere('bm.id = :bumon_id')
             ->setParameter('bumon_id', $objBumon->getId());
         }
-        // 受渡日の条件を追加
-        if ($ukedate_start) {
-            $qb
-                ->andWhere('o.ukedate >= :ukedate_start')
-                ->setParameter('ukedate_start', $ukedate_start);
-        }
-        if ($ukedate_end) {
-            $qb
-                ->andWhere('o.ukedate <= :ukedate_end')
-                ->setParameter('ukedate_end', $ukedate_end);
-        }
+       
 
         // (HDN) 実績取得
         $dtls = $qb->getQuery()->execute();
