@@ -58,10 +58,5 @@ if (!class_exists(CsvType::class, false)) {
          */
         const CSV_TYPE_PRODUCT_FOR_IMPORT = 6;
 	
-	//ヤマト配送用　追加　2024/10/07
-        /**
-         * @var integer
-         */
-        const CSV_TYPE_YAMATO = 7;
     }
 }
