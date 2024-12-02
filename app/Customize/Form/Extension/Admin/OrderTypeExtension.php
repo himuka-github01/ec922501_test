@@ -182,15 +182,15 @@ class OrderTypeExtension extends AbstractTypeExtension
                 'multiple' => false,
                 'placeholder' => '都道府県を選択',
             ])
-            ->add('h_aaddress', AddressType::class, [
-                'required' => false,
-                'h_addr1_options' => [
-                    'required' => false,
-                ],
-                'h_addr2_options' => [
-                    'required' => false,
-                ],
-            ])
+//            ->add('h_aaddress', AddressType::class, [
+//                'required' => false,
+//                'h_addr1_options' => [
+//                    'required' => false,
+//                ],
+//                'h_addr2_options' => [
+//                    'required' => false,
+//                ],
+//            ])
             ->add('h_phone_number', PhoneNumberType::class, [
                 'required' => false,
             ])
