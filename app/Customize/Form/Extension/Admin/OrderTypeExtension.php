@@ -17,6 +17,7 @@ namespace Customize\Form\Extension\Admin;
 use Customize\Repository\VisitRepository;
 use Eccube\Form\Type\Admin\OrderType; // 元のFormType
 
+use Eccube\Form\Type\PhoneNumberType;
 use Symfony\Component\Form\AbstractTypeExtension;   // これが必要
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -75,6 +76,8 @@ class OrderTypeExtension extends AbstractTypeExtension
 //            $list[$item->getId()] = $item->getVisitT();
 //        }
 
+        $Hpref = $this->hprefRepository->findAll();
+
         $builder
             ->remove('postal_code')
             ->add('postal_code', PostalType::class, [
@@ -132,7 +135,61 @@ class OrderTypeExtension extends AbstractTypeExtension
                 'placeholder' => 'common.select__unspecified',
                 'mapped' => false,
             ])
-
+            ->add('h_name1', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ])
+                ],
+            ])
+            ->add('h_name2', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ])
+                ],
+            ])
+            ->add('h_kana1', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ])
+                ],
+            ])
+            ->add('h_kana2', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => $this->eccubeConfig['eccube_stext_len'],
+                    ])
+                ],
+            ])
+            ->add('h_postal_code', PostalType::class, [
+                'required' => false,
+            ])
+            ->add('h_pref', ChoiceType::class, [
+                'choices' => $Hpref,
+                'choice_label' => 'h_pref',
+                'required' => false,
+                'expanded' => false,
+                'multiple' => false,
+                'placeholder' => '都道府県を選択',
+            ])
+            ->add('h_aaddress', AddressType::class, [
+                'required' => false,
+                'h_addr1_options' => [
+                    'required' => false,
+                ],
+                'h_addr2_options' => [
+                    'required' => false,
+                ],
+            ])
+            ->add('h_phone_number', PhoneNumberType::class, [
+                'required' => false,
+            ])
              //受け取り方法追加　2024/08/23 田中
             /*->add('uketori', TextType::class, [
             'required' => false,
