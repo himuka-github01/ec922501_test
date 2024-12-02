@@ -1260,7 +1260,7 @@ class OrderController extends BaseOrderController
             ->addSelect('sum(oi.quantity*oi.wari_kikan_gaku) as wari_kikan_kingaku')
             ->addSelect('sum(oi.quantity*oi.wari_matome_gaku) as wari_matome_kingaku')
             ->leftJoin('o.OrderItems', 'oi')
-            ->leftJoin('oi.Shipping', 's')
+            //->leftJoin('oi.Shipping', 's')
             ->leftJoin('o.Saiji', 'sj')
             ->leftJoin('o.Tenpo', 'tp')
             ->leftJoin('oi.Bumon', 'bm')
@@ -1903,7 +1903,7 @@ class OrderController extends BaseOrderController
             ->andWhere('bm.id = :bumon_id')
             ->setParameter('bumon_id', $objBumon->getId());
         }
-       
+
 
         // (HDN) 実績取得
         $dtls = $qb->getQuery()->execute();
