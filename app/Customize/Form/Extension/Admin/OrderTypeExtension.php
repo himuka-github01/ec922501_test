@@ -20,6 +20,7 @@ use Customize\Repository\VisitRepository;
 use Customize\Repository\HprefRepository;
 use Eccube\Form\Type\Admin\OrderType; // 元のFormType
 
+use Eccube\Form\Type\Master\PrefType;
 use Eccube\Form\Type\PhoneNumberType;
 use Symfony\Component\Form\AbstractTypeExtension;   // これが必要
 
@@ -183,9 +184,8 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('h_postal_code', PostalType::class, [
                 'required' => false,
             ])
-            ->add('h_pref', ChoiceType::class, [
-                'choices' => $Hpref,
-                'choice_label' => 'h_pref',
+            ->add('h_pref', PrefType::class, [
+                'choice_label' => 'name',
                 'required' => false,
                 'expanded' => false,
                 'multiple' => false,
@@ -212,14 +212,11 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('h_phone_number', PhoneNumberType::class, [
                 'required' => false,
             ])
-            ->add('tenpo_cd', ChoiceType::class, [
-            'choices' => $tenpo,
-                'choice_label' => 'tenpo_cd',
+            ->add('tenpo_cd', EntityType::class, [
                 'required' => false,
-                'expanded' => false,
-                'multiple' => false,
+                'class' => HdnTenpo::class,
+                'choice_label' => 'tenp_name',
                 'placeholder' => '店舗を選択',
-
             ])
              //受け取り方法追加　2024/08/23 田中
             /*->add('uketori', TextType::class, [
