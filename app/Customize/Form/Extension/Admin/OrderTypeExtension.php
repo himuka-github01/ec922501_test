@@ -212,7 +212,7 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('h_phone_number', PhoneNumberType::class, [
                 'required' => false,
             ])
-            ->add('tenpo_id', EntityType::class, [
+            ->add('tenpo_cd', EntityType::class, [
                 'required' => false,
                 'class' => HdnTenpo::class,
                 'choice_label' => 'tenpo_name',
