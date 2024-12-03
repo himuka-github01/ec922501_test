@@ -19,6 +19,7 @@ use Customize\Entity\Hpref;
 use Customize\Repository\HdnTenpoRepository;
 use Customize\Repository\VisitRepository;
 use Customize\Repository\HprefRepository;
+use Eccube\Entity\Master\Pref;
 use Eccube\Form\Type\Admin\OrderType; // 元のFormType
 
 use Eccube\Form\Type\Master\PrefType;
@@ -185,7 +186,7 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('h_postal_code', PostalType::class, [
                 'required' => false,
             ])
-            ->add('h_pref', Hpref::class, [
+            ->add('h_pref', Pref::class, [
                 'choice_label' => 'name',
                 'required' => false,
                 'expanded' => false,
