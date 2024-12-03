@@ -215,7 +215,7 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('tenpo_cd', EntityType::class, [
                 'required' => false,
                 'class' => HdnTenpo::class,
-                'choice_label' => 'tenp_name',
+                'choice_label' => 'tenpo_name',
                 'placeholder' => '店舗を選択',
             ])
              //受け取り方法追加　2024/08/23 田中
