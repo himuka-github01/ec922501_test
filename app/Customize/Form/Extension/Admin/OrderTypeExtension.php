@@ -15,6 +15,7 @@
 namespace Customize\Form\Extension\Admin;
 
 use Customize\Entity\HdnTenpo;
+use Customize\Entity\Hpref;
 use Customize\Repository\HdnTenpoRepository;
 use Customize\Repository\VisitRepository;
 use Customize\Repository\HprefRepository;
@@ -184,12 +185,13 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('h_postal_code', PostalType::class, [
                 'required' => false,
             ])
-            ->add('h_pref', PrefType::class, [
+            ->add('h_pref', Hpref::class, [
                 'choice_label' => 'name',
                 'required' => false,
                 'expanded' => false,
                 'multiple' => false,
                 'placeholder' => '都道府県を選択',
+                'mapped' => false,
             ])
             ->add('h_addr1', TextType::class, [
                 'required' => false,
