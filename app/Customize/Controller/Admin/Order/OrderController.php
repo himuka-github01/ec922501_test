@@ -42,7 +42,7 @@ use Eccube\Repository\ProductRepository;    // (HDN) ProductRepository
 use Eccube\Repository\ProductStockRepository;
 use Eccube\Service\CsvExportService;
 use Eccube\Service\MailService;
-
+use Doctrine\Common\Collections\ArrayCollection; //2024/12/03　追記　田中
 use Eccube\Service\OrderPdfService;
 //use Customize\Service\OrderPdfService;  // services.yamlの記述が効かないためCustomize側を直接記述
 
