@@ -311,6 +311,13 @@ file that was distributed with this source code.
                                                 {{ form_errors(form.uketsuke_name) }}
                                             </div>
                                         </div>
+                                        <div class="row mb-3 form-group">
+                                            <label class="col-3 col-form-label" data-tooltip="true" data-placement="top">{{ 'admin.order.tenpo_code'|trans }}</label>
+                                            <div class="col">
+                                                {{ form_widget(form.tenpo_cd) }}
+                                                {{ form_errors(form.tenpo_cd) }}
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="row mb-3">
@@ -755,6 +762,73 @@ file that was distributed with this source code.
                                                 <div class="col">
                                                     {{ form_widget(form.Shipping.DeliveryTime) }}
                                                     {{ form_errors(form.Shipping.DeliveryTime) }}
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="col-3 col-form-label">{{ 'admin.common.name'|trans }}</label>
+                                                <div class="col">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            {{ form_widget(form.h_name1) }}
+                                                            {{ form_errors(form.h_name1) }}
+                                                        </div>
+                                                        <div class="col">
+                                                            {{ form_widget(form.h_name2) }}
+                                                            {{ form_errors(form.h_name1) }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="col-3 col-form-label">{{ 'admin.common.kana'|trans }}</label>
+                                                <div class="col">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            {{ form_widget(form.h_kana1) }}
+                                                            {{ form_errors(form.h_kana1) }}
+                                                        </div>
+                                                        <div class="col">
+                                                            {{ form_widget(form.h_kana2) }}
+                                                            {{ form_errors(form.h_kana2) }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group delivery-address-use">
+                                                <label class="col-3 col-form-label">{{ 'admin.common.address'|trans }}</label>
+                                                <div class="col">
+                                                    <div class="row mb-3">
+                                                        <div class="col form-inline">
+                                                            {{ 'admin.common.postal_symbol'|trans }}
+                                                            {{ form_widget(form.h_postal_code) }}
+                                                            {{ form_errors(form.h_postal_code) }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col">
+                                                            {{ form_widget(form.h_pref) }}
+                                                            {{ form_errors(form.h_pref) }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col">
+                                                            {{ form_widget(form.h_addr1) }}
+                                                            {{ form_errors(form.h_addr1) }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            {{ form_widget(form.h_addr2) }}
+                                                            {{ form_errors(form.h_addr2) }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <label class="col-3 col-form-label">{{ 'admin.common.phone_number'|trans }}</label>
+                                                <div class="col">
+                                                    {{ form_widget(form.h_phone_number) }}
+                                                    {{ form_errors(form.h_phone_number) }}
                                                 </div>
                                             </div>
                                         </div>

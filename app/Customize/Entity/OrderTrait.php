@@ -36,7 +36,7 @@ trait OrderTrait
     private $Saiji;
 
     /**
-     * @ORM\Column(type="string", length=13, nullable=true)
+     * @ORM\Column(name="tenpo_cd", type="string", length=13, nullable=true)
      */
     private $tenpo_cd;
 
@@ -499,14 +499,14 @@ trait OrderTrait
      */
     public function setUkedate(\DateTimeInterface $ukedate)
     {
-        
+
         $this->ukedate = $ukedate;
         return $this;
     }
 
     /**
      * Get Ukedate.
-     * 
+     *
      */
     public function getUkedate()
     {
