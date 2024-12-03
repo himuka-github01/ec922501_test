@@ -915,7 +915,7 @@ admin.order.change_status: 対応状況の変更
 admin.order.csv_shipping_date_description: 出荷日を「YYYY-MM-DD」の形式で設定
 admin.order.order_csv: 受注CSV
 admin.order.shipping_csv: 出荷CSV
-# add 2024/11/11 ヤマトCSV用
+# add 2024/12/02　ヤマトCSV用
 admin.order.shipping_yamato: ヤマト配送CSV
 admin.order.shipping_status: 出荷状況
 admin.order.delivery: お届け先

@@ -57,6 +57,12 @@ if (!class_exists(CsvType::class, false)) {
          * @var integer
          */
         const CSV_TYPE_PRODUCT_FOR_IMPORT = 6;
+
+        //ヤマトCSV　2024/12/02　田中
+         /**
+         * @var integer
+         */
+        const CSV_TYPE_YAMATO = 7;
 	
     }
 }
