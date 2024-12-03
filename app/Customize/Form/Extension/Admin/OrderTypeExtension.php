@@ -186,7 +186,7 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('h_postal_code', PostalType::class, [
                 'required' => false,
             ])
-            ->add('h_pref', Pref::class, [
+            ->add('h_pref', PrefType::class, [
                 'choice_label' => 'name',
                 'required' => false,
                 'expanded' => false,
