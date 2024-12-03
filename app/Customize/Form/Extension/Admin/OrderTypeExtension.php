@@ -212,9 +212,9 @@ class OrderTypeExtension extends AbstractTypeExtension
             ->add('h_phone_number', PhoneNumberType::class, [
                 'required' => false,
             ])
-            ->add('tenpo_code', ChoiceType::class, [
+            ->add('tenpo_cd', ChoiceType::class, [
             'choices' => $tenpo,
-                'choice_label' => 'tenpo_code',
+                'choice_label' => 'tenpo_cd',
                 'required' => false,
                 'expanded' => false,
                 'multiple' => false,
