@@ -1316,7 +1316,7 @@ class OrderController extends BaseOrderController
             ->addOrderBy('bumon_id')
             ->addOrderBy('tenpo_id')
             ->having('o.ukedate is not null')
-            ->andWhere('o.tenpo_cd <> \'999\'');
+            ->having('tenpo_id <> 999');
 
         // ⑦日付毎の実績を取得
         $dtls = $qb->getQuery()->execute();
