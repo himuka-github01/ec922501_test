@@ -43,6 +43,7 @@ use Eccube\Repository\ProductStockRepository;
 use Eccube\Service\CsvExportService;
 use Eccube\Service\MailService;
 use Doctrine\Common\Collections\ArrayCollection; //2024/12/03　追記　田中
+
 use Eccube\Service\OrderPdfService;
 //use Customize\Service\OrderPdfService;  // services.yamlの記述が効かないためCustomize側を直接記述
 
@@ -3667,7 +3668,9 @@ class OrderController extends BaseOrderController
     public function exportPdf(Request $request)
     {
         // requestから出荷番号IDの一覧を取得する.
-        $ids = $request->get('ids', []);
+        // $ids = $request->get('ids', []);
+        //修正　2024/12/03　田中
+        $ids = $request->query->get('ids', []);
 
         if (count($ids) == 0) {
             $this->addError('admin.order.delivery_note_parameter_error', 'admin');
@@ -3801,7 +3804,9 @@ class OrderController extends BaseOrderController
         log_info('商品引換証 download start!', ['Order ID' => implode(',', $request->get('ids', []))]);
 
         // requestから出荷番号IDの一覧を取得する.
-        $ids = $request->get('ids', []);
+        // $ids = $request->get('ids', []);
+        //修正　2024/12/03　田中
+        $ids = $request->query->get('ids', []);
 
         if (count($ids) == 0) {
             $this->addError('admin.order.delivery_note_parameter_error', 'admin');
@@ -3907,7 +3912,7 @@ class OrderController extends BaseOrderController
         ];
         */
     }
-     //ヤマト配送用CSV 2024/12/02
+    //ヤマト配送用CSV 2024/12/02　修正　2024/12/03
     /**
      * @param Request $request
      * @param $csvTypeId 
@@ -3934,10 +3939,13 @@ class OrderController extends BaseOrderController
             $this->csvExportService->exportHeader();
             // 受注データ検索用のクエリビルダを取得.
             //$qb = $this->orderRepository->createQueryBuilder('o');
+            //検索条件変更　2024/12/03　田中
             $qb = $this->csvExportService
                 ->getOrderQueryBuilder($request)
                 ->andWhere('o.uketori = :uketori')
-                ->setParameter('uketori', 'ヤマト配送');
+                ->andWhere('o.OrderStatus = :OrderStatus')
+                ->setParameter('uketori', 'ヤマト配送')
+                ->setParameter('OrderStatus', '1');//ヤマト配送かつOrderStatusが’1’の場合のみ出力
     
                 // データ行の出力.
                 $this->csvExportService->setExportQueryBuilder($qb);
@@ -4000,7 +4008,9 @@ class OrderController extends BaseOrderController
                     $kana02 = $Order->getH_kana1() . $Order->getH_kana2();
                     $addr01 = $Order->getPref() . $Order->getAddr01();
                     $addr02 = $Order->getH_pref() . $Order->getH_addr1();
-                    $hpn = $Order->getH_phone_number();
+                    // $hpn = $Order->getH_phone_number();
+                    // 修正　2024/12/03　田中
+                    $hpn = '0' . $Order->getH_phone_number();
                     $hpostal = $Order->getH_postal_code();
                     $addr03 = $Order->getH_addr2();
                     //$addr04 = $Order->getAddr02();
