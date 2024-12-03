@@ -1259,6 +1259,7 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
+            ->andWhere('tenpo_id <> 999')
             ->groupBy('saiji_id')
             //->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
@@ -1315,8 +1316,7 @@ class OrderController extends BaseOrderController
             ->addOrderBy('product_name')
             ->addOrderBy('bumon_id')
             ->addOrderBy('tenpo_id')
-            ->having('o.ukedate is not null')
-            ->having('tenpo_id <> 999');
+            ->having('o.ukedate is not null');
 
         // ⑦日付毎の実績を取得
         $dtls = $qb->getQuery()->execute();
