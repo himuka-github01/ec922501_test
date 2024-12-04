@@ -1503,7 +1503,7 @@ class OrderController extends BaseOrderController
         $posOfTenpo = $namesOfTenpo = [];
         foreach ( $Tenpos as $tenpo ) {
             //$posOfTenpo[$tenpo->getId()] = $pos;
-            if ($tenpo->getId() != 999) {
+            if ($tenpo->getId() == 999) {
                 $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
                 $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
                 $pos++;
@@ -1547,7 +1547,6 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
-            ->andWhere('o.ukedate is not null')
             ->andWhere('tp.id = 999')
             ->groupBy('saiji_id')
             //->addGroupBy('s.shipping_delivery_date')
