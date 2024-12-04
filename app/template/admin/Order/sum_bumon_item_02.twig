@@ -502,7 +502,7 @@ file that was distributed with this source code.
                                         <tr>
                                             <th class="border-top-0 pt-2 pb-2 text-center">{{ 'admin.order.delivery_date'|trans }}</th>
                                             <th class="border-top-0 pt-2 pb-2 text-left">
-                                                {{ Order.ukedate == null ? '全日' : Order.ukedate|date("Y/m/d") }}　
+                                                {{ Order.shipping_delivery_date == null ? '全日' : Order.shipping_delivery_date|date("Y/m/d") }}　
                                                  {% if Order.sbt == 'quantity' %}
                                                     【受注数量】
                                                 {% else %}
@@ -536,9 +536,9 @@ file that was distributed with this source code.
                                                     {{ Order.product_name }}<br>
                                                     <!--<span class="text_right">{{ Order.product_code }}</span>-->
                                                 {% elseif Order.sbt == 'quantity' %}
-                                                    {{ Order.ukedate == null ? '全日' : Order.ukedate|date("Y/m/d") }}　【受注数量】** 合計 **
+                                                    {{ Order.shipping_delivery_date == null ? '全日' : Order.shipping_delivery_date|date("Y/m/d") }}　【受注数量】** 合計 **
                                                 {% else %}
-                                                    {{ Order.ukedate == null ? '全日' : Order.ukedate|date("Y/m/d") }}　【税抜売上割引後】** 合計 **
+                                                    {{ Order.shipping_delivery_date == null ? '全日' : Order.shipping_delivery_date|date("Y/m/d") }}　【税抜売上割引後】** 合計 **
                                                 {% endif %}
                                             </td>
                                             {% for name,pos in posOfTenpo %}
