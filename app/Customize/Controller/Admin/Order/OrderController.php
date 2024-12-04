@@ -1260,6 +1260,7 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
+            ->andWhere('tenpo_id <> 999')
             ->groupBy('saiji_id')
             //->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
@@ -1305,14 +1306,18 @@ class OrderController extends BaseOrderController
 
         // ⑥日付毎(催事/日付/部門/商品/店舗)の実績取得SQLを準備
         $qb
-            ->addSelect('s.shipping_delivery_date')
+//            ->addSelect('s.shipping_delivery_date')
+            ->addSelect('o.ukedate')
             ->leftJoin('oi.Shipping', 's')
-            ->addGroupBy('s.shipping_delivery_date')
+//            ->addGroupBy('s.shipping_delivery_date')
+            ->addGroupBy('o.ukedate')
             ->orderBy('saiji_id')
-            ->addOrderBy('s.shipping_delivery_date')
+//            ->addOrderBy('s.shipping_delivery_date')
+            ->addOrderBy('o.ukedate')
             ->addOrderBy('product_name')
             ->addOrderBy('bumon_id')
-            ->addOrderBy('tenpo_id');
+            ->addOrderBy('tenpo_id')
+            ->having('o.ukedate is not null');
 
         // ⑦日付毎の実績を取得
         $dtls = $qb->getQuery()->execute();
@@ -3915,7 +3920,7 @@ class OrderController extends BaseOrderController
     //ヤマト配送用CSV 2024/12/02　修正　2024/12/03
     /**
      * @param Request $request
-     * @param $csvTypeId 
+     * @param $csvTypeId
      * @param string $fileName
      * @Route("/%eccube_admin_route%/order/export/yamato", name="admin_order_export_yamato")
      *
@@ -3946,11 +3951,11 @@ class OrderController extends BaseOrderController
                 ->andWhere('o.OrderStatus = :OrderStatus')
                 ->setParameter('uketori', 'ヤマト配送')
                 ->setParameter('OrderStatus', '1');//ヤマト配送かつOrderStatusが’1’の場合のみ出力
-    
+
                 // データ行の出力.
                 $this->csvExportService->setExportQueryBuilder($qb);
                 $this->csvExportService->exportData(function ($entity, $csvService) use ($request) {
-                    
+
                 $Csvs = $csvService->getCsvs();
                 log_info('csvs', $Csvs);
 
@@ -3964,7 +3969,7 @@ class OrderController extends BaseOrderController
                     // CSV出力項目と合致するデータを取得.
                     foreach ($Csvs as $Csv) {
                         //log_info( (string)$Csv);
-                        // 受注データを検索. 
+                        // 受注データを検索.
                         //$wData = $csvService->getData($Csv, $Order);
                         //log_info((string)$wData);
                         $ExportCsvRow->setData($csvService->getData($Csv, $Order));
@@ -3978,7 +3983,7 @@ class OrderController extends BaseOrderController
                             $ExportCsvRow->setData($csvService->getData($Csv, $Shipping));
                             log_info($csvService->getData($Csv, $Shipping));
                         }
-                
+
                         $event = new EventArgs(
                             [
                                 'csvService' => $csvService,
@@ -3995,7 +4000,7 @@ class OrderController extends BaseOrderController
                         //var_dump('ExportCsvRow',$ExportCsvRow);
 
                         }
-                    }   
+                    }
                     //$row[] = number_format(memory_get_usage(true));
                     //データ行を配列に加工
                     $rowData = (array)$ExportCsvRow->getRow();
@@ -4049,7 +4054,7 @@ class OrderController extends BaseOrderController
                     switch ($rowData[6]) {
                         case '08～12時':
                         case '午前中':
-                            $rowData[6] = '0812'; 
+                            $rowData[6] = '0812';
                             break;
                         case '14〜16時':
                             $rowData[6] = '1416';
@@ -4066,8 +4071,8 @@ class OrderController extends BaseOrderController
                         default:
                             $rowData[6] = '指定なし';
                             break;
-                    } 
-                    
+                    }
+
 
                     // var_dump('時間帯',$deliveryTime);
                     log_info('rowData2', $rowData);
