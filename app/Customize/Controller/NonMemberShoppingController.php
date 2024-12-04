@@ -393,7 +393,7 @@ class NonMemberShoppingController extends BaseNMSController
 
             $pref = $this->prefRepository->findOneBy(['name' => $data['customer_pref']]);
             if (!$pref) {
-                log_info('[非会員お客様情報変更2]入力チェックエラー');
+                log_info('[非会員お客様情報変更2]入力チェックエラー',$data[$pref]);
 
                 return $this->json(['status' => 'NG'], 400);
             }
