@@ -200,13 +200,13 @@ trait CustomerTrait
         $this->h_addr2 = $h_addr2;
         return $this;
     }
-    public function getH_pref()
+    public function getH_phone_number(): ?string
     {
-        return $this->h_pref;
+        return $this->h_phone_number;
     }
-    public function setH_pref($h_pref): self
+    public function setH_phone_number(?string $h_phone_number): self
     {
-        $this->h_pref = $h_pref;
+        $this->h_phone_number = $h_phone_number;
         return $this;
     }
     //ここまで
