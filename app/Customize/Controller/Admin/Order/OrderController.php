@@ -1601,7 +1601,7 @@ class OrderController extends BaseOrderController
             ->addOrderBy('product_name')
             ->addOrderBy('bumon_id')
             ->addOrderBy('tenpo_id')
-            ->having('o.ukedate is not null')
+            ->having('s.shipping_delivery_date is not null')
         ;
 
         // ⑦日付毎の実績を取得
