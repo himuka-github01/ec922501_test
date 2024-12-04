@@ -1218,9 +1218,11 @@ class OrderController extends BaseOrderController
         $posOfTenpo = $namesOfTenpo = [];
         foreach ( $Tenpos as $tenpo ) {
             //$posOfTenpo[$tenpo->getId()] = $pos;
-            $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
-            $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
-            $pos++;
+            if ($tenpo->getId() != 999) {
+                $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
+                $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
+                $pos++;
+            }
         }
         log_info('[受注部門商品集計(02]posOfTenpo',$posOfTenpo);
 
@@ -1260,7 +1262,7 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
-            ->andWhere('tenpo_id <> 999')
+            ->andWhere('tp.id <> 999')
             ->groupBy('saiji_id')
             //->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
