@@ -233,19 +233,19 @@ trait OrderTrait
     /**
      * Summary of pref
      */
-    public function setPref($pref): self
-    {
-        $this->pref = $pref;
+    //public function setPref($pref): self
+    //{
+        //$this->pref = $pref;
 
-        return $this;
-    }
+      //  return $this;
+    //}
     /**
      * Get Uketori.
      */
-    public function getPref()
-    {
-        return $this->pref;
-    }
+    //public function getPref()
+    //{
+      //  return $this->pref;
+    //}
     //受取方法ここまで
 
     //受取方法追加　2024/08/26 田中

@@ -124,9 +124,11 @@ class NonMemberShoppingController extends BaseNMSController
             if(empty($data['addr02'])){
                 $data['addr02'] = 'なし';
 
-            } if(empty($data['pref'])){
-                $data['pref'] = 'なし';
-            }
+            } 
+			
+			//if(empty($data['pref'])){
+            //    $data['pref'] = 'なし';
+            //}
 
 
             //2024/09/02 井口さんからアドバイス
