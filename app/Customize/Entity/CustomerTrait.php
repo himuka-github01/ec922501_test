@@ -200,11 +200,11 @@ trait CustomerTrait
         $this->h_addr2 = $h_addr2;
         return $this;
     }
-    public function getH_pref(): ?string
+    public function getH_pref()
     {
         return $this->h_pref;
     }
-    public function setH_pref(?string $h_pref): self
+    public function setH_pref($h_pref): self
     {
         $this->h_pref = $h_pref;
         return $this;
