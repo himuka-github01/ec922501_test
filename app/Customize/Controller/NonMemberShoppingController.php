@@ -193,19 +193,19 @@ class NonMemberShoppingController extends BaseNMSController
             //dump('受取日２', $form['Ukedate']); //ここまではUkeDateはプロパティOK
                 
                //県のダミー情報　2024/11/18 田中
-            //$pref = $form['pref']->getData();
-           // if ($data['pref'] === null) {
+            $pref = $form['pref']->getData();
+            if ($data['pref'] === null) {
                 //ID 48の都道府県オブジェクトを取得
-              //  $pref = $this->prefRepository->find(48);
-           // } else {
+                $pref = $this->prefRepository->find(48);
+            } else {
                 //都道府県名から対応するPrefオブジェクトを取得
-             //   $pref = $this->prefRepository->findOneBy(['name' => $data['pref']]);
+               $pref = $this->prefRepository->findOneBy(['name' => $data['pref']]);
                 
                 // 該当する都道府県が見つからない場合はデフォルトの都道府県を設定
-              //  if (!$pref) {
-               //     $pref = $this->prefRepository->find(48);
-            //    }
-           // }
+                if (!$pref) {
+                    $pref = $this->prefRepository->find(48);
+               }
+            }
 
             $Customer = new Customer();
             $Customer
