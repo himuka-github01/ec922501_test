@@ -120,6 +120,7 @@ admin.order.order_sum_tenpo_bumon: 売上集計
 admin.order.order_sum_minou_item: 未引渡商品一覧
 # 2022.05.xx Version（名称は暫定）
 admin.order.order_sum_bumon_item_02: 受注集計(新)
+admin.order.order_sum_bumon_item_03: 売上集計（ヤマト配送）
 admin.order.order_sum_tenpo_bumon_02: 売上集計(新)
 admin.order.order_sum_minou_item_02: 未引渡商品一覧(新)
 

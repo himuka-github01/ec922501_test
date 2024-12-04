@@ -48,6 +48,9 @@ parameters:
                 order_sum_bumon_item_02:
                     name: admin.order.order_sum_bumon_item_02
                     url: admin_order_sum_bumon_item_02
+                order_sum_bumon_item_03:
+                    name: admin.order.order_sum_bumon_item_03
+                    url: admin_order_sum_bumon_item_03
                 order_sum_minou_item:
                     name: admin.order.order_sum_minou_item
                     url: admin_order_sum_minou_item

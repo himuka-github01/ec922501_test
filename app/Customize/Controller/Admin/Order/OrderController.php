@@ -1364,6 +1364,287 @@ class OrderController extends BaseOrderController
     }
 
     /**
+     * 受注部門商品集計画面(03)
+     *
+     * - 検索条件
+     *   - O 催事（必須）
+     *   - O お引き渡し日（全日,期間の日付）※無くても良いのでは？
+     *   - X 店舗（廃止）=> 店舗を横並び表示
+     *   - 部門（任意）
+     * - Viewへの引渡（主要項目）
+     *   - searchForm
+     *   - posOfTenpo（店舗横並びの配置）
+     *   - lines（リスト）
+     *
+     * @Route("/%eccube_admin_route%/order/sum_bumon_item_03", name="admin_order_sum_bumon_item_03")
+     * @Route("/%eccube_admin_route%/order/sum_bumon_item_03/{saiji_id}", requirements={"saiji_id" = "\d+"}, name="admin_order_sum_bumon_item_03_saiji")
+     * @Template("@admin/Order/sum_bumon_item_03.twig")
+     */
+    public function sumBumonItem03(Request $request, $saiji_id = null, PaginatorInterface $paginator)
+    {
+        log_info('[受注部門商品集計(03)]Request',$request->request->all());
+
+        // (☆☆☆HDN) 受注検索FORMの受渡日改修版とする
+        $builder = $this->formFactory
+            ->createBuilder(SearchOrderType::class);
+
+        // (HDN) イベントはとりあえずそのまま
+        $event = new EventArgs(
+            [
+                'builder' => $builder,
+            ],
+            $request
+        );
+        $this->eventDispatcher->dispatch(EccubeEvents::ADMIN_ORDER_INDEX_INITIALIZE, $event);
+
+        $searchForm = $builder->getForm();
+
+        // (HDN) 催事オブジェクト
+        $objSaiji = null;
+        // (HDN) 店舗オブジェクト
+        $objTenpo = null;
+        // (HDN) 部門オブジェクト
+        $objBumon = null;
+
+        // (HDN) 検索条件を取得
+        if ('POST' === $request->getMethod()) {
+            $searchForm->handleRequest($request);
+
+            if ($searchForm->isValid()) {
+                /**
+                 * 検索が実行された場合は, セッションに検索条件を保存する.
+                 */
+                $searchData = $searchForm->getData();
+
+                // 検索条件をセッションに保持.
+                $this->session->set('eccube.admin.order.search', FormUtil::getViewData($searchForm));
+            } else {
+                // 検索エラーの際は, 詳細検索枠を開いてエラー表示する.
+                return [
+                    'searchForm' => $searchForm->createView(),
+                    'has_errors' => true,
+                ];
+            }
+        } else {
+            if ($request->get('resume')) {
+                /*
+                 * 他画面から戻ってきた場合は, セッションから検索条件を復旧する.
+                 */
+                $viewData = $this->session->get('eccube.admin.order.search', []);
+                $searchData = FormUtil::submitAndGetData($searchForm, $viewData);
+            } else {
+                /**
+                 * 初期表示の場合.
+                 */
+                $viewData = [];
+
+                if ($saiji_id) {
+                    $viewData = ['saiji_id' => $saiji_id];
+                }
+
+                $searchData = FormUtil::submitAndGetData($searchForm, $viewData);
+
+                // セッション中の検索条件を初期化.
+                $this->session->set('eccube.admin.order.search', $viewData);
+            }
+        }
+
+        log_info('[受注部門商品集計(03)]searchData',$searchData);
+
+        // (HDN) formで指定があれば催事オブジェクトを取得
+        if ( $searchForm->get('saiji_id') ) {
+            $objSaiji = $searchForm->get('saiji_id')->getData();
+        }
+        // (HDN) formで指定があれば店舗オブジェクトを取得
+        if ( $searchForm->get('tenpo_id') ) {
+            $objTenpo = $searchForm->get('tenpo_id')->getData();
+        }
+        // (HDN) formで指定があれば部門オブジェクトを取得
+        if ( $searchForm->get('bumon_id') ) {
+            $objBumon = $searchForm->get('bumon_id')->getData();
+        }
+
+        // (HDN) 催事指定がなければ初期表示
+        if ( !$objSaiji ) {
+            return [
+                'searchForm' => $searchForm->createView(),
+                'has_errors' => false,
+                'posOfTenpo' => null,
+                'lines' => [],
+            ];
+        }
+
+        /*
+         * (HDN) 受注部門商品集計(03)
+         *  ①催事対象店舗のリストを取得
+         *  ②店舗のポジションをセット
+         *  ②'対象商品のリストを取得
+         *  ③全日の実績取得SQLを準備
+         *  ④催事が複数日か判定
+         *  ⑤複数日であれば
+         *      1) 催事/部門/商品/店舗の実績(全日の実績)を取得
+         *      2) 全日の実績を店舗で展開
+         *  ⑥日付毎の実績取得SQLを準備
+         *  ⑦催事/日付/部門/商品/店舗の実績(日付毎の集計)を取得
+         *  ⑧日付毎の実績を店舗で展開
+         *  ⑨作成したリストを数量表示用とする
+         *  ⑩金額表示用にリストをCOPYし、リストの後続にマージする
+         */
+
+        // EntityManager取得
+        $em = $this->getDoctrine()->getEntityManager();
+
+        // ①催事対象店舗のリストを取得
+        $Tenpos = $this->hdnTenpoRepository->findBySaiji($objSaiji->getId());
+        log_info('[受注部門商品集計(03)]Tenpos by saiji',$Tenpos);
+
+        // ②店舗のポジションをセット
+        $pos = 0;
+        $posOfTenpo = $namesOfTenpo = [];
+        foreach ( $Tenpos as $tenpo ) {
+            //$posOfTenpo[$tenpo->getId()] = $pos;
+            if ($tenpo->getId() == 999) {
+                $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
+                $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
+                $pos++;
+            }
+        }
+        log_info('[受注部門商品集計(03)]posOfTenpo',$posOfTenpo);
+
+        // ②'対象商品のリストを取得
+        if ( $objTenpo ) {
+            $arrProducts = $this->productRepository->findProductsWithSaiji2($objSaiji->getId(),$objTenpo->getId());
+        } else {
+            $arrProducts = $this->productRepository->findProductsWithSaiji2($objSaiji->getId());
+        }
+
+        // ③全日の実績取得SQLを準備
+        // QueryBuilderを取得
+        $qb = $this->orderRepository->createQueryBuilder('o')
+            ->select('sj.id as saiji_id')
+            ->addSelect('sj.name as saiji_name')
+            //->addSelect('s.shipping_delivery_date')
+            ->addSelect('bm.id as bumon_id')
+            ->addSelect('bm.name as bumon_name')
+            ->addSelect('oi.product_code')
+            ->addSelect('max(oi.product_name) as product_name')
+            ->addSelect('tp.id as tenpo_id')
+            ->addSelect('tp.tenpo_ryaku_name as tenpo_name')
+            ->addSelect('os.id as order_status_id')
+            ->addSelect('sum(oi.quantity) as quantity')
+            ->addSelect('sum(oi.quantity*oi.base_price) as base_kingaku')
+            ->addSelect('sum(oi.quantity*oi.price) as kingaku')
+            ->addSelect('sum(oi.quantity*oi.wari_a_gaku) as wari_a_kingaku')
+            ->addSelect('sum(oi.quantity*oi.wari_b_gaku) as wari_b_kingaku')
+            ->addSelect('sum(oi.quantity*oi.wari_kikan_gaku) as wari_kikan_kingaku')
+            ->addSelect('sum(oi.quantity*oi.wari_matome_gaku) as wari_matome_kingaku')
+            ->leftJoin('o.OrderItems', 'oi')
+            //->leftJoin('oi.Shipping', 's')
+            ->leftJoin('o.Saiji', 'sj')
+            ->leftJoin('o.Tenpo', 'tp')
+            ->leftJoin('oi.Bumon', 'bm')
+            ->leftJoin('o.OrderStatus', 'os')
+            ->where('o.Saiji = :Saiji')
+            ->andWhere('o.OrderStatus not in (3,8)')
+            ->andWhere('oi.product_code is not null')
+            ->andWhere('tp.id = 999')
+            ->groupBy('saiji_id')
+            //->addGroupBy('s.shipping_delivery_date')
+            ->addGroupBy('bumon_id')
+            ->addGroupBy('oi.product_code')
+            ->addGroupBy('tenpo_id')
+            ->addGroupBy('os.id')
+            ->having('oi.product_code is not null')
+            ->orderBy('saiji_id')
+            //->addOrderBy('s.shipping_delivery_date')
+            ->addOrderBy('product_name')
+            ->addOrderBy('bumon_id')
+            ->addOrderBy('tenpo_id');
+
+        // (HDN) 催事指定は必須
+        //$qb->where('o.Saiji = :Saiji')->setParameter('Saiji', $objSaiji);
+        $qb->setParameter('Saiji', $objSaiji);
+
+        // (HDN) 店舗指定があれば条件セット
+        if ( $objTenpo ) {
+            $qb
+                ->andWhere('tp.id = :tenpo_id')
+                ->setParameter('tenpo_id', $objTenpo->getId());
+        }
+
+        // (HDN) 部門指定があれば条件セット
+        if ( $objBumon ) {
+            $qb
+                ->andWhere('bm.id = :bumon_id')
+                ->setParameter('bumon_id', $objBumon->getId());
+        }
+
+        $lines = [];
+        // ④催事が複数日かを判定
+        if ( $objSaiji->getDeliveryStartDt() != $objSaiji->getDeliveryEndDt() ) {
+            // ⑤ 1) 催事/日付/部門/商品/店舗の実績を取得
+            $dtls = $qb->getQuery()->execute();
+            //log_debug('[受注部門商品集計(02]dtls by execute()',$dtls);
+            // ⑤ 2) 全日の実績を店舗で展開
+            //$lines = $this->makeItemLines($dtls,$namesOfTenpo,$posOfTenpo);   // (HDN) 22.06.xx 実績商品のみ表示
+            $lines = $this->makeAllItemLines($dtls,$namesOfTenpo,$posOfTenpo,$arrProducts);  // (HDN) 22.07.03 対象全商品を表示
+            log_debug('[受注部門商品集計(03)]lines of all days',$lines);
+        }
+
+        // ⑥日付毎(催事/日付/部門/商品/店舗)の実績取得SQLを準備
+        $qb
+            ->addSelect('s.shipping_delivery_date as ukedate')
+            ->leftJoin('oi.Shipping', 's')
+            ->addGroupBy('s.shipping_delivery_date')
+            ->orderBy('saiji_id')
+            ->addOrderBy('s.shipping_delivery_date')
+            ->addOrderBy('product_name')
+            ->addOrderBy('bumon_id')
+            ->addOrderBy('tenpo_id')
+            ->having('s.shipping_delivery_date is not null')
+        ;
+
+        // ⑦日付毎の実績を取得
+        $dtls = $qb->getQuery()->execute();
+        log_debug('[受注部門商品集計(03)]dtls by execute()',$dtls);
+
+        // ⑧日付毎の実績を店舗で展開して追記
+        //$linesByDate = $this->makeItemLines($dtls,$namesOfTenpo,$posOfTenpo);   // (HDN) 22.06.xx 実績商品のみ表示
+        $linesByDate = $this->makeAllItemLines($dtls,$namesOfTenpo,$posOfTenpo,$arrProducts);   // (HDN) 22.07.03 対象全商品を表示
+        log_debug('[受注部門商品集計(03)]lines by days',$linesByDate);
+        $lines = array_merge($lines,$linesByDate);
+        log_debug('[受注部門商品集計(03)]all lines',$lines);
+
+        log_info('[受注部門商品集計(03)]lines',$lines);
+
+        // ⑨作成したリストを数量表示用(sbt=quantity)とする
+        // ⑩数量表示用リストを金額表示用にCOPY(sbtをkingakuに書き換え)し、リストの後続にマージする
+        $num = count($lines);
+        for ( $i=0; $i<$num; $i++ ) {
+            $newLine = $lines[$i];
+            $newLine['sbt'] = 'kingaku';
+            $lines[] = $newLine;
+        }
+
+        $event = new EventArgs(
+            [
+                'qb' => $qb,
+                'searchData' => $searchData,
+            ],
+            $request
+        );
+
+        $this->eventDispatcher->dispatch(EccubeEvents::ADMIN_ORDER_INDEX_SEARCH, $event);
+
+        return [
+            'searchForm' => $searchForm->createView(),
+            'has_errors' => false,
+            'posOfTenpo' => $posOfTenpo,
+            'lines' => $lines,
+        ];
+    }
+
+    /**
      * 未引渡商品一覧画面.
      *
      * - 検索条件
