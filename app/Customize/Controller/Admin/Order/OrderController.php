@@ -1259,7 +1259,7 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
-            ->andWhere('tenpo_id <> 999')
+            ->andWhere('tp.id <> 999')
             ->groupBy('saiji_id')
             //->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
