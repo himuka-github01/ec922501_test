@@ -1217,9 +1217,11 @@ class OrderController extends BaseOrderController
         $posOfTenpo = $namesOfTenpo = [];
         foreach ( $Tenpos as $tenpo ) {
             //$posOfTenpo[$tenpo->getId()] = $pos;
-            $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
-            $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
-            $pos++;
+            if ($tenpo->getId() != 999) {
+                $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
+                $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
+                $pos++;
+            }
         }
         log_info('[受注部門商品集計(02]posOfTenpo',$posOfTenpo);
 
