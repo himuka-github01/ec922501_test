@@ -170,6 +170,9 @@ class NonMemberShoppingController extends BaseNMSController
             } else {
                 $Ukedate = null;
             }
+
+            $pref = $form['pref']->getData();
+
             //更新用index.php改修　2024/11/13 田中
             // $tenposes = $this->tenposRepository->findAll();
             // return [
@@ -186,7 +189,7 @@ class NonMemberShoppingController extends BaseNMSController
             //DateTimeオブジェクトへ変換
             //$Ukedate = \DateTime::createFromFormat('Y-m-d(EEEE)', $Ukedate);
             //dump('受取日２', $form['Ukedate']); //ここまではUkeDateはプロパティOK
-
+                
                //県のダミー情報　2024/11/18 田中
             if ($data['pref'] === 'なし') {
                 //ID 48の都道府県オブジェクトを取得
@@ -197,10 +200,9 @@ class NonMemberShoppingController extends BaseNMSController
 
                 // 該当する都道府県が見つからない場合はデフォルトの都道府県を設定
                 if (!$pref) {
-                    $pref = $this->prefRepository->find(48);
+                   $pref = $this->prefRepository->find(48);
                 }
             }
-
 
             $Customer = new Customer();
             $Customer
