@@ -39,6 +39,11 @@ trait CustomerTrait
     private $h_pref;
     private $h_addr1;
     private $h_addr2;
+     /**
+    * @var string|null
+    *
+    * @ORM\Column(name="h_phone_number", type="string", length=14, nullable=true)
+    */
     private $h_phone_number;
     //ここまで
     //店頭受取日　2024/09/19 田中
@@ -195,13 +200,13 @@ trait CustomerTrait
         $this->h_addr2 = $h_addr2;
         return $this;
     }
-    public function getH_phone_number(): ?int
+    public function getH_pref(): ?string
     {
-        return $this->h_phone_number;
+        return $this->h_pref;
     }
-    public function setH_phone_number(?int $h_phone_number): self
+    public function setH_pref(?string $h_pref): self
     {
-        $this->h_phone_number = $h_phone_number;
+        $this->h_pref = $h_pref;
         return $this;
     }
     //ここまで

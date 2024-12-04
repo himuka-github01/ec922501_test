@@ -410,7 +410,7 @@ class NonMemberTypeExtension extends AbstractTypeExtension
         ->add('h_addr2', TextType::class, [
             'required' => false,
         ])
-        ->add('h_phone_number', PhoneNumberType::class, [
+        ->add('h_phone_number', TextType::class, [
             'required' => false,
         ])
         //受付店鋪追加　2024/09/10 田中
