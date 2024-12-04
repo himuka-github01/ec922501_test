@@ -2485,7 +2485,10 @@ class OrderController extends BaseOrderController
         // (HDN) 実績を展開
         while ( $dtl = current($dtls) ) {
             // 全日の場合は日付に初期値をセット
-            if ( !isset($dtl['shipping_delivery_date']) ) {
+//            if ( !isset($dtl['shipping_delivery_date']) ) {
+//                $dtl['shipping_delivery_date'] = '';
+//            }
+            if ( !isset($dtl['ukedate']) ) {
                 $dtl['shipping_delivery_date'] = '';
             }
             // 受渡日集計行の切り替わり時
@@ -2496,7 +2499,8 @@ class OrderController extends BaseOrderController
                 $headerLine['kbn'] = 'header';
                 $headerLine['saiji_id'] = $dtl['saiji_id'];
                 $headerLine['saiji_name'] = $dtl['saiji_name'];
-                $headerLine['shipping_delivery_date'] = $dtl['shipping_delivery_date'];
+//                $headerLine['shipping_delivery_date'] = $dtl['shipping_delivery_date'];
+                $headerLine['shipping_delivery_date'] = $dtl['ukedate'];
                 for ( $i=0; $i<count($namesOfTenpo); $i++ ) {
                     $headerLine['tenpo_name'][$i] = $namesOfTenpo[$i];
                 }
@@ -2506,7 +2510,8 @@ class OrderController extends BaseOrderController
                 $sumLine['kbn'] = 'sum';
                 $sumLine['saiji_id'] = $dtl['saiji_id'];
                 $sumLine['saiji_name'] = $dtl['saiji_name'];
-                $sumLine['shipping_delivery_date'] = $dtl['shipping_delivery_date'];
+//                $sumLine['shipping_delivery_date'] = $dtl['shipping_delivery_date'];
+                $sumLine['shipping_delivery_date'] = $dtl['ukedate'];
                 $sumLine['bumon_id'] = '';
                 $sumLine['bumon_name'] = '';
                 $sumLine['product_code'] = '';
@@ -2528,7 +2533,8 @@ class OrderController extends BaseOrderController
                     $itemLine['kbn'] = 'item';
                     $itemLine['saiji_id'] = $dtl['saiji_id'];
                     $itemLine['saiji_name'] = $dtl['saiji_name'];
-                    $itemLine['shipping_delivery_date'] = $dtl['shipping_delivery_date'];
+//                    $itemLine['shipping_delivery_date'] = $dtl['shipping_delivery_date'];
+                    $itemLine['shipping_delivery_date'] = $dtl['ukedate'];
                     $itemLine['bumon_id'] = $product['bumon_id'];
                     $itemLine['bumon_name'] = $product['bumon_name'];
                     $itemLine['product_code'] = $product['code'];
@@ -2615,13 +2621,20 @@ class OrderController extends BaseOrderController
             $pre = $dtl;
             $post = next($dtls);
             // 全日の場合は日付に初期値をセット
-            if ( $post && !isset($post['shipping_delivery_date']) ) {
-                $post['shipping_delivery_date'] = '';
+//            if ( $post && !isset($post['shipping_delivery_date']) ) {
+//                $post['shipping_delivery_date'] = '';
+//            }
+            if ( $post && !isset($post['ukedate']) ) {
+                $post['ukedate'] = '';
             }
             // 行の出力
+//            if ( !$post ||
+//                $post['saiji_id'] != $dtl['saiji_id'] ||
+//                $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
             if ( !$post ||
                 $post['saiji_id'] != $dtl['saiji_id'] ||
-                $post['shipping_delivery_date'] != $dtl['shipping_delivery_date'] ) {
+                $post['ukedate'] != $dtl['ukedate'] ) {
+
                 // 受渡日BREAK時は明細行と受渡日集計行を出力
                 foreach($itemLinePool as $itemLine) {
                     $lines[] = $itemLine;
