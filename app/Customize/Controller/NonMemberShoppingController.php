@@ -171,7 +171,7 @@ class NonMemberShoppingController extends BaseNMSController
                 $Ukedate = null;
             }
 
-            $pref = $form['pref']->getData();
+
 
             //更新用index.php改修　2024/11/13 田中
             // $tenposes = $this->tenposRepository->findAll();
