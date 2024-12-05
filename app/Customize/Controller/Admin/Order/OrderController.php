@@ -1218,7 +1218,7 @@ class OrderController extends BaseOrderController
         $posOfTenpo = $namesOfTenpo = [];
         foreach ( $Tenpos as $tenpo ) {
             //$posOfTenpo[$tenpo->getId()] = $pos;
-            if ($tenpo->getId() != 999) {
+            if ($tenpo->getTenpoCd() != '999') {
                 $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
                 $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
                 $pos++;
@@ -1503,7 +1503,7 @@ class OrderController extends BaseOrderController
         $posOfTenpo = $namesOfTenpo = [];
         foreach ( $Tenpos as $tenpo ) {
             //$posOfTenpo[$tenpo->getId()] = $pos;
-            if ($tenpo->getId() == 999) {
+            if ($tenpo->getTenpoCd() == '999') {
                 $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
                 $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
                 $pos++;
