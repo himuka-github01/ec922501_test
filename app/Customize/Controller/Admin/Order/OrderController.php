@@ -1218,7 +1218,7 @@ class OrderController extends BaseOrderController
         $posOfTenpo = $namesOfTenpo = [];
         foreach ( $Tenpos as $tenpo ) {
             //$posOfTenpo[$tenpo->getId()] = $pos;
-            if ($tenpo->getId() != 999) {
+            if ($tenpo->getTenpoCd() != '999') {
                 $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
                 $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
                 $pos++;
@@ -1263,7 +1263,7 @@ class OrderController extends BaseOrderController
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
             ->andWhere('o.ukedate is not null')
-            ->andWhere('tp.id <> 999')
+            ->andWhere('tp.tenpo_cd <> \'999\'')
             ->groupBy('saiji_id')
             //->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
@@ -1503,7 +1503,7 @@ class OrderController extends BaseOrderController
         $posOfTenpo = $namesOfTenpo = [];
         foreach ( $Tenpos as $tenpo ) {
             //$posOfTenpo[$tenpo->getId()] = $pos;
-            if ($tenpo->getId() == 999) {
+            if ($tenpo->getTenpoCd() == '999') {
                 $posOfTenpo[$tenpo->getTenpoRyakuName()] = $pos;
                 $namesOfTenpo[$pos] = $tenpo->getTenpoRyakuName();
                 $pos++;
@@ -1547,7 +1547,7 @@ class OrderController extends BaseOrderController
             ->where('o.Saiji = :Saiji')
             ->andWhere('o.OrderStatus not in (3,8)')
             ->andWhere('oi.product_code is not null')
-            ->andWhere('tp.id = 999')
+            ->andWhere('tp.tenpo_cd = \'999\'')
             ->groupBy('saiji_id')
             //->addGroupBy('s.shipping_delivery_date')
             ->addGroupBy('bumon_id')
@@ -4215,10 +4215,11 @@ class OrderController extends BaseOrderController
         ];
         */
     }
-    //ヤマト配送用CSV 2024/12/02　修正　2024/12/03
+
+//ヤマト配送用CSV 2024/12/02　修正　2024/12/04 修正　2024/12/06
     /**
      * @param Request $request
-     * @param $csvTypeId
+     * @param $csvTypeId 
      * @param string $fileName
      * @Route("/%eccube_admin_route%/order/export/yamato", name="admin_order_export_yamato")
      *
@@ -4242,18 +4243,17 @@ class OrderController extends BaseOrderController
             $this->csvExportService->exportHeader();
             // 受注データ検索用のクエリビルダを取得.
             //$qb = $this->orderRepository->createQueryBuilder('o');
-            //検索条件変更　2024/12/03　田中
             $qb = $this->csvExportService
                 ->getOrderQueryBuilder($request)
-                ->andWhere('o.uketori = :uketori')
                 ->andWhere('o.OrderStatus = :OrderStatus')
-                ->setParameter('uketori', 'ヤマト配送')
-                ->setParameter('OrderStatus', '1');//ヤマト配送かつOrderStatusが’1’の場合のみ出力
-
+                ->andWhere('o.uketori = :uketori')
+                ->setParameter('OrderStatus', '1')
+                ->setParameter('uketori', 'ヤマト配送');
+    
                 // データ行の出力.
                 $this->csvExportService->setExportQueryBuilder($qb);
                 $this->csvExportService->exportData(function ($entity, $csvService) use ($request) {
-
+                    
                 $Csvs = $csvService->getCsvs();
                 log_info('csvs', $Csvs);
 
@@ -4267,7 +4267,7 @@ class OrderController extends BaseOrderController
                     // CSV出力項目と合致するデータを取得.
                     foreach ($Csvs as $Csv) {
                         //log_info( (string)$Csv);
-                        // 受注データを検索.
+                        // 受注データを検索. 
                         //$wData = $csvService->getData($Csv, $Order);
                         //log_info((string)$wData);
                         $ExportCsvRow->setData($csvService->getData($Csv, $Order));
@@ -4281,7 +4281,7 @@ class OrderController extends BaseOrderController
                             $ExportCsvRow->setData($csvService->getData($Csv, $Shipping));
                             log_info($csvService->getData($Csv, $Shipping));
                         }
-
+                
                         $event = new EventArgs(
                             [
                                 'csvService' => $csvService,
@@ -4298,7 +4298,7 @@ class OrderController extends BaseOrderController
                         //var_dump('ExportCsvRow',$ExportCsvRow);
 
                         }
-                    }
+                    }   
                     //$row[] = number_format(memory_get_usage(true));
                     //データ行を配列に加工
                     $rowData = (array)$ExportCsvRow->getRow();
@@ -4306,18 +4306,20 @@ class OrderController extends BaseOrderController
 
                     //ここをgetでの値取得に修正
                     $fullname01 = $Order->getName01() . $Order->getName02();
-                    $fullname02 = $Order->getkana01() . $Order->getkana02();
+                    $fullname02 = $Order->getH_name1() . $Order->getH_name2();
                     $kana01 = $Order->getKana01() . $Order->getKana02();
                     $kana02 = $Order->getH_kana1() . $Order->getH_kana2();
                     $addr01 = $Order->getPref() . $Order->getAddr01();
                     $addr02 = $Order->getH_pref() . $Order->getH_addr1();
-                    // $hpn = $Order->getH_phone_number();
-                    // 修正　2024/12/03　田中
-                    $hpn = '0' . $Order->getH_phone_number();
+                    $hpn = $Order->getH_phone_number();
                     $hpostal = $Order->getH_postal_code();
                     $addr03 = $Order->getH_addr2();
                     //$addr04 = $Order->getAddr02();
 
+                    //文字列変換　2024/12/06　田中
+                    $kana01 = mb_convert_kana($kana01,"k");
+                    $kana02 = mb_convert_kana($kana02,"k");
+                    
                     //それぞれの行にセット
                     $rowData[39] = '0962861691';//請求先コード
                     $rowData[8] = $hpn;//お届け先電話番号
@@ -4329,6 +4331,7 @@ class OrderController extends BaseOrderController
                     $rowData[22] = $addr01;//ご依頼主住所
                     $rowData[24] = $fullname01;//ご依頼主名
                     $rowData[25] = $kana01;//ご依頼主名(ｶﾅ)
+                    $rowData[41] = '01'; //運賃管理番号（固定値）2024/12/06　田中
 
                     //B列（０：発払い）、C列（１：クール便）、E列（2024/12/28）のデフォルト値
                     $rowData[1] = 0;
@@ -4347,12 +4350,13 @@ class OrderController extends BaseOrderController
                     }
                     //log_info('配達日', $rowData[5]);
                     log_info('配送時間: ' . $rowData[6]);
+
                     //配達時間の変換・セット　2024/10/23 田中
                     //switch文で処理
                     switch ($rowData[6]) {
                         case '08～12時':
                         case '午前中':
-                            $rowData[6] = '0812';
+                            $rowData[6] = '0812'; 
                             break;
                         case '14〜16時':
                             $rowData[6] = '1416';
@@ -4366,11 +4370,14 @@ class OrderController extends BaseOrderController
                         case '19〜21時':
                             $rowData[6] = '1921';
                             break;
-                        default:
-                            $rowData[6] = '指定なし';
+                        case '指定なし':
+                            $rowData[6] = '';
                             break;
-                    }
-
+                        default:
+                            $rowData[6] = '';
+                            break;
+                    } 
+                    
 
                     // var_dump('時間帯',$deliveryTime);
                     log_info('rowData2', $rowData);
@@ -4389,9 +4396,9 @@ class OrderController extends BaseOrderController
                     */
                     //CSV出力
                     //$csvService->fputcsv($wCol);
-                    $csvService->fputcsv($rowData);
+                    //$csvService->fputcsv($rowData);
                     //$csvService->fputcsv($rowData[6]);
-                    //$csvService->fputcsv($rowData);//ヤマト配送用に修正　2024/10/18 田中
+                    $csvService->fputcsv($rowData);//ヤマト配送用に修正　2024/10/18 田中
             });
         });
         $fileName = 'yamatoB2_'.(new \DateTime())->format('YmdHis').'.csv';
