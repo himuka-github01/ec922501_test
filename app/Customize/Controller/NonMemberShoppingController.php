@@ -124,8 +124,8 @@ class NonMemberShoppingController extends BaseNMSController
             if(empty($data['addr02'])){
                 $data['addr02'] = 'なし';
 
-            } 
-			
+            }
+
 			//if(empty($data['pref'])){
             //    $data['pref'] = 'なし';
             //}
@@ -191,7 +191,7 @@ class NonMemberShoppingController extends BaseNMSController
             //DateTimeオブジェクトへ変換
             //$Ukedate = \DateTime::createFromFormat('Y-m-d(EEEE)', $Ukedate);
             //dump('受取日２', $form['Ukedate']); //ここまではUkeDateはプロパティOK
-                
+
                //県のダミー情報　2024/11/18 田中
             //$pref = $form['pref']->getData();
             if ($data['pref'] === null) {
@@ -199,8 +199,8 @@ class NonMemberShoppingController extends BaseNMSController
                 $pref = $this->prefRepository->find(48);
             } else {
                 //都道府県名から対応するPrefオブジェクトを取得
-               $pref = $this->prefRepository->findOneBy(['name' => $data['pref']]);
-                
+               $pref = $this->prefRepository->findOneBy(['id' => $data['pref']]);
+
                 // 該当する都道府県が見つからない場合はデフォルトの都道府県を設定
                 if (!$pref) {
                     $pref = $this->prefRepository->find(48);

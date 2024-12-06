@@ -314,8 +314,7 @@ file that was distributed with this source code.
                                         <div class="row mb-3 form-group">
                                             <label class="col-3 col-form-label" data-tooltip="true" data-placement="top">{{ 'admin.order.tenpo_cd'|trans }}</label>
                                             <div class="col">
-                                                {{ form_widget(form.Tenpo) }}
-                                                {{ form_errors(form.Tenpo) }}
+                                                <span class="customer-edit customer-visit_t">{{ Order.tenpo_cd }}</span>
                                             </div>
                                         </div>
                                     </div>
